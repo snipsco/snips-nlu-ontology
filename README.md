@@ -1,2 +1,4 @@
-# snips-nlu-ontology
-Ontology of the Snips NLU
+# Snips NLU Ontology
+
+Ontology of the Rust NLU library API
+

@@ -1,0 +1,26 @@
+[package]
+name = "snips-nlu-ontology"
+version = "0.53.0-SNAPSHOT"
+authors = [
+    "Adrien Ball <adrien.ball@snips.ai>",
+    "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
+    "Kevin Lefevre <kevin.lefevre@snips.ai",
+]
+repository = "https://github.com/snipsco/nlu-rust-ontology/"
+description = "Ontology of the Rust NLU library API"
+
+[workspace]
+members = [
+    "snips-nlu-ontology-ffi",
+]
+
+[dependencies]
+error-chain = { version = "0.11", default-features = false }
+itertools = "0.7"
+lazy_static = "1.0"
+rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.15.3" }
+serde = "1.0"
+serde_derive = "1.0"
+
+[dev-dependencies]
+serde_json = "1.0"

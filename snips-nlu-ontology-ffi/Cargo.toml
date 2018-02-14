@@ -1,0 +1,16 @@
+[package]
+name = "snips-nlu-ontology-ffi"
+version = "0.53.0-SNAPSHOT"
+authors = [
+    "Kevin Lefevre <kevin.lefevre@snips.ai>",
+    "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
+]
+
+[dependencies]
+snips-nlu-ontology = { path = ".." }
+error-chain = { version = "0.11", default-features = false }
+libc = "0.2"
+
+[lib]
+name = "snips_nlu_ontology"
+crate-type = ["cdylib"]

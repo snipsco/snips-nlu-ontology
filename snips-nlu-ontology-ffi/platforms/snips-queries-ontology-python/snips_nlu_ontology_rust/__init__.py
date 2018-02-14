@@ -1,0 +1,3 @@
+from __future__ import absolute_import
+
+from snips_nlu_ontology_rust.rustling_parser import RustlingParser
