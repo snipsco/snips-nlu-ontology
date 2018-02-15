@@ -1,5 +1,6 @@
 extern crate snips_nlu_ontology;
 #[macro_use] extern crate error_chain;
+#[macro_use] extern crate lazy_static;
 extern crate libc;
 
 pub mod errors;

@@ -1,14 +1,36 @@
 use std::ffi::{CStr, CString};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+use std::slice;
+
 use libc;
 
 use errors::*;
 use snips_nlu_ontology::rustling_parser::*;
 use snips_nlu_ontology::BuiltinEntityKind;
 
+lazy_static! {
+    static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
+}
+
 #[repr(C)]
 pub enum CResult {
     OK, KO
+}
+
+macro_rules! wrap {
+    ($e:expr) => { match $e {
+        Ok(_) => { CResult::OK }
+        Err(e) => {
+            use error_chain::ChainedError;
+            let msg = e.display_chain().to_string();
+            eprintln!("{}", msg);
+            match LAST_ERROR.lock() {
+                Ok(mut guard) => *guard = msg,
+                Err(_) => () /* curl up and cry */
+            }
+            CResult::KO
+        }
+    }}
 }
 
 #[repr(C)]
@@ -92,6 +114,32 @@ impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
     }
 }
 
+#[repr(C)]
+#[derive(Debug)]
+pub struct CRustlingEntityArray {
+    pub data: *const CRustlingEntity,
+    pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
+}
+
+impl CRustlingEntityArray {
+    pub fn from(input: Vec<::CRustlingEntity>) -> OntologyResult<Self> {
+        Ok(Self {
+            size: input.len() as libc::c_int,
+            data: Box::into_raw(input.into_boxed_slice()) as *const CRustlingEntity,
+        })
+    }
+}
+
+impl Drop for CRustlingEntityArray {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                    self.data as *mut CRustlingEntityArray,
+                    self.size as usize))
+        };
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_rustling_parser(
     lang: ::CLanguage,
@@ -108,28 +156,11 @@ pub extern "C" fn nlu_ontology_create_rustling_parser(
 pub extern "C" fn nlu_ontology_extract_entities(
     ptr: *const RustlingParser,
     sentence: *const libc::c_char,
-    filter_entity_kinds: *const Vec<CBuiltinEntityKind>,
-    results: *mut Box<Vec<CRustlingEntity>>,
+    filter_entity_kinds: *const CBuiltinEntityKind,
+    filter_entity_kinds_size: usize,
+    results: *mut *const CRustlingEntityArray,
 ) -> CResult {
-    let parser = unsafe { &*ptr };
-    let sentence = unsafe { CStr::from_ptr(sentence) }.to_str().unwrap();
-
-    let opt_filter: Option<Vec<_>> = unsafe { filter_entity_kinds.as_ref() }
-        .map(|vec| vec.into_iter().map(BuiltinEntityKind::from).collect());
-    let opt_filter = opt_filter.as_ref().map(|vec| vec.as_slice());
-
-    let c_entities = parser.extract_entities(sentence, opt_filter)
-        .into_iter()
-        .map(CRustlingEntity::from)
-        .collect::<OntologyResult<_>>()
-        .unwrap();
-    let c_entities = Box::new(c_entities);
-
-    unsafe {
-        *results = c_entities;
-    }
-
-    CResult::OK
+    wrap!(extract_entity(ptr, sentence, filter_entity_kinds, filter_entity_kinds_size, results))
 }
 
 #[no_mangle]
@@ -141,3 +172,36 @@ pub extern "C" fn nlu_ontology_destroy_rustling_parser(
     }
     CResult::OK
 }
+
+fn extract_entity(
+    ptr: *const RustlingParser,
+    sentence: *const libc::c_char,
+    filter_entity_kinds: *const CBuiltinEntityKind,
+    filter_entity_kinds_size: usize,
+    results: *mut *const CRustlingEntityArray,
+) -> OntologyResult<()> {
+    let parser = unsafe { &*ptr };
+    let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
+
+    let opt_filter: Option<Vec<_>> = unsafe { filter_entity_kinds.as_ref() }
+        .map(|vec| {
+            unsafe { slice::from_raw_parts(vec, filter_entity_kinds_size) }
+                .into_iter()
+                .map(BuiltinEntityKind::from)
+                .collect()
+        });
+    let opt_filter = opt_filter.as_ref().map(|vec| vec.as_slice());
+
+    let c_entities = parser.extract_entities(sentence, opt_filter)
+        .into_iter()
+        .map(CRustlingEntity::from)
+        .collect::<OntologyResult<_>>()?;
+    let c_entities = Box::new(CRustlingEntityArray::from(c_entities)?);
+
+    unsafe {
+        *results = Box::into_raw(c_entities);
+    }
+
+    Ok(())
+}
+
