@@ -8,26 +8,14 @@ extern crate serde_json;
 
 pub mod errors;
 pub mod builtin_entities;
+#[macro_use]
+pub mod macros;
+#[macro_use]
+pub mod language;
 
 mod ontology;
 
 pub use rustling_ontology::Lang as RustlingLang;
 pub use builtin_entities::*;
 pub use ontology::*;
-
-pub enum Language {
-    DE, EN, ES, FR, KO, ZH
-}
-
-impl From<Language> for RustlingLang {
-    fn from(lang: Language) -> Self {
-        match lang {
-            Language::DE => RustlingLang::DE,
-            Language::EN => RustlingLang::EN,
-            Language::ES => RustlingLang::ES,
-            Language::FR => RustlingLang::FR,
-            Language::KO => RustlingLang::KO,
-            Language::ZH => RustlingLang::ZH,
-        }
-    }
-}
+pub use language::*;

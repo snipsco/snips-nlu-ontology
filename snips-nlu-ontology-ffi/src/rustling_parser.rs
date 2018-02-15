@@ -5,8 +5,7 @@ use std::slice;
 use libc;
 
 use errors::*;
-use snips_nlu_ontology::rustling_parser::*;
-use snips_nlu_ontology::BuiltinEntityKind;
+use snips_nlu_ontology::*;
 
 lazy_static! {
     static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
@@ -40,7 +39,7 @@ pub struct CRustlingEntity {
     pub range_start: libc::c_int,
     pub range_end: libc::c_int,
     pub entity: ::CSlotValue,
-    pub entity_kind: ::CBuiltinEntityKind,
+    pub entity_kind: CBuiltinEntityKind,
 }
 
 impl CRustlingEntity {

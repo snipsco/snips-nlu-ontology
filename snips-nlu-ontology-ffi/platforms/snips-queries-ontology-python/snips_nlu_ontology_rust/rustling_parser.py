@@ -14,6 +14,21 @@ dylib_path = glob(
 lib = cdll.LoadLibrary(dylib_path)
 
 
+class CArrayString(Structure):
+    _fields_ = [("data", POINTER(POINTER(c_char))),
+                ("size", c_int)]
+
+
+def get_supported_languages():
+    array_str = CArrayString(lib.nlu_ontology_supported_languages())
+    return array_str
+
+
+SUPPORTED_LANGUAGES = get_supported_languages()
+
+print(SUPPORTED_LANGUAGES)
+
+
 class BuiltinEntityParser(object):
     """Extract builtin entities
 
