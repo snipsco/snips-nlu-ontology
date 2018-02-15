@@ -121,7 +121,7 @@ pub struct CRustlingEntityArray {
 }
 
 impl CRustlingEntityArray {
-    pub fn from(input: Vec<::CRustlingEntity>) -> OntologyResult<Self> {
+    pub fn from(input: Vec<CRustlingEntity>) -> OntologyResult<Self> {
         Ok(Self {
             size: input.len() as libc::c_int,
             data: Box::into_raw(input.into_boxed_slice()) as *const CRustlingEntity,

@@ -16,3 +16,4 @@ use snips_nlu_ontology::*;
 
 pub use ontology::*;
 pub use language::*;
+pub use rustling_parser::*;
