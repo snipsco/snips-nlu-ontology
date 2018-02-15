@@ -13,24 +13,25 @@ pub extern "C" fn nlu_ontology_supported_languages() -> *const CArrayString {
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub enum CLanguage {
-    DE,
-    EN,
-    ES,
-    FR,
-    KO,
-    ZH,
+    LANGUAGE_DE,
+    LANGUAGE_EN,
+    LANGUAGE_ES,
+    LANGUAGE_FR,
+    LANGUAGE_KO,
+    LANGUAGE_ZH,
 }
 
 impl From<CLanguage> for Language {
     fn from(c_lang: CLanguage) -> Self {
         match c_lang {
-            CLanguage::DE => Language::DE,
-            CLanguage::EN => Language::EN,
-            CLanguage::ES => Language::ES,
-            CLanguage::FR => Language::FR,
-            CLanguage::KO => Language::KO,
-            CLanguage::ZH => Language::ZH,
+            CLanguage::LANGUAGE_DE => Language::DE,
+            CLanguage::LANGUAGE_EN => Language::EN,
+            CLanguage::LANGUAGE_ES => Language::ES,
+            CLanguage::LANGUAGE_FR => Language::FR,
+            CLanguage::LANGUAGE_KO => Language::KO,
+            CLanguage::LANGUAGE_ZH => Language::ZH,
         }
     }
 }

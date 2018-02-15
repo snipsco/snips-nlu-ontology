@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 use std::ffi::{CStr, CString};
 use std::sync::{Arc, Mutex};
 use std::slice;
@@ -12,13 +14,35 @@ lazy_static! {
 }
 
 #[repr(C)]
+pub struct BuiltinEntityParser {
+    pub parser: *const libc::c_void,
+}
+
+macro_rules! get_parser {
+    ($opaque:ident) => {{
+        let container: &BuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *const ::RustlingParser;
+        unsafe { &*x }
+    }};
+}
+
+macro_rules! get_parser_mut {
+    ($opaque:ident) => {{
+        let container: &BuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *mut ::RustlingParser;
+        unsafe { &mut *x }
+    }};
+}
+
+#[repr(C)]
 pub enum CResult {
-    OK, KO
+    RESULT_OK = 0,
+    RESULT_KO = 1,
 }
 
 macro_rules! wrap {
     ($e:expr) => { match $e {
-        Ok(_) => { CResult::OK }
+        Ok(_) => { CResult::RESULT_OK }
         Err(e) => {
             use error_chain::ChainedError;
             let msg = e.display_chain().to_string();
@@ -27,7 +51,7 @@ macro_rules! wrap {
                 Ok(mut guard) => *guard = msg,
                 Err(_) => () /* curl up and cry */
             }
-            CResult::KO
+            CResult::RESULT_KO
         }
     }}
 }
@@ -62,15 +86,14 @@ impl Drop for CRustlingEntity {
 
 #[repr(C)]
 #[derive(Debug)]
-#[allow(non_camel_case_types)]
 pub enum CBuiltinEntityKind {
-    AMOUNT_OF_MONEY,
-    DURATION,
-    NUMBER,
-    ORDINAL,
-    TEMPERATURE,
-    TIME,
-    PERCENTAGE,
+    KIND_AMOUNT_OF_MONEY,
+    KIND_DURATION,
+    KIND_NUMBER,
+    KIND_ORDINAL,
+    KIND_TEMPERATURE,
+    KIND_TIME,
+    KIND_PERCENTAGE,
 }
 
 impl From<CBuiltinEntityKind> for BuiltinEntityKind {
@@ -82,13 +105,13 @@ impl From<CBuiltinEntityKind> for BuiltinEntityKind {
 impl<'a> From<&'a CBuiltinEntityKind> for BuiltinEntityKind {
     fn from(c_value: &CBuiltinEntityKind) -> Self {
         match *c_value {
-            CBuiltinEntityKind::AMOUNT_OF_MONEY => BuiltinEntityKind::AmountOfMoney,
-            CBuiltinEntityKind::DURATION => BuiltinEntityKind::Duration,
-            CBuiltinEntityKind::NUMBER => BuiltinEntityKind::Number,
-            CBuiltinEntityKind::ORDINAL => BuiltinEntityKind::Ordinal,
-            CBuiltinEntityKind::TEMPERATURE => BuiltinEntityKind::Temperature,
-            CBuiltinEntityKind::TIME => BuiltinEntityKind::Time,
-            CBuiltinEntityKind::PERCENTAGE => BuiltinEntityKind::Percentage,
+            CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY => BuiltinEntityKind::AmountOfMoney,
+            CBuiltinEntityKind::KIND_DURATION => BuiltinEntityKind::Duration,
+            CBuiltinEntityKind::KIND_NUMBER => BuiltinEntityKind::Number,
+            CBuiltinEntityKind::KIND_ORDINAL => BuiltinEntityKind::Ordinal,
+            CBuiltinEntityKind::KIND_TEMPERATURE => BuiltinEntityKind::Temperature,
+            CBuiltinEntityKind::KIND_TIME => BuiltinEntityKind::Time,
+            CBuiltinEntityKind::KIND_PERCENTAGE => BuiltinEntityKind::Percentage,
         }
     }
 }
@@ -102,13 +125,13 @@ impl From<BuiltinEntityKind> for CBuiltinEntityKind {
 impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
     fn from(c_value: &BuiltinEntityKind) -> Self {
         match *c_value {
-            BuiltinEntityKind::AmountOfMoney => CBuiltinEntityKind::AMOUNT_OF_MONEY,
-            BuiltinEntityKind::Duration => CBuiltinEntityKind::DURATION,
-            BuiltinEntityKind::Number => CBuiltinEntityKind::NUMBER,
-            BuiltinEntityKind::Ordinal => CBuiltinEntityKind::ORDINAL,
-            BuiltinEntityKind::Temperature => CBuiltinEntityKind::TEMPERATURE,
-            BuiltinEntityKind::Time => CBuiltinEntityKind::TIME,
-            BuiltinEntityKind::Percentage => CBuiltinEntityKind::PERCENTAGE,
+            BuiltinEntityKind::AmountOfMoney => CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY,
+            BuiltinEntityKind::Duration => CBuiltinEntityKind::KIND_DURATION,
+            BuiltinEntityKind::Number => CBuiltinEntityKind::KIND_NUMBER,
+            BuiltinEntityKind::Ordinal => CBuiltinEntityKind::KIND_ORDINAL,
+            BuiltinEntityKind::Temperature => CBuiltinEntityKind::KIND_TEMPERATURE,
+            BuiltinEntityKind::Time => CBuiltinEntityKind::KIND_TIME,
+            BuiltinEntityKind::Percentage => CBuiltinEntityKind::KIND_PERCENTAGE,
         }
     }
 }
@@ -142,18 +165,14 @@ impl Drop for CRustlingEntityArray {
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_rustling_parser(
     lang: ::CLanguage,
-    ptr: *mut *const RustlingParser,
+    ptr: *mut *const BuiltinEntityParser,
 ) -> CResult {
-    let parser = RustlingParser::get(lang.into());
-    unsafe {
-        *ptr = Arc::into_raw(parser);
-    }
-    CResult::OK
+    wrap!(create_rustling_parser(lang, ptr))
 }
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_extract_entities(
-    ptr: *const RustlingParser,
+    ptr: *const BuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
@@ -164,22 +183,38 @@ pub extern "C" fn nlu_ontology_extract_entities(
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_destroy_rustling_parser(
-    ptr: *mut RustlingParser,
+    ptr: *mut BuiltinEntityParser,
 ) -> CResult {
+    let parser = get_parser_mut!(ptr);
     unsafe {
-        let _ = Arc::from_raw(ptr);
+        let _ = Arc::from_raw(parser);
     }
-    CResult::OK
+    CResult::RESULT_OK
+}
+
+fn create_rustling_parser(
+    lang: ::CLanguage,
+    ptr: *mut *const BuiltinEntityParser,
+) -> OntologyResult<()> {
+    let parser = RustlingParser::get(lang.into());
+
+    unsafe {
+        let container = BuiltinEntityParser {
+            parser: Arc::into_raw(parser) as *const libc::c_void,
+        };
+        *ptr = Box::into_raw(Box::new(container))
+    }
+    Ok(())
 }
 
 fn extract_entity(
-    ptr: *const RustlingParser,
+    ptr: *const BuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
     results: *mut *const CRustlingEntityArray,
 ) -> OntologyResult<()> {
-    let parser = unsafe { &*ptr };
+    let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
 
     let opt_filter: Option<Vec<_>> = unsafe { filter_entity_kinds.as_ref() }
