@@ -3,8 +3,8 @@ use ffi_utils::*;
 use std::convert::From;
 
 #[no_mangle]
-pub extern "C" fn nlu_ontology_supported_languages() -> *const CArrayString {
-    let arr = Box::new(CArrayString::from(
+pub extern "C" fn nlu_ontology_supported_languages() -> *const CStringArray {
+    let arr = Box::new(CStringArray::from(
         Language::all()
             .iter()
             .map(|l| l.to_string().to_lowercase())
