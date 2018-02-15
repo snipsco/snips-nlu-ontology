@@ -19,7 +19,7 @@ class CArrayString(Structure):
                 ("size", c_int)]
 
 
-def get_supported_languages():
+def get_all_languages():
     lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
 
     array_ptr = lib.nlu_ontology_supported_languages()
@@ -30,9 +30,12 @@ def get_supported_languages():
     return ["boop", "bip"]
 
 
-SUPPORTED_LANGUAGES = get_supported_languages()
+def get_all_builtin_entities():
+    return ["snips/number", "snips/datetime"]
 
-print(SUPPORTED_LANGUAGES)
+
+ALL_LANGUAGES = get_all_languages()
+ALL_BUILTIN_ENTITIES = get_all_builtin_entities()
 
 
 class BuiltinEntityParser(object):
@@ -83,6 +86,8 @@ class BuiltinEntityParser(object):
         Returns:
               list of str: the list of entity labels
         """
+        if self.language == "zh":
+            return []
         return [
             "snips/number",
             "snips/datetime",
