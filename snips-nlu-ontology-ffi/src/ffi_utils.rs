@@ -15,8 +15,8 @@ impl From<Vec<String>> for CArrayString {
         Self {
             size: input.len() as libc::c_int,
             data: Box::into_raw(input.into_iter()
-                .map(|s| CString::new(s).expect("String should be valid"))
-                .collect::<Vec<CString>>()
+                .map(|s| CString::new(s).unwrap().into_raw())
+                .collect::<Vec<_>>()
                 .into_boxed_slice()) as *const *const libc::c_char,
         }
     }
