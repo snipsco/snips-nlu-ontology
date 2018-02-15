@@ -12,13 +12,13 @@ import zipfile
 from builtins import input, str, bytes
 from tempfile import mkdtemp
 
-from snips_nlu_ontology_rust.rustling_parser import RustlingParser
+from snips_nlu_ontology_rust.rustling_parser import BuiltinEntityParser
 # from snips_nlu_ontology_rust.rustling_parser import Language
 
 
 def debug_inference(language):
     # language = Language.from_iso_code(iso_code)
-    parser = RustlingParser(language)
+    parser = BuiltinEntityParser(language)
     # with io.open(os.path.abspath(engine_path), "r", encoding="utf8") as f:
         # engine_dict = json.load(f)
 

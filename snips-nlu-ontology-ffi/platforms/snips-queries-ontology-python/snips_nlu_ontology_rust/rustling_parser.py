@@ -15,13 +15,19 @@ lib = cdll.LoadLibrary(dylib_path)
 
 
 class CArrayString(Structure):
-    _fields_ = [("data", POINTER(POINTER(c_char))),
+    _fields_ = [("data", POINTER(c_char_p)),
                 ("size", c_int)]
 
 
 def get_supported_languages():
-    array_str = CArrayString(lib.nlu_ontology_supported_languages())
-    return array_str
+    lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
+
+    array_ptr = lib.nlu_ontology_supported_languages()
+    print(array_ptr.contents.size)
+
+    for i in xrange(array_ptr.contents.size):
+        print("i:", i, ", lang:", array_ptr.contents.data[i])
+    return ["boop", "bip"]
 
 
 SUPPORTED_LANGUAGES = get_supported_languages()
