@@ -12,7 +12,7 @@ import zipfile
 from builtins import input, str, bytes
 from tempfile import mkdtemp
 
-from snips_nlu_ontology_rust.rustling_parser import BuiltinEntityParser
+from snips_nlu_ontology_rust.builtin_entities import BuiltinEntityParser
 # from snips_nlu_ontology_rust.rustling_parser import Language
 
 

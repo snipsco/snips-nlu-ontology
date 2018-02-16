@@ -8,34 +8,28 @@ import os
 from ctypes import *
 from glob import glob
 
-dylib_path = glob(
-    os.path.join(os.path.dirname(__file__), "dylib",
-                 "libsnips_nlu_ontology*"))[0]
+dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
+dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
 lib = cdll.LoadLibrary(dylib_path)
 
 
 class CArrayString(Structure):
-    _fields_ = [("data", POINTER(c_char_p)),
-                ("size", c_int)]
+    _fields_ = [
+        ("data", POINTER(c_char_p)),
+        ("size", c_int)
+    ]
 
 
 def get_all_languages():
     lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
-
     array_ptr = lib.nlu_ontology_supported_languages()
-    print(array_ptr.contents.size)
-
-    for i in xrange(array_ptr.contents.size):
-        print("i:", i, ", lang:", array_ptr.contents.data[i])
-    return ["boop", "bip"]
+    return array_ptr.contents.data[0:array_ptr.contents.size]
 
 
 def get_all_builtin_entities():
-    return ["snips/number", "snips/datetime"]
-
-
-ALL_LANGUAGES = get_all_languages()
-ALL_BUILTIN_ENTITIES = get_all_builtin_entities()
+    lib.nlu_ontology_all_builtin_entities.restype = POINTER(CArrayString)
+    array_ptr = lib.nlu_ontology_all_builtin_entities()
+    return array_ptr.contents.data[0:array_ptr.contents.size]
 
 
 class BuiltinEntityParser(object):
@@ -48,7 +42,7 @@ class BuiltinEntityParser(object):
     def __init__(self, language):
         self._parser = pointer(c_void_p())
         exit_code = lib.nlu_ontology_create_rustling_parser(
-            FR, byref(self._parser))
+            language, byref(self._parser))
         if exit_code:
             raise ImportError('Something wrong happened while creating the '
                               'intent parser. See stderr.')
@@ -86,8 +80,6 @@ class BuiltinEntityParser(object):
         Returns:
               list of str: the list of entity labels
         """
-        if self.language == "zh":
-            return []
         return [
             "snips/number",
             "snips/datetime",
@@ -97,3 +89,7 @@ class BuiltinEntityParser(object):
             "snips/percentage",
             "snips/amountOfMoney"
         ]
+
+
+ALL_LANGUAGES = get_all_languages()
+ALL_BUILTIN_ENTITIES = get_all_builtin_entities()
