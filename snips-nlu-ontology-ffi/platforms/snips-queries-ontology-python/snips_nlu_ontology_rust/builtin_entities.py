@@ -5,12 +5,17 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+from builtins import object
+from builtins import range
 from ctypes import *
 from glob import glob
 
 dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
 dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
 lib = cdll.LoadLibrary(dylib_path)
+
+_ALL_LANGUAGES = None
+_ALL_BUILTIN_ENTITIES = None
 
 
 class CArrayString(Structure):
@@ -21,15 +26,25 @@ class CArrayString(Structure):
 
 
 def get_all_languages():
-    lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
-    array_ptr = lib.nlu_ontology_supported_languages()
-    return array_ptr.contents.data[0:array_ptr.contents.size]
+    global _ALL_LANGUAGES
+    if _ALL_LANGUAGES is None:
+        lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
+        array_ptr = lib.nlu_ontology_supported_languages()
+        size = array_ptr.contents.size
+        _ALL_LANGUAGES = set(
+            array_ptr.contents.data[i].decode("utf8") for i in range(size))
+    return _ALL_LANGUAGES
 
 
 def get_all_builtin_entities():
-    lib.nlu_ontology_all_builtin_entities.restype = POINTER(CArrayString)
-    array_ptr = lib.nlu_ontology_all_builtin_entities()
-    return array_ptr.contents.data[0:array_ptr.contents.size]
+    global _ALL_BUILTIN_ENTITIES
+    if _ALL_BUILTIN_ENTITIES is None:
+        lib.nlu_ontology_all_builtin_entities.restype = POINTER(CArrayString)
+        array_ptr = lib.nlu_ontology_all_builtin_entities()
+        size = array_ptr.contents.size
+        _ALL_BUILTIN_ENTITIES = set(
+            array_ptr.contents.data[i].decode("utf8") for i in range(size))
+    return _ALL_BUILTIN_ENTITIES
 
 
 class BuiltinEntityParser(object):
@@ -89,7 +104,3 @@ class BuiltinEntityParser(object):
             "snips/percentage",
             "snips/amountOfMoney"
         ]
-
-
-ALL_LANGUAGES = get_all_languages()
-ALL_BUILTIN_ENTITIES = get_all_builtin_entities()
