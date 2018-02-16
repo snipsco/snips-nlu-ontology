@@ -6,11 +6,10 @@ extern crate rustling_ontology;
 #[cfg(test)]
 extern crate serde_json;
 
-pub mod errors;
-pub mod builtin_entities;
 #[macro_use]
 pub mod macros;
-#[macro_use]
+pub mod errors;
+pub mod builtin_entities;
 pub mod language;
 
 mod ontology;

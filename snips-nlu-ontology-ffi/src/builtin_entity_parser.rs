@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 use std::sync::{Arc, Mutex};
 use std::slice;
 
@@ -8,6 +8,7 @@ use libc;
 
 use errors::*;
 use snips_nlu_ontology::*;
+use builtin_entity::*;
 
 lazy_static! {
     static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
@@ -56,111 +57,6 @@ macro_rules! wrap {
     }}
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct CBuiltinEntity {
-    pub value: *const libc::c_char,
-    pub range_start: libc::c_int,
-    pub range_end: libc::c_int,
-    pub entity: ::CSlotValue,
-    pub entity_kind: CBuiltinEntityKind,
-}
-
-impl CBuiltinEntity {
-    fn from(e: ::BuiltinEntity) -> OntologyResult<Self> {
-        Ok(Self {
-            value: CString::new(e.value)?.into_raw(),
-            range_start: e.range.start as libc::c_int,
-            range_end: e.range.end as libc::c_int,
-            entity: ::CSlotValue::from(e.entity)?,
-            entity_kind: e.entity_kind.into(),
-        })
-    }
-}
-
-impl Drop for CBuiltinEntity {
-    fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.value as *mut libc::c_char) };
-    }
-}
-
-#[repr(C)]
-#[derive(Debug)]
-pub enum CBuiltinEntityKind {
-    KIND_AMOUNT_OF_MONEY,
-    KIND_DURATION,
-    KIND_NUMBER,
-    KIND_ORDINAL,
-    KIND_TEMPERATURE,
-    KIND_TIME,
-    KIND_PERCENTAGE,
-}
-
-impl From<CBuiltinEntityKind> for BuiltinEntityKind {
-    fn from(c_value: CBuiltinEntityKind) -> Self {
-        BuiltinEntityKind::from(&c_value)
-    }
-}
-
-impl<'a> From<&'a CBuiltinEntityKind> for BuiltinEntityKind {
-    fn from(c_value: &CBuiltinEntityKind) -> Self {
-        match *c_value {
-            CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY => BuiltinEntityKind::AmountOfMoney,
-            CBuiltinEntityKind::KIND_DURATION => BuiltinEntityKind::Duration,
-            CBuiltinEntityKind::KIND_NUMBER => BuiltinEntityKind::Number,
-            CBuiltinEntityKind::KIND_ORDINAL => BuiltinEntityKind::Ordinal,
-            CBuiltinEntityKind::KIND_TEMPERATURE => BuiltinEntityKind::Temperature,
-            CBuiltinEntityKind::KIND_TIME => BuiltinEntityKind::Time,
-            CBuiltinEntityKind::KIND_PERCENTAGE => BuiltinEntityKind::Percentage,
-        }
-    }
-}
-
-impl From<BuiltinEntityKind> for CBuiltinEntityKind {
-    fn from(c_value: BuiltinEntityKind) -> Self {
-        CBuiltinEntityKind::from(&c_value)
-    }
-}
-
-impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
-    fn from(c_value: &BuiltinEntityKind) -> Self {
-        match *c_value {
-            BuiltinEntityKind::AmountOfMoney => CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY,
-            BuiltinEntityKind::Duration => CBuiltinEntityKind::KIND_DURATION,
-            BuiltinEntityKind::Number => CBuiltinEntityKind::KIND_NUMBER,
-            BuiltinEntityKind::Ordinal => CBuiltinEntityKind::KIND_ORDINAL,
-            BuiltinEntityKind::Temperature => CBuiltinEntityKind::KIND_TEMPERATURE,
-            BuiltinEntityKind::Time => CBuiltinEntityKind::KIND_TIME,
-            BuiltinEntityKind::Percentage => CBuiltinEntityKind::KIND_PERCENTAGE,
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct CRustlingEntityArray {
-    pub data: *const CBuiltinEntity,
-    pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
-}
-
-impl CRustlingEntityArray {
-    pub fn from(input: Vec<CBuiltinEntity>) -> OntologyResult<Self> {
-        Ok(Self {
-            size: input.len() as libc::c_int,
-            data: Box::into_raw(input.into_boxed_slice()) as *const CBuiltinEntity,
-        })
-    }
-}
-
-impl Drop for CRustlingEntityArray {
-    fn drop(&mut self) {
-        let _ = unsafe {
-            Box::from_raw(slice::from_raw_parts_mut(
-                    self.data as *mut CRustlingEntityArray,
-                    self.size as usize))
-        };
-    }
-}
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_rustling_parser(
@@ -176,7 +72,7 @@ pub extern "C" fn nlu_ontology_extract_entities(
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
-    results: *mut *const CRustlingEntityArray,
+    results: *mut *const CBuiltinEntityArray,
 ) -> CResult {
     wrap!(extract_entity(ptr, sentence, filter_entity_kinds, filter_entity_kinds_size, results))
 }
@@ -212,7 +108,7 @@ fn extract_entity(
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
-    results: *mut *const CRustlingEntityArray,
+    results: *mut *const CBuiltinEntityArray,
 ) -> OntologyResult<()> {
     let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
@@ -229,8 +125,8 @@ fn extract_entity(
     let c_entities = parser.extract_entities(sentence, opt_filter)
         .into_iter()
         .map(CBuiltinEntity::from)
-        .collect::<OntologyResult<_>>()?;
-    let c_entities = Box::new(CRustlingEntityArray::from(c_entities)?);
+        .collect::<Vec<CBuiltinEntity>>();
+    let c_entities = Box::new(CBuiltinEntityArray::from(c_entities));
 
     unsafe {
         *results = Box::into_raw(c_entities);

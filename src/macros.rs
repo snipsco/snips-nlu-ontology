@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! enum_kind {
     ($kindname:ident, [$($varname:ident),*]) => {
-        #[derive(Debug,Copy,Clone,PartialEq, Hash, Eq)]
+        #[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Hash, Eq)]
         pub enum $kindname {
             $( $varname ),*
         }
