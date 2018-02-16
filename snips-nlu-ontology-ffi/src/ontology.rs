@@ -3,7 +3,6 @@ use std::ptr::null;
 use std::slice;
 
 use libc;
-pub use errors::*;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -13,21 +12,21 @@ pub struct CIntentParserResult {
     pub slots: *const CSlotList,
 }
 
-impl CIntentParserResult {
-    pub fn from(input: ::IntentParserResult) -> OntologyResult<Self> {
-        Ok(Self {
-            input: CString::new(input.input)?.into_raw(),
+impl From<::IntentParserResult> for CIntentParserResult {
+    fn from(input: ::IntentParserResult) -> Self {
+        Self {
+            input: CString::new(input.input).unwrap().into_raw(), // String can not contains 0
             intent: if let Some(intent) = input.intent {
-                Box::into_raw(Box::new(CIntentClassifierResult::from(intent)?)) as *const CIntentClassifierResult
+                Box::into_raw(Box::new(CIntentClassifierResult::from(intent))) as *const CIntentClassifierResult
             } else {
                 null()
             },
             slots: if let Some(slots) = input.slots {
-                Box::into_raw(Box::new(CSlotList::from(slots)?)) as *const CSlotList
+                Box::into_raw(Box::new(CSlotList::from(slots))) as *const CSlotList
             } else {
                 null()
             },
-        })
+        }
     }
 }
 
@@ -50,12 +49,12 @@ pub struct CIntentClassifierResult {
     pub probability: libc::c_float,
 }
 
-impl CIntentClassifierResult {
-    pub fn from(input: ::IntentClassifierResult) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<::IntentClassifierResult> for CIntentClassifierResult {
+    fn from(input: ::IntentClassifierResult) -> Self {
+        Self {
             probability: input.probability,
-            intent_name: CString::new(input.intent_name)?.into_raw(),
-        })
+            intent_name: CString::new(input.intent_name).unwrap().into_raw(), // String can not contains 0
+        }
     }
 }
 
@@ -72,18 +71,18 @@ pub struct CSlotList {
     pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
-impl CSlotList {
-    pub fn from(input: Vec<::Slot>) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<Vec<::Slot>> for CSlotList {
+    fn from(input: Vec<::Slot>) -> Self {
+        Self {
             size: input.len() as libc::c_int,
             slots: Box::into_raw(
                 input
                     .into_iter()
                     .map(|s| CSlot::from(s))
-                    .collect::<OntologyResult<Vec<CSlot>>>()?
+                    .collect::<Vec<CSlot>>()
                     .into_boxed_slice(),
             ) as *const CSlot,
-        })
+        }
     }
 }
 
@@ -104,22 +103,22 @@ pub struct CSlot {
     pub slot_name: *const libc::c_char,
 }
 
-impl CSlot {
-    pub fn from(input: ::Slot) -> OntologyResult<Self> {
+impl From<::Slot> for CSlot {
+    fn from(input: ::Slot) -> Self {
         let range = if let Some(range) = input.range {
             range.start as libc::c_int..range.end as libc::c_int
         } else {
             -1..-1
         };
 
-        Ok(Self {
-            raw_value: CString::new(input.raw_value)?.into_raw(),
-            value: CSlotValue::from(input.value)?,
+        Self {
+            raw_value: CString::new(input.raw_value).unwrap().into_raw(), // String can not contains 0
+            value: CSlotValue::from(input.value),
             range_start: range.start,
             range_end: range.end,
-            entity: CString::new(input.entity)?.into_raw(),
-            slot_name: CString::new(input.slot_name)?.into_raw(),
-        })
+            entity: CString::new(input.entity).unwrap().into_raw(), // String can not contains 0
+            slot_name: CString::new(input.slot_name).unwrap().into_raw(), // String can not contains 0
+        }
     }
 }
 
@@ -217,13 +216,13 @@ pub struct CInstantTimeValue {
     pub precision: CPrecision,
 }
 
-impl CInstantTimeValue {
-    pub fn from(value: ::InstantTimeValue) -> OntologyResult<Self> {
-        Ok(Self {
-            value: CString::new(value.value)?.into_raw(),
+impl From<::InstantTimeValue> for CInstantTimeValue {
+    fn from(value: ::InstantTimeValue) -> Self {
+        Self {
+            value: CString::new(value.value).unwrap().into_raw(), // String can not contains 0
             grain: CGrain::from(value.grain),
             precision: CPrecision::from(value.precision),
-        })
+        }
     }
 }
 
@@ -240,20 +239,20 @@ pub struct CTimeIntervalValue {
     pub to: *const libc::c_char,
 }
 
-impl CTimeIntervalValue {
-    pub fn from(value: ::TimeIntervalValue) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<::TimeIntervalValue> for CTimeIntervalValue {
+    fn from(value: ::TimeIntervalValue) -> Self {
+        Self {
             from: if let Some(s) = value.from {
-                CString::new(s)?.into_raw()
+                CString::new(s).unwrap().into_raw() // String can not contains 0
             } else {
                 null()
             },
             to: if let Some(s) = value.to {
-                CString::new(s)?.into_raw()
+                CString::new(s).unwrap().into_raw() // String can not contains 0
             } else {
                 null()
             },
-        })
+        }
     }
 }
 
@@ -276,17 +275,17 @@ pub struct CAmountOfMoneyValue {
     pub unit: *const libc::c_char,
 }
 
-impl CAmountOfMoneyValue {
-    pub fn from(value: ::AmountOfMoneyValue) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
+    fn from(value: ::AmountOfMoneyValue) -> Self {
+        Self {
             value: value.value as libc::c_float,
             precision: CPrecision::from(value.precision),
             unit: if let Some(s) = value.unit {
-                CString::new(s)?.into_raw()
+                CString::new(s).unwrap().into_raw() // String can not contains 0
             } else {
                 null()
             },
-        })
+        }
     }
 }
 
@@ -305,16 +304,16 @@ pub struct CTemperatureValue {
     pub unit: *const libc::c_char,
 }
 
-impl CTemperatureValue {
-    pub fn from(value: ::TemperatureValue) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<::TemperatureValue> for CTemperatureValue {
+    fn from(value: ::TemperatureValue) -> Self {
+        Self {
             value: value.value as libc::c_float,
             unit: if let Some(s) = value.unit {
-                CString::new(s)?.into_raw()
+                CString::new(s).unwrap().into_raw() // String can not contains 0
             } else {
                 null()
             },
-        })
+        }
     }
 }
 
@@ -340,9 +339,9 @@ pub struct CDurationValue {
     pub precision: CPrecision,
 }
 
-impl CDurationValue {
-    pub fn from(value: ::DurationValue) -> OntologyResult<Self> {
-        Ok(Self {
+impl From<::DurationValue> for CDurationValue {
+    fn from(value: ::DurationValue) -> Self {
+        Self {
             years: value.years as libc::c_long,
             quarters: value.quarters as libc::c_long,
             months: value.months as libc::c_long,
@@ -352,7 +351,7 @@ impl CDurationValue {
             minutes: value.minutes as libc::c_long,
             seconds: value.seconds as libc::c_long,
             precision: CPrecision::from(value.precision),
-        })
+        }
     }
 }
 
@@ -368,33 +367,33 @@ pub struct CSlotValue {
     value: *const libc::c_void,
 }
 
-impl CSlotValue {
-    pub fn from(slot_value: ::SlotValue) -> OntologyResult<Self> {
+impl From<::SlotValue> for CSlotValue {
+    fn from(slot_value: ::SlotValue) -> Self {
         let value_type = CSlotValueType::from(&slot_value);
         let value: *const libc::c_void = match slot_value {
-            ::SlotValue::Custom(value) => CString::new(value.value.as_bytes())?.into_raw() as _,
+            ::SlotValue::Custom(value) => CString::new(value.value).unwrap().into_raw() as _, // String can not contains 0
             ::SlotValue::Number(value) => Box::into_raw(Box::new(value.value as CNumberValue)) as _,
             ::SlotValue::Ordinal(value) => {
                 Box::into_raw(Box::new(value.value as COrdinalValue)) as _
-            },
+            }
             ::SlotValue::InstantTime(value) => {
-                Box::into_raw(Box::new(CInstantTimeValue::from(value)?)) as _
-            },
+                Box::into_raw(Box::new(CInstantTimeValue::from(value))) as _
+            }
             ::SlotValue::TimeInterval(value) => {
-                Box::into_raw(Box::new(CTimeIntervalValue::from(value)?)) as _
-            },
+                Box::into_raw(Box::new(CTimeIntervalValue::from(value))) as _
+            }
             ::SlotValue::AmountOfMoney(value) => {
-                Box::into_raw(Box::new(CAmountOfMoneyValue::from(value)?)) as _
-            },
+                Box::into_raw(Box::new(CAmountOfMoneyValue::from(value))) as _
+            }
             ::SlotValue::Temperature(value) => {
-                Box::into_raw(Box::new(CTemperatureValue::from(value)?)) as _
-            },
+                Box::into_raw(Box::new(CTemperatureValue::from(value))) as _
+            }
             ::SlotValue::Duration(value) => {
-                Box::into_raw(Box::new(CDurationValue::from(value)?)) as _
-            },
+                Box::into_raw(Box::new(CDurationValue::from(value))) as _
+            }
             ::SlotValue::Percentage(value) => Box::into_raw(Box::new(value.value as CPercentageValue)) as _,
         };
-        Ok(Self { value_type, value })
+        Self { value_type, value }
     }
 }
 
