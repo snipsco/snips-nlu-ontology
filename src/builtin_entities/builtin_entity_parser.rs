@@ -1,34 +1,26 @@
 use std::sync::{Mutex, Arc};
-use std::ops::Range;
 use std::collections::HashMap;
 use std::time::Instant;
 
 use itertools::Itertools;
 
 use rustling_ontology::{Lang, OutputKind, Parser, build_parser, ResolverContext};
+use builtin_entities::BuiltinEntity;
 
-pub struct RustlingParser {
+pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Lang,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct RustlingEntity {
-    pub value: String,
-    pub range: Range<usize>,
-    pub entity: ::SlotValue,
-    pub entity_kind: ::BuiltinEntityKind,
-}
-
-impl RustlingParser {
-    pub fn get(lang: Lang) -> Arc<RustlingParser> {
+impl BuiltinEntityParser {
+    pub fn get(lang: Lang) -> Arc<BuiltinEntityParser> {
         lazy_static! {
-            static ref CACHED_PARSERS: Mutex<HashMap<String, Arc<RustlingParser>>> = Mutex::new(HashMap::new());
+            static ref CACHED_PARSERS: Mutex<HashMap<String, Arc<BuiltinEntityParser>>> = Mutex::new(HashMap::new());
         }
 
         CACHED_PARSERS.lock().unwrap()
             .entry(lang.to_string())
-            .or_insert_with(|| Arc::new(RustlingParser { parser: build_parser(lang).unwrap(), lang }))
+            .or_insert_with(|| Arc::new(BuiltinEntityParser { parser: build_parser(lang).unwrap(), lang }))
             .clone()
     }
 
@@ -36,7 +28,7 @@ impl RustlingParser {
         &self,
         sentence: &str,
         filter_entity_kinds: Option<&[::BuiltinEntityKind]>,
-    ) -> Vec<RustlingEntity> {
+    ) -> Vec<BuiltinEntity> {
         lazy_static! {
             static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
         }
@@ -59,7 +51,7 @@ impl RustlingParser {
                         kinds.iter()
                             .find(|kind| **kind == entity_kind)
                             .map(|kind|
-                                RustlingEntity {
+                                BuiltinEntity {
                                     value: sentence[m.byte_range.0..m.byte_range.1].into(),
                                     range: m.char_range.0..m.char_range.1,
                                     entity: m.value.clone().into(),
@@ -72,7 +64,7 @@ impl RustlingParser {
                     .unwrap_or(Vec::new())
                     .iter()
                     .map(|entity|
-                        RustlingEntity {
+                        BuiltinEntity {
                             value: sentence[entity.byte_range.0..entity.byte_range.1].into(),
                             range: entity.char_range.0..entity.char_range.1,
                             entity: entity.value.clone().into(),
@@ -94,7 +86,7 @@ impl EntityCache {
         EntityCache { container: HashMap::new(), valid_duration_sec }
     }
 
-    fn cache<F: Fn(&CacheKey) -> Vec<RustlingEntity>>(&mut self, key: &CacheKey, producer: F) -> CacheValue {
+    fn cache<F: Fn(&CacheKey) -> Vec<BuiltinEntity>>(&mut self, key: &CacheKey, producer: F) -> CacheValue {
         let cached_value = self.container.get(key).map(|a| a.clone());
         if let Some(value) = cached_value { if value.is_valid(self.valid_duration_sec) { return value; } }
         let value = CacheValue::new(producer(key));
@@ -112,14 +104,14 @@ struct CacheKey {
 
 #[derive(Debug, Clone)]
 struct CacheValue {
-    entities: Vec<RustlingEntity>,
+    entities: Vec<BuiltinEntity>,
     instant: Instant,
 }
 
 impl CacheValue {
-    fn new(entities: Vec<RustlingEntity>) -> CacheValue {
+    fn new(entities: Vec<BuiltinEntity>) -> CacheValue {
         CacheValue {
-            entities: entities,
+            entities,
             instant: Instant::now(),
         }
     }
@@ -136,7 +128,7 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let parser = RustlingParser::get(Lang::EN);
+        let parser = BuiltinEntityParser::get(Lang::EN);
         assert_eq!(vec![
             ::BuiltinEntityKind::Number,
             ::BuiltinEntityKind::Time,
@@ -173,15 +165,15 @@ mod test {
 
     #[test]
     fn test_entity_cache() {
-        fn parse(_: &CacheKey) -> Vec<RustlingEntity> {
+        fn parse(_: &CacheKey) -> Vec<BuiltinEntity> {
             vec![
-                RustlingEntity {
+                BuiltinEntity {
                     value: "two".into(),
                     range: 23..26,
                     entity_kind: ::BuiltinEntityKind::Number,
                     entity: ::SlotValue::Number(::NumberValue { value: 2.0 }),
                 },
-                RustlingEntity {
+                BuiltinEntity {
                     value: "4.5".into(),
                     range: 34..42,
                     entity_kind: ::BuiltinEntityKind::Number,

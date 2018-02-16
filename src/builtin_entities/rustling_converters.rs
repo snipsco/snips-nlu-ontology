@@ -1,9 +1,10 @@
-use errors::*;
+use builtin_entities::builtin_entity::BuiltinEntityKind;
 use rustling_ontology::Grain as RustlingGrain;
 use rustling_ontology::dimension::Precision as RustlingPrecision;
 use rustling_ontology::output::{AmountOfMoneyOutput, DurationOutput, FloatOutput, IntegerOutput,
                                 OrdinalOutput, Output, OutputKind, TemperatureOutput, TimeIntervalOutput,
                                 TimeOutput, PercentageOutput};
+
 
 impl From<IntegerOutput> for ::NumberValue {
     fn from(rustling_output: IntegerOutput) -> Self {
@@ -162,31 +163,6 @@ impl From<Output> for ::SlotValue {
     }
 }
 
-#[derive(Copy, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum BuiltinEntityKind {
-    AmountOfMoney,
-    Duration,
-    Number,
-    Ordinal,
-    Temperature,
-    Time,
-    Percentage,
-}
-
-impl BuiltinEntityKind {
-    pub fn all() -> Vec<Self> {
-        vec![
-            BuiltinEntityKind::AmountOfMoney,
-            BuiltinEntityKind::Duration,
-            BuiltinEntityKind::Number,
-            BuiltinEntityKind::Ordinal,
-            BuiltinEntityKind::Temperature,
-            BuiltinEntityKind::Time,
-            BuiltinEntityKind::Percentage,
-        ]
-    }
-}
-
 impl<'a> From<&'a Output> for BuiltinEntityKind {
     fn from(v: &Output) -> Self {
         match *v {
@@ -214,28 +190,5 @@ impl<'a> From<&'a BuiltinEntityKind> for OutputKind {
             BuiltinEntityKind::Time => OutputKind::Time,
             BuiltinEntityKind::Percentage => OutputKind::Percentage,
         }
-    }
-}
-
-impl BuiltinEntityKind {
-    pub fn identifier(&self) -> &str {
-        match *self {
-            BuiltinEntityKind::AmountOfMoney => "snips/amountOfMoney",
-            BuiltinEntityKind::Duration => "snips/duration",
-            BuiltinEntityKind::Number => "snips/number",
-            BuiltinEntityKind::Ordinal => "snips/ordinal",
-            BuiltinEntityKind::Temperature => "snips/temperature",
-            BuiltinEntityKind::Time => "snips/datetime",
-            BuiltinEntityKind::Percentage => "snips/percentage",
-        }
-    }
-
-    pub fn from_identifier(identifier: &str) -> Result<Self> {
-        BuiltinEntityKind::all()
-            .into_iter()
-            .find(|kind| kind.identifier() == identifier)
-            .ok_or(
-                format!("Unknown EntityKind identifier: {}", identifier).into(),
-            )
     }
 }

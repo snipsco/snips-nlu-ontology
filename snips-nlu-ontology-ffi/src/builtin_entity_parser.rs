@@ -14,22 +14,22 @@ lazy_static! {
 }
 
 #[repr(C)]
-pub struct BuiltinEntityParser {
+pub struct CBuiltinEntityParser {
     pub parser: *const libc::c_void,
 }
 
 macro_rules! get_parser {
     ($opaque:ident) => {{
-        let container: &BuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *const ::RustlingParser;
+        let container: &CBuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *const ::BuiltinEntityParser;
         unsafe { &*x }
     }};
 }
 
 macro_rules! get_parser_mut {
     ($opaque:ident) => {{
-        let container: &BuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *mut ::RustlingParser;
+        let container: &CBuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *mut ::BuiltinEntityParser;
         unsafe { &mut *x }
     }};
 }
@@ -58,7 +58,7 @@ macro_rules! wrap {
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct CRustlingEntity {
+pub struct CBuiltinEntity {
     pub value: *const libc::c_char,
     pub range_start: libc::c_int,
     pub range_end: libc::c_int,
@@ -66,8 +66,8 @@ pub struct CRustlingEntity {
     pub entity_kind: CBuiltinEntityKind,
 }
 
-impl CRustlingEntity {
-    fn from(e: ::RustlingEntity) -> OntologyResult<Self> {
+impl CBuiltinEntity {
+    fn from(e: ::BuiltinEntity) -> OntologyResult<Self> {
         Ok(Self {
             value: CString::new(e.value)?.into_raw(),
             range_start: e.range.start as libc::c_int,
@@ -78,7 +78,7 @@ impl CRustlingEntity {
     }
 }
 
-impl Drop for CRustlingEntity {
+impl Drop for CBuiltinEntity {
     fn drop(&mut self) {
         let _ = unsafe { CString::from_raw(self.value as *mut libc::c_char) };
     }
@@ -139,15 +139,15 @@ impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CRustlingEntityArray {
-    pub data: *const CRustlingEntity,
+    pub data: *const CBuiltinEntity,
     pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl CRustlingEntityArray {
-    pub fn from(input: Vec<CRustlingEntity>) -> OntologyResult<Self> {
+    pub fn from(input: Vec<CBuiltinEntity>) -> OntologyResult<Self> {
         Ok(Self {
             size: input.len() as libc::c_int,
-            data: Box::into_raw(input.into_boxed_slice()) as *const CRustlingEntity,
+            data: Box::into_raw(input.into_boxed_slice()) as *const CBuiltinEntity,
         })
     }
 }
@@ -165,14 +165,14 @@ impl Drop for CRustlingEntityArray {
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_rustling_parser(
     lang: ::CLanguage,
-    ptr: *mut *const BuiltinEntityParser,
+    ptr: *mut *const CBuiltinEntityParser,
 ) -> CResult {
-    wrap!(create_rustling_parser(lang, ptr))
+    wrap!(create_builtin_entity_parser(lang, ptr))
 }
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_extract_entities(
-    ptr: *const BuiltinEntityParser,
+    ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
@@ -183,7 +183,7 @@ pub extern "C" fn nlu_ontology_extract_entities(
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_destroy_rustling_parser(
-    ptr: *mut BuiltinEntityParser,
+    ptr: *mut CBuiltinEntityParser,
 ) -> CResult {
     let parser = get_parser_mut!(ptr);
     unsafe {
@@ -192,14 +192,14 @@ pub extern "C" fn nlu_ontology_destroy_rustling_parser(
     CResult::RESULT_OK
 }
 
-fn create_rustling_parser(
+fn create_builtin_entity_parser(
     lang: ::CLanguage,
-    ptr: *mut *const BuiltinEntityParser,
+    ptr: *mut *const CBuiltinEntityParser,
 ) -> OntologyResult<()> {
-    let parser = RustlingParser::get(lang.into());
+    let parser = BuiltinEntityParser::get(lang.into());
 
     unsafe {
-        let container = BuiltinEntityParser {
+        let container = CBuiltinEntityParser {
             parser: Arc::into_raw(parser) as *const libc::c_void,
         };
         *ptr = Box::into_raw(Box::new(container))
@@ -208,7 +208,7 @@ fn create_rustling_parser(
 }
 
 fn extract_entity(
-    ptr: *const BuiltinEntityParser,
+    ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CBuiltinEntityKind,
     filter_entity_kinds_size: usize,
@@ -228,7 +228,7 @@ fn extract_entity(
 
     let c_entities = parser.extract_entities(sentence, opt_filter)
         .into_iter()
-        .map(CRustlingEntity::from)
+        .map(CBuiltinEntity::from)
         .collect::<OntologyResult<_>>()?;
     let c_entities = Box::new(CRustlingEntityArray::from(c_entities)?);
 
