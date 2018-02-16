@@ -6,8 +6,7 @@ enum_kind!(Language,
         EN,
         ES,
         FR,
-        KO,
-        ZH
+        KO
     ]
 );
 
@@ -19,7 +18,6 @@ impl From<Language> for RustlingLang {
             Language::ES => RustlingLang::ES,
             Language::FR => RustlingLang::FR,
             Language::KO => RustlingLang::KO,
-            Language::ZH => RustlingLang::ZH,
         }
     }
 }
