@@ -1,10 +1,12 @@
 #![allow(non_camel_case_types)]
 
+use std::convert::From;
 use std::ffi::CString;
 use std::slice;
 
 use libc;
 
+use ffi_utils::*;
 use snips_nlu_ontology::*;
 
 
@@ -112,4 +114,14 @@ impl Drop for CBuiltinEntityArray {
                 self.size as usize))
         };
     }
+}
+
+#[no_mangle]
+pub extern "C" fn nlu_ontology_all_builtin_entities() -> *const CStringArray {
+    let arr = Box::new(CStringArray::from(
+        BuiltinEntityKind::all()
+            .iter()
+            .map(|l| l.identifier().to_string())
+            .collect::<Vec<String>>()));
+    Box::into_raw(arr)
 }
