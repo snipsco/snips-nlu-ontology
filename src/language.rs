@@ -11,7 +11,6 @@ enum_kind!(Language,
     ]
 );
 
-
 impl From<Language> for RustlingLang {
     fn from(lang: Language) -> Self {
         match lang {

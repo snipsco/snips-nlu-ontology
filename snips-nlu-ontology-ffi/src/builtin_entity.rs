@@ -8,16 +8,15 @@ use std::str::FromStr;
 use libc;
 
 use errors::*;
-use ffi_utils::*;
+use ffi_utils::{CResult, CStringArray};
 use snips_nlu_ontology::*;
-
 
 #[repr(C)]
 #[derive(Debug)]
 pub struct CBuiltinEntity {
     pub entity: ::CSlotValue,
+    pub entity_kind: *const libc::c_char,
     pub value: *const libc::c_char,
-    pub entity_kind: CBuiltinEntityKind,
     pub range_start: libc::int32_t,
     pub range_end: libc::int32_t,
 }
@@ -25,11 +24,11 @@ pub struct CBuiltinEntity {
 impl From<::BuiltinEntity> for CBuiltinEntity {
     fn from(e: ::BuiltinEntity) -> CBuiltinEntity {
         Self {
+            entity: ::CSlotValue::from(e.entity),
+            entity_kind: CString::new(e.entity_kind.identifier()).unwrap().into_raw(),
             value: CString::new(e.value).unwrap().into_raw(), // String can not contains 0
             range_start: e.range.start as libc::int32_t,
             range_end: e.range.end as libc::int32_t,
-            entity: ::CSlotValue::from(e.entity),
-            entity_kind: e.entity_kind.into(),
         }
     }
 }
@@ -37,58 +36,7 @@ impl From<::BuiltinEntity> for CBuiltinEntity {
 impl Drop for CBuiltinEntity {
     fn drop(&mut self) {
         let _ = unsafe { CString::from_raw(self.value as *mut libc::c_char) };
-    }
-}
-
-#[repr(C)]
-#[derive(Debug)]
-pub enum CBuiltinEntityKind {
-    KIND_AMOUNT_OF_MONEY,
-    KIND_DURATION,
-    KIND_NUMBER,
-    KIND_ORDINAL,
-    KIND_TEMPERATURE,
-    KIND_TIME,
-    KIND_PERCENTAGE,
-}
-
-impl From<CBuiltinEntityKind> for BuiltinEntityKind {
-    fn from(c_value: CBuiltinEntityKind) -> Self {
-        BuiltinEntityKind::from(&c_value)
-    }
-}
-
-impl<'a> From<&'a CBuiltinEntityKind> for BuiltinEntityKind {
-    fn from(c_value: &CBuiltinEntityKind) -> Self {
-        match *c_value {
-            CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY => BuiltinEntityKind::AmountOfMoney,
-            CBuiltinEntityKind::KIND_DURATION => BuiltinEntityKind::Duration,
-            CBuiltinEntityKind::KIND_NUMBER => BuiltinEntityKind::Number,
-            CBuiltinEntityKind::KIND_ORDINAL => BuiltinEntityKind::Ordinal,
-            CBuiltinEntityKind::KIND_TEMPERATURE => BuiltinEntityKind::Temperature,
-            CBuiltinEntityKind::KIND_TIME => BuiltinEntityKind::Time,
-            CBuiltinEntityKind::KIND_PERCENTAGE => BuiltinEntityKind::Percentage,
-        }
-    }
-}
-
-impl From<BuiltinEntityKind> for CBuiltinEntityKind {
-    fn from(c_value: BuiltinEntityKind) -> Self {
-        CBuiltinEntityKind::from(&c_value)
-    }
-}
-
-impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
-    fn from(c_value: &BuiltinEntityKind) -> Self {
-        match *c_value {
-            BuiltinEntityKind::AmountOfMoney => CBuiltinEntityKind::KIND_AMOUNT_OF_MONEY,
-            BuiltinEntityKind::Duration => CBuiltinEntityKind::KIND_DURATION,
-            BuiltinEntityKind::Number => CBuiltinEntityKind::KIND_NUMBER,
-            BuiltinEntityKind::Ordinal => CBuiltinEntityKind::KIND_ORDINAL,
-            BuiltinEntityKind::Temperature => CBuiltinEntityKind::KIND_TEMPERATURE,
-            BuiltinEntityKind::Time => CBuiltinEntityKind::KIND_TIME,
-            BuiltinEntityKind::Percentage => CBuiltinEntityKind::KIND_PERCENTAGE,
-        }
+        let _ = unsafe { CString::from_raw(self.entity_kind as *mut libc::c_char) };
     }
 }
 

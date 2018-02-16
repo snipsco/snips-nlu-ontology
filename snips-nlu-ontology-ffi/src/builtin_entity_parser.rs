@@ -1,9 +1,11 @@
 use std::ffi::CStr;
-use std::sync::Arc;
 use std::slice;
+use std::sync::Arc;
+use std::str::FromStr;
 
 use libc;
 
+use ffi_utils::CStringArray;
 use errors::*;
 use snips_nlu_ontology::*;
 use builtin_entity::*;
@@ -33,21 +35,20 @@ macro_rules! get_parser_mut {
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_builtin_entity_parser(
-    lang: ::CLanguage,
     ptr: *mut *const CBuiltinEntityParser,
+    lang: *const libc::c_char,
 ) -> CResult {
-    wrap!(create_builtin_entity_parser(lang, ptr))
+    wrap!(create_builtin_entity_parser(ptr, lang))
 }
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_extract_entities(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
-    filter_entity_kinds: *const CBuiltinEntityKind,
-    filter_entity_kinds_size: usize,
+    filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
 ) -> CResult {
-    wrap!(extract_entity(ptr, sentence, filter_entity_kinds, filter_entity_kinds_size, results))
+    wrap!(extract_entity(ptr, sentence, filter_entity_kinds, results))
 }
 
 #[no_mangle]
@@ -62,9 +63,11 @@ pub extern "C" fn nlu_ontology_destroy_builtin_entity_parser(
 }
 
 fn create_builtin_entity_parser(
-    lang: ::CLanguage,
     ptr: *mut *const CBuiltinEntityParser,
+    lang: *const libc::c_char,
 ) -> OntologyResult<()> {
+    let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
+    let lang = ::Language::from_str(lang)?;
     let parser = BuiltinEntityParser::get(lang.into());
 
     unsafe {
@@ -79,23 +82,28 @@ fn create_builtin_entity_parser(
 fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
-    filter_entity_kinds: *const CBuiltinEntityKind,
-    filter_entity_kinds_size: usize,
+    filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
 ) -> OntologyResult<()> {
     let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
 
-    let opt_filter: Option<Vec<_>> = unsafe { filter_entity_kinds.as_ref() }
-        .map(|vec| {
-            unsafe { slice::from_raw_parts(vec, filter_entity_kinds_size) }
-                .into_iter()
-                .map(BuiltinEntityKind::from)
-                .collect()
-        });
-    let opt_filter = opt_filter.as_ref().map(|vec| vec.as_slice());
+    let opt_filters: Option<Vec<_>> = if !filter_entity_kinds.is_null() {
+        let filters = unsafe {
+            let array = &*filter_entity_kinds;
+            slice::from_raw_parts(array.data, array.size as usize)
+        }
+            .into_iter()
+            .map(|&ptr| Ok(unsafe { CStr::from_ptr(ptr) }.to_str()?)
+                .and_then(|s| ::BuiltinEntityKind::from_identifier(s).chain_err(|| format!("`{}` isn't a known builtin entity kind", s))))
+            .collect::<OntologyResult<Vec<_>>>()?;
+        Some(filters)
+    } else {
+        None
+    };
+    let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    let c_entities = parser.extract_entities(sentence, opt_filter)
+    let c_entities = parser.extract_entities(sentence, opt_filters)
         .into_iter()
         .map(CBuiltinEntity::from)
         .collect::<Vec<CBuiltinEntity>>();

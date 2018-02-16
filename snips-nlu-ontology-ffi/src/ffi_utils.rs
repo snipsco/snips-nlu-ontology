@@ -16,7 +16,6 @@ pub enum CResult {
     RESULT_KO = 1,
 }
 
-
 macro_rules! wrap {
     ($e:expr) => { match $e {
         Ok(_) => { CResult::RESULT_OK }
@@ -24,7 +23,7 @@ macro_rules! wrap {
             use error_chain::ChainedError;
             let msg = e.display_chain().to_string();
             eprintln!("{}", msg);
-            match LAST_ERROR.lock() {
+            match ::ffi_utils::LAST_ERROR.lock() {
                 Ok(mut guard) => *guard = msg,
                 Err(_) => () /* curl up and cry */
             }
@@ -32,7 +31,6 @@ macro_rules! wrap {
         }
     }}
 }
-
 
 #[repr(C)]
 #[derive(Debug)]
