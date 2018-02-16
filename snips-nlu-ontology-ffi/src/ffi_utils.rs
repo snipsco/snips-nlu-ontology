@@ -7,13 +7,13 @@ use libc;
 #[derive(Debug)]
 pub struct CStringArray {
     pub data: *const *const libc::c_char,
-    pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl From<Vec<String>> for CStringArray {
     fn from(input: Vec<String>) -> CStringArray {
         Self {
-            size: input.len() as libc::c_int,
+            size: input.len() as libc::int32_t,
             data: Box::into_raw(input.into_iter()
                 .map(|s| CString::new(s).unwrap().into_raw())
                 .collect::<Vec<_>>()
@@ -21,7 +21,6 @@ impl From<Vec<String>> for CStringArray {
         }
     }
 }
-
 
 impl Drop for CStringArray {
     fn drop(&mut self) {

@@ -18,32 +18,30 @@ _ALL_LANGUAGES = None
 _ALL_BUILTIN_ENTITIES = None
 
 
-class CArrayString(Structure):
+class CStringArray(Structure):
     _fields_ = [
         ("data", POINTER(c_char_p)),
-        ("size", c_int)
+        ("size", c_int32)
     ]
 
 
 def get_all_languages():
     global _ALL_LANGUAGES
     if _ALL_LANGUAGES is None:
-        lib.nlu_ontology_supported_languages.restype = POINTER(CArrayString)
-        array_ptr = lib.nlu_ontology_supported_languages()
-        size = array_ptr.contents.size
+        lib.nlu_ontology_supported_languages.restype = CStringArray
+        array = lib.nlu_ontology_supported_languages()
         _ALL_LANGUAGES = set(
-            array_ptr.contents.data[i].decode("utf8") for i in range(size))
+            array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_LANGUAGES
 
 
 def get_all_builtin_entities():
     global _ALL_BUILTIN_ENTITIES
     if _ALL_BUILTIN_ENTITIES is None:
-        lib.nlu_ontology_all_builtin_entities.restype = POINTER(CArrayString)
-        array_ptr = lib.nlu_ontology_all_builtin_entities()
-        size = array_ptr.contents.size
+        lib.nlu_ontology_all_builtin_entities.restype = CStringArray
+        array = lib.nlu_ontology_all_builtin_entities()
         _ALL_BUILTIN_ENTITIES = set(
-            array_ptr.contents.data[i].decode("utf8") for i in range(size))
+            array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_BUILTIN_ENTITIES
 
 

@@ -8,7 +8,7 @@ macro_rules! enum_kind {
 
         impl $kindname {
             pub fn all() -> &'static [$kindname] {
-                static ALL: &'static [$kindname] = &[$( $kindname::$varname ),*];
+                static ALL: &[$kindname] = &[$( $kindname::$varname ),*];
                 ALL
             }
         }
