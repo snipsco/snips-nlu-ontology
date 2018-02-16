@@ -68,13 +68,13 @@ impl Drop for CIntentClassifierResult {
 #[derive(Debug)]
 pub struct CSlotList {
     pub slots: *const CSlot,
-    pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl From<Vec<::Slot>> for CSlotList {
     fn from(input: Vec<::Slot>) -> Self {
         Self {
-            size: input.len() as libc::c_int,
+            size: input.len() as libc::int32_t,
             slots: Box::into_raw(
                 input
                     .into_iter()
@@ -95,18 +95,18 @@ impl Drop for CSlotList {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CSlot {
-    pub raw_value: *const libc::c_char,
     pub value: CSlotValue,
-    pub range_start: libc::c_int,
-    pub range_end: libc::c_int,
+    pub raw_value: *const libc::c_char,
     pub entity: *const libc::c_char,
     pub slot_name: *const libc::c_char,
+    pub range_start: libc::int32_t,
+    pub range_end: libc::int32_t,
 }
 
 impl From<::Slot> for CSlot {
     fn from(input: ::Slot) -> Self {
         let range = if let Some(range) = input.range {
-            range.start as libc::c_int..range.end as libc::c_int
+            range.start as libc::int32_t..range.end as libc::int32_t
         } else {
             -1..-1
         };
@@ -270,9 +270,9 @@ impl Drop for CTimeIntervalValue {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CAmountOfMoneyValue {
+    pub unit: *const libc::c_char,
     pub value: libc::c_float,
     pub precision: CPrecision,
-    pub unit: *const libc::c_char,
 }
 
 impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
@@ -300,8 +300,8 @@ impl Drop for CAmountOfMoneyValue {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CTemperatureValue {
-    pub value: libc::c_float,
     pub unit: *const libc::c_char,
+    pub value: libc::c_float,
 }
 
 impl From<::TemperatureValue> for CTemperatureValue {
@@ -358,13 +358,13 @@ impl From<::DurationValue> for CDurationValue {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CSlotValue {
-    value_type: CSlotValueType,
     /**
      * Points to either a *const char, a CNumberValue, a COrdinalValue,
      * a CInstantTimeValue, a CTimeIntervalValue, a CAmountOfMoneyValue,
      * a CTemperatureValue or a CDurationValue depending on value_type
      */
     value: *const libc::c_void,
+    value_type: CSlotValueType,
 }
 
 impl From<::SlotValue> for CSlotValue {

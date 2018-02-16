@@ -13,19 +13,19 @@ use snips_nlu_ontology::*;
 #[repr(C)]
 #[derive(Debug)]
 pub struct CBuiltinEntity {
-    pub value: *const libc::c_char,
-    pub range_start: libc::c_int,
-    pub range_end: libc::c_int,
     pub entity: ::CSlotValue,
+    pub value: *const libc::c_char,
     pub entity_kind: CBuiltinEntityKind,
+    pub range_start: libc::int32_t,
+    pub range_end: libc::int32_t,
 }
 
 impl From<::BuiltinEntity> for CBuiltinEntity {
     fn from(e: ::BuiltinEntity) -> CBuiltinEntity {
         Self {
             value: CString::new(e.value).unwrap().into_raw(), // String can not contains 0
-            range_start: e.range.start as libc::c_int,
-            range_end: e.range.end as libc::c_int,
+            range_start: e.range.start as libc::int32_t,
+            range_end: e.range.end as libc::int32_t,
             entity: ::CSlotValue::from(e.entity),
             entity_kind: e.entity_kind.into(),
         }
@@ -94,13 +94,13 @@ impl<'a> From<&'a BuiltinEntityKind> for CBuiltinEntityKind {
 #[derive(Debug)]
 pub struct CBuiltinEntityArray {
     pub data: *const CBuiltinEntity,
-    pub size: libc::c_int, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl CBuiltinEntityArray {
     pub fn from(input: Vec<CBuiltinEntity>) -> Self {
         Self {
-            size: input.len() as libc::c_int,
+            size: input.len() as libc::int32_t,
             data: Box::into_raw(input.into_boxed_slice()) as *const CBuiltinEntity,
         }
     }
