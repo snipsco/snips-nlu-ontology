@@ -1,8 +1,11 @@
-#[macro_use] extern crate error_chain;
+#[macro_use]
+extern crate error_chain;
 extern crate itertools;
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 extern crate rustling_ontology;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
 
@@ -18,3 +21,5 @@ pub use rustling_ontology::Lang as RustlingLang;
 pub use builtin_entities::*;
 pub use ontology::*;
 pub use language::*;
+
+pub static ONTOLOGY_VERSION: &str = "0.6.0";

@@ -18,6 +18,7 @@ lib = cdll.LoadLibrary(dylib_path)
 _ALL_LANGUAGES = None
 _SUPPORTED_ENTITIES = dict()
 _ALL_BUILTIN_ENTITIES = None
+_ONTOLOGY_VERSION = None
 
 
 @contextmanager
@@ -33,6 +34,15 @@ class CStringArray(Structure):
         ("data", POINTER(c_char_p)),
         ("size", c_int32)
     ]
+
+
+def get_ontology_version():
+    """Get the version of the ontology"""
+    global _ONTOLOGY_VERSION
+    if _ONTOLOGY_VERSION is None:
+        lib.nlu_ontology_version.restype = c_char_p
+        _ONTOLOGY_VERSION = lib.nlu_ontology_version().decode("utf8")
+    return _ONTOLOGY_VERSION
 
 
 def get_all_languages():
@@ -104,8 +114,8 @@ class BuiltinEntityParser(object):
             text (str): Input
             scope (list of str, optional): List of builtin entity labels. If
             defined, the parser will extract entities using the provided scope
-            instead of the entire scope of all entities. This allows to look
-            for specify builtin entity kinds
+            instead of the entire scope of all available entities. This allows
+            to look for specifics builtin entity kinds.
 
         Returns:
             list of dict: The list of extracted entities

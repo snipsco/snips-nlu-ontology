@@ -1,6 +1,8 @@
 extern crate snips_nlu_ontology;
-#[macro_use] extern crate error_chain;
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate error_chain;
+#[macro_use]
+extern crate lazy_static;
 extern crate libc;
 
 pub mod errors;
@@ -14,6 +16,7 @@ mod builtin_entity;
 mod ontology;
 mod language;
 
+use std::ffi::CString;
 use snips_nlu_ontology::*;
 
 
@@ -22,3 +25,8 @@ pub use ontology::*;
 pub use language::*;
 pub use builtin_entity::*;
 pub use builtin_entity_parser::*;
+
+#[no_mangle]
+pub extern "C" fn nlu_ontology_version() -> *const libc::c_char {
+    CString::new(::ONTOLOGY_VERSION).unwrap().into_raw()
+}
