@@ -1,11 +1,13 @@
 #![allow(non_camel_case_types)]
 
 use std::convert::From;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::slice;
+use std::str::FromStr;
 
 use libc;
 
+use errors::*;
 use ffi_utils::*;
 use snips_nlu_ontology::*;
 
@@ -141,4 +143,27 @@ pub extern "C" fn nlu_ontology_all_builtin_entities() -> CStringArray {
         data: ALL.0.as_ptr() as *const *const libc::c_char,
         size: ALL.0.len() as libc::int32_t,
     }
+}
+
+#[no_mangle]
+pub extern "C" fn nlu_ontology_supported_builtin_entities(
+    language: *const libc::c_char,
+    results: *mut *const CStringArray) -> CResult {
+    wrap!(get_supported_builtin_entities(language, results))
+}
+
+fn get_supported_builtin_entities(
+    language: *const libc::c_char,
+    results: *mut *const CStringArray) -> OntologyResult<()> {
+    let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
+    let language = Language::from_str(&*language_str.to_uppercase())?;
+    let entities = BuiltinEntityKind::all().iter()
+        .filter(|e| e.supported_languages().contains(&language))
+        .map(|e| e.identifier().to_string())
+        .collect::<Vec<String>>();
+    let c_entities = CStringArray::from(entities);
+    unsafe {
+        *results = Box::into_raw(Box::new(c_entities));
+    }
+    Ok(())
 }

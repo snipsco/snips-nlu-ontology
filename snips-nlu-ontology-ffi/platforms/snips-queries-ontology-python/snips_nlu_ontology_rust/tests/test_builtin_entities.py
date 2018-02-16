@@ -1,9 +1,8 @@
 import unittest
-
 from builtins import str
 
 from snips_nlu_ontology_rust.builtin_entities import (
-    get_all_languages, get_all_builtin_entities)
+    get_all_languages, get_all_builtin_entities, get_supported_entities)
 
 
 class TestBuiltinEntities(unittest.TestCase):
@@ -25,4 +24,14 @@ class TestBuiltinEntities(unittest.TestCase):
         self.assertIn(u"snips/number", all_builtins)
         self.assertIn(u"snips/datetime", all_builtins)
         for builtin in all_builtins:
+            self.assertIsInstance(builtin, str)
+
+    def test_should_get_supported_builtin_entities(self):
+        # When
+        supported_entities = get_supported_entities(u"en")
+
+        # Then
+        self.assertIn(u"snips/number", supported_entities)
+        self.assertIn(u"snips/datetime", supported_entities)
+        for builtin in supported_entities:
             self.assertIsInstance(builtin, str)

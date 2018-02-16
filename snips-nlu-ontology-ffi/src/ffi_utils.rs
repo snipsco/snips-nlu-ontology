@@ -1,7 +1,38 @@
+#![allow(non_camel_case_types)]
+
+use std::sync::Mutex;
 use std::ffi::CString;
 use std::slice;
 
 use libc;
+
+lazy_static! {
+    pub static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
+}
+
+#[repr(C)]
+pub enum CResult {
+    RESULT_OK = 0,
+    RESULT_KO = 1,
+}
+
+
+macro_rules! wrap {
+    ($e:expr) => { match $e {
+        Ok(_) => { CResult::RESULT_OK }
+        Err(e) => {
+            use error_chain::ChainedError;
+            let msg = e.display_chain().to_string();
+            eprintln!("{}", msg);
+            match LAST_ERROR.lock() {
+                Ok(mut guard) => *guard = msg,
+                Err(_) => () /* curl up and cry */
+            }
+            CResult::RESULT_KO
+        }
+    }}
+}
+
 
 #[repr(C)]
 #[derive(Debug)]
@@ -31,4 +62,9 @@ impl Drop for CStringArray {
             }
         };
     }
+}
+
+#[no_mangle]
+pub extern "C" fn nlu_ontology_destroy_string_array(ptr: *mut CStringArray) {
+    let _ = unsafe { Box::from_raw(ptr) };
 }

@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 from builtins import object
 from builtins import range
+from contextlib import contextmanager
 from ctypes import *
 from glob import glob
 
@@ -15,7 +16,16 @@ dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
 lib = cdll.LoadLibrary(dylib_path)
 
 _ALL_LANGUAGES = None
+_SUPPORTED_ENTITIES = dict()
 _ALL_BUILTIN_ENTITIES = None
+
+
+@contextmanager
+def string_array_pointer(ptr):
+    try:
+        yield ptr
+    finally:
+        lib.nlu_ontology_destroy_string_array(ptr)
 
 
 class CStringArray(Structure):
@@ -26,6 +36,7 @@ class CStringArray(Structure):
 
 
 def get_all_languages():
+    """Lists all the supported languages"""
     global _ALL_LANGUAGES
     if _ALL_LANGUAGES is None:
         lib.nlu_ontology_supported_languages.restype = CStringArray
@@ -36,6 +47,8 @@ def get_all_languages():
 
 
 def get_all_builtin_entities():
+    """Lists the builtin entities that are supported in at least one
+    language"""
     global _ALL_BUILTIN_ENTITIES
     if _ALL_BUILTIN_ENTITIES is None:
         lib.nlu_ontology_all_builtin_entities.restype = CStringArray
@@ -43,6 +56,26 @@ def get_all_builtin_entities():
         _ALL_BUILTIN_ENTITIES = set(
             array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_BUILTIN_ENTITIES
+
+
+def get_supported_entities(language):
+    """Lists the builtin entities supported in the specified *language*
+
+    Returns:
+          list of str: the list of entity labels
+    """
+    global _SUPPORTED_ENTITIES
+    if language not in _SUPPORTED_ENTITIES:
+        with string_array_pointer(pointer(CStringArray())) as ptr:
+            exit_code = lib.nlu_ontology_supported_builtin_entities(
+                language.encode("utf8"), byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while retrieving "
+                                 "supported entities. See stderr.")
+            array = ptr.contents
+            _SUPPORTED_ENTITIES[language] = set(
+                array.data[i].decode("utf8") for i in range(array.size))
+    return _SUPPORTED_ENTITIES[language]
 
 
 class BuiltinEntityParser(object):
@@ -53,15 +86,16 @@ class BuiltinEntityParser(object):
     """
 
     def __init__(self, language):
+        self.language = language
         self._parser = pointer(c_void_p())
-        exit_code = lib.nlu_ontology_create_rustling_parser(
+        exit_code = lib.nlu_ontology_create_builtin_entity_parser(
             language, byref(self._parser))
         if exit_code:
-            raise ImportError('Something wrong happened while creating the '
-                              'intent parser. See stderr.')
+            raise ImportError("Something wrong happened while creating the "
+                              "intent parser. See stderr.")
 
     def __del__(self):
-        lib.nlu_ontology_destroy_rustling_parser(self._parser)
+        lib.nlu_ontology_destroy_builtin_entity_parser(self._parser)
 
     def parse(self, text, scope=None):
         """Extract builtin entities from *text*
@@ -77,7 +111,7 @@ class BuiltinEntityParser(object):
             list of dict: The list of extracted entities
         """
         if scope is None:
-            scope = self.supported_entities()
+            scope = get_supported_entities(self.language)
         return [{
             "range": [0, len(text)],
             "value": {
@@ -86,19 +120,3 @@ class BuiltinEntityParser(object):
             },
             "entity": "snips/number"
         }]
-
-    def supported_entities(self):
-        """Lists the builtin entities supported in the parser's language
-
-        Returns:
-              list of str: the list of entity labels
-        """
-        return [
-            "snips/number",
-            "snips/datetime",
-            "snips/duration",
-            "snips/temperature",
-            "snips/ordinal",
-            "snips/percentage",
-            "snips/amountOfMoney"
-        ]

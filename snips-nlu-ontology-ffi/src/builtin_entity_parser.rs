@@ -1,7 +1,5 @@
-#![allow(non_camel_case_types)]
-
 use std::ffi::CStr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::slice;
 
 use libc;
@@ -9,10 +7,7 @@ use libc;
 use errors::*;
 use snips_nlu_ontology::*;
 use builtin_entity::*;
-
-lazy_static! {
-    static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
-}
+use ffi_utils::*;
 
 #[repr(C)]
 pub struct CBuiltinEntityParser {
@@ -35,31 +30,9 @@ macro_rules! get_parser_mut {
     }};
 }
 
-#[repr(C)]
-pub enum CResult {
-    RESULT_OK = 0,
-    RESULT_KO = 1,
-}
-
-macro_rules! wrap {
-    ($e:expr) => { match $e {
-        Ok(_) => { CResult::RESULT_OK }
-        Err(e) => {
-            use error_chain::ChainedError;
-            let msg = e.display_chain().to_string();
-            eprintln!("{}", msg);
-            match LAST_ERROR.lock() {
-                Ok(mut guard) => *guard = msg,
-                Err(_) => () /* curl up and cry */
-            }
-            CResult::RESULT_KO
-        }
-    }}
-}
-
 
 #[no_mangle]
-pub extern "C" fn nlu_ontology_create_rustling_parser(
+pub extern "C" fn nlu_ontology_create_builtin_entity_parser(
     lang: ::CLanguage,
     ptr: *mut *const CBuiltinEntityParser,
 ) -> CResult {
@@ -78,7 +51,7 @@ pub extern "C" fn nlu_ontology_extract_entities(
 }
 
 #[no_mangle]
-pub extern "C" fn nlu_ontology_destroy_rustling_parser(
+pub extern "C" fn nlu_ontology_destroy_builtin_entity_parser(
     ptr: *mut CBuiltinEntityParser,
 ) -> CResult {
     let parser = get_parser_mut!(ptr);
