@@ -75,6 +75,11 @@ def get_supported_entities(language):
           list of str: the list of entity labels
     """
     global _SUPPORTED_ENTITIES
+
+    if not isinstance(language, str):
+        raise TypeError("Expected language to be of type 'str' but found: %s"
+                        % type(language))
+
     if language not in _SUPPORTED_ENTITIES:
         with string_array_pointer(pointer(CStringArray())) as ptr:
             exit_code = lib.nlu_ontology_supported_builtin_entities(
