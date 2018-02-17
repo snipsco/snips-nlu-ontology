@@ -43,10 +43,13 @@ impl From<Vec<String>> for CStringArray {
     fn from(input: Vec<String>) -> CStringArray {
         Self {
             size: input.len() as libc::int32_t,
-            data: Box::into_raw(input.into_iter()
-                .map(|s| CString::new(s).unwrap().into_raw())
-                .collect::<Vec<_>>()
-                .into_boxed_slice()) as *const *const libc::c_char,
+            data: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(|s| CString::new(s).unwrap().into_raw())
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const *const libc::c_char,
         }
     }
 }
@@ -54,7 +57,10 @@ impl From<Vec<String>> for CStringArray {
 impl Drop for CStringArray {
     fn drop(&mut self) {
         let _ = unsafe {
-            let y = Box::from_raw(slice::from_raw_parts_mut(self.data as *mut *mut libc::c_char, self.size as usize));
+            let y = Box::from_raw(slice::from_raw_parts_mut(
+                self.data as *mut *mut libc::c_char,
+                self.size as usize,
+            ));
             for p in y.into_iter() {
                 CString::from_raw(*p);
             }

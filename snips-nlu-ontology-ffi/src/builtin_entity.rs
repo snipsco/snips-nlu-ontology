@@ -61,7 +61,8 @@ impl Drop for CBuiltinEntityArray {
         let _ = unsafe {
             Box::from_raw(slice::from_raw_parts_mut(
                 self.data as *mut CBuiltinEntityArray,
-                self.size as usize))
+                self.size as usize,
+            ))
         };
     }
 }
@@ -96,16 +97,19 @@ pub extern "C" fn nlu_ontology_all_builtin_entities() -> CStringArray {
 #[no_mangle]
 pub extern "C" fn nlu_ontology_supported_builtin_entities(
     language: *const libc::c_char,
-    results: *mut *const CStringArray) -> CResult {
+    results: *mut *const CStringArray,
+) -> CResult {
     wrap!(get_supported_builtin_entities(language, results))
 }
 
 fn get_supported_builtin_entities(
     language: *const libc::c_char,
-    results: *mut *const CStringArray) -> OntologyResult<()> {
+    results: *mut *const CStringArray,
+) -> OntologyResult<()> {
     let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
     let language = Language::from_str(&*language_str.to_uppercase())?;
-    let entities = BuiltinEntityKind::all().iter()
+    let entities = BuiltinEntityKind::all()
+        .iter()
         .filter(|e| e.supported_languages().contains(&language))
         .map(|e| e.identifier().to_string())
         .collect::<Vec<String>>();

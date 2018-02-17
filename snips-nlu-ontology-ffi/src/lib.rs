@@ -1,9 +1,9 @@
-extern crate snips_nlu_ontology;
 #[macro_use]
 extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
 extern crate libc;
+extern crate snips_nlu_ontology;
 
 pub mod errors;
 #[macro_use]
@@ -19,8 +19,7 @@ mod language;
 use std::ffi::CString;
 use snips_nlu_ontology::*;
 
-
-pub use ffi_utils::{CStringArray, nlu_ontology_destroy_string_array};
+pub use ffi_utils::{nlu_ontology_destroy_string_array, CStringArray};
 pub use ontology::*;
 pub use language::*;
 pub use builtin_entity::*;

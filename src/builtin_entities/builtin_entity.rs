@@ -11,7 +11,8 @@ pub struct BuiltinEntity {
     pub entity_kind: ::BuiltinEntityKind,
 }
 
-enum_kind!(BuiltinEntityKind,
+enum_kind!(
+    BuiltinEntityKind,
     [
         AmountOfMoney,
         Duration,
@@ -41,9 +42,7 @@ impl BuiltinEntityKind {
             .iter()
             .find(|kind| kind.identifier() == identifier)
             .map(|k| k.clone())
-            .ok_or(
-                format!("Unknown EntityKind identifier: {}", identifier).into(),
-            )
+            .ok_or(format!("Unknown EntityKind identifier: {}", identifier).into())
     }
 }
 
@@ -64,38 +63,20 @@ impl BuiltinEntityKind {
 impl BuiltinEntityKind {
     pub fn examples(&self) -> &[&str] {
         match *self {
-            BuiltinEntityKind::AmountOfMoney => &[
-                "ten dollars and five cents",
-                "around 5€"
-            ],
-            BuiltinEntityKind::Duration => &[
-                "3 month",
-                "4 seconds",
-                "8 years"
-            ],
-            BuiltinEntityKind::Number => &[
-                "twenty-two",
-                "1.2"
-            ],
-            BuiltinEntityKind::Ordinal => &[
-                "the second"
-            ],
-            BuiltinEntityKind::Temperature => &[
-                "Twenty three degrees celsius",
-                "3°C"
-            ],
+            BuiltinEntityKind::AmountOfMoney => &["ten dollars and five cents", "around 5€"],
+            BuiltinEntityKind::Duration => &["3 month", "4 seconds", "8 years"],
+            BuiltinEntityKind::Number => &["twenty-two", "1.2"],
+            BuiltinEntityKind::Ordinal => &["the second"],
+            BuiltinEntityKind::Temperature => &["Twenty three degrees celsius", "3°C"],
             BuiltinEntityKind::Time => &[
                 "Today",
                 "4:30 pm",
                 "next monday at 8p.m.",
                 "yesterday morning",
                 "3rd tuesday of June",
-                "June 2nd at 9 pm"
+                "June 2nd at 9 pm",
             ],
-            BuiltinEntityKind::Percentage => &[
-                "twenty percent",
-                "25%"
-            ],
+            BuiltinEntityKind::Percentage => &["twenty percent", "25%"],
         }
     }
 }
@@ -122,49 +103,46 @@ impl BuiltinEntityKind {
                 Language::FR,
                 Language::DE,
                 Language::ES,
-                Language::KO
+                Language::KO,
             ],
             BuiltinEntityKind::Duration => &[
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE
+                Language::DE,
             ],
             BuiltinEntityKind::Number => &[
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE
+                Language::DE,
             ],
             BuiltinEntityKind::Ordinal => &[
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE
+                Language::DE,
             ],
             BuiltinEntityKind::Temperature => &[
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE
+                Language::DE,
             ],
             BuiltinEntityKind::Time => &[
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE
+                Language::DE,
             ],
-            BuiltinEntityKind::Percentage => &[
-                Language::EN,
-                Language::ES,
-                Language::FR,
-                Language::DE
-            ],
+            BuiltinEntityKind::Percentage => {
+                &[Language::EN, Language::ES, Language::FR, Language::DE]
+            }
         }
     }
 }

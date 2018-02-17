@@ -17,7 +17,8 @@ impl From<::IntentParserResult> for CIntentParserResult {
         Self {
             input: CString::new(input.input).unwrap().into_raw(), // String can not contains 0
             intent: if let Some(intent) = input.intent {
-                Box::into_raw(Box::new(CIntentClassifierResult::from(intent))) as *const CIntentClassifierResult
+                Box::into_raw(Box::new(CIntentClassifierResult::from(intent)))
+                    as *const CIntentClassifierResult
             } else {
                 null()
             },
@@ -88,7 +89,12 @@ impl From<Vec<::Slot>> for CSlotList {
 
 impl Drop for CSlotList {
     fn drop(&mut self) {
-        let _ = unsafe { Box::from_raw(slice::from_raw_parts_mut(self.slots as *mut CSlot, self.size as usize)) };
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.slots as *mut CSlot,
+                self.size as usize,
+            ))
+        };
     }
 }
 
@@ -391,7 +397,9 @@ impl From<::SlotValue> for CSlotValue {
             ::SlotValue::Duration(value) => {
                 Box::into_raw(Box::new(CDurationValue::from(value))) as _
             }
-            ::SlotValue::Percentage(value) => Box::into_raw(Box::new(value.value as CPercentageValue)) as _,
+            ::SlotValue::Percentage(value) => {
+                Box::into_raw(Box::new(value.value as CPercentageValue)) as _
+            }
         };
         Self { value_type, value }
     }

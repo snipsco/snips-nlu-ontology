@@ -1,14 +1,6 @@
 use rustling_ontology::Lang as RustlingLang;
 
-enum_kind!(Language,
-    [
-        DE,
-        EN,
-        ES,
-        FR,
-        KO
-    ]
-);
+enum_kind!(Language, [DE, EN, ES, FR, KO]);
 
 impl From<Language> for RustlingLang {
     fn from(lang: Language) -> Self {

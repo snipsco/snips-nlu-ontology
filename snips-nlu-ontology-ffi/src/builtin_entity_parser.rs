@@ -32,7 +32,6 @@ macro_rules! get_parser_mut {
     }};
 }
 
-
 #[no_mangle]
 pub extern "C" fn nlu_ontology_create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
@@ -92,10 +91,13 @@ fn extract_entity(
         let filters = unsafe {
             let array = &*filter_entity_kinds;
             slice::from_raw_parts(array.data, array.size as usize)
-        }
-            .into_iter()
-            .map(|&ptr| Ok(unsafe { CStr::from_ptr(ptr) }.to_str()?)
-                .and_then(|s| ::BuiltinEntityKind::from_identifier(s).chain_err(|| format!("`{}` isn't a known builtin entity kind", s))))
+        }.into_iter()
+            .map(|&ptr| {
+                Ok(unsafe { CStr::from_ptr(ptr) }.to_str()?).and_then(|s| {
+                    ::BuiltinEntityKind::from_identifier(s)
+                        .chain_err(|| format!("`{}` isn't a known builtin entity kind", s))
+                })
+            })
             .collect::<OntologyResult<Vec<_>>>()?;
         Some(filters)
     } else {
@@ -103,7 +105,8 @@ fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    let c_entities = parser.extract_entities(sentence, opt_filters)
+    let c_entities = parser
+        .extract_entities(sentence, opt_filters)
         .into_iter()
         .map(CBuiltinEntity::from)
         .collect::<Vec<CBuiltinEntity>>();
@@ -115,4 +118,3 @@ fn extract_entity(
 
     Ok(())
 }
-

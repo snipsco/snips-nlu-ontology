@@ -25,7 +25,12 @@ pub struct Slot {
 }
 
 impl Slot {
-    pub fn new_custom(value: String, range: Range<usize>, entity: String, slot_name: String) -> Slot {
+    pub fn new_custom(
+        value: String,
+        range: Range<usize>,
+        entity: String,
+        slot_name: String,
+    ) -> Slot {
         Slot {
             raw_value: value.clone(),
             value: SlotValue::Custom(value.into()),
@@ -64,7 +69,9 @@ pub enum SlotValue {
 
 /// This struct is required in order to use serde Internally tagged enum representation
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct StringValue { pub value: String }
+pub struct StringValue {
+    pub value: String,
+}
 
 impl From<String> for StringValue {
     fn from(string: String) -> Self {
@@ -74,18 +81,26 @@ impl From<String> for StringValue {
 
 impl From<&'static str> for StringValue {
     fn from(str: &str) -> Self {
-        StringValue { value: str.to_string() }
+        StringValue {
+            value: str.to_string(),
+        }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-pub struct NumberValue { pub value: f64 }
+pub struct NumberValue {
+    pub value: f64,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-pub struct OrdinalValue { pub value: i64 }
+pub struct OrdinalValue {
+    pub value: i64,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-pub struct PercentageValue { pub value: f64 }
+pub struct PercentageValue {
+    pub value: f64,
+}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct InstantTimeValue {
@@ -180,13 +195,11 @@ mod tests {
     fn test_builtin_slot_2() {
         let slot = Slot {
             raw_value: "some_value".into(),
-            value: SlotValue::InstantTime(
-                InstantTimeValue {
-                    value: "some_value".into(),
-                    grain: Grain::Year,
-                    precision: Precision::Exact,
-                }
-            ),
+            value: SlotValue::InstantTime(InstantTimeValue {
+                value: "some_value".into(),
+                grain: Grain::Year,
+                precision: Precision::Exact,
+            }),
             range: None,
             entity: "toto".into(),
             slot_name: "toto".into(),

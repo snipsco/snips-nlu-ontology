@@ -2,9 +2,8 @@ use builtin_entities::builtin_entity::BuiltinEntityKind;
 use rustling_ontology::Grain as RustlingGrain;
 use rustling_ontology::dimension::Precision as RustlingPrecision;
 use rustling_ontology::output::{AmountOfMoneyOutput, DurationOutput, FloatOutput, IntegerOutput,
-                                OrdinalOutput, Output, OutputKind, TemperatureOutput, TimeIntervalOutput,
-                                TimeOutput, PercentageOutput};
-
+                                OrdinalOutput, Output, OutputKind, PercentageOutput,
+                                TemperatureOutput, TimeIntervalOutput, TimeOutput};
 
 impl From<IntegerOutput> for ::NumberValue {
     fn from(rustling_output: IntegerOutput) -> Self {
@@ -59,7 +58,12 @@ impl From<TimeIntervalOutput> for ::TimeIntervalValue {
                 from: None,
                 to: Some(before.moment.to_string()),
             },
-            TimeIntervalOutput::Between { start, end, precision: _, latent: _ } => Self {
+            TimeIntervalOutput::Between {
+                start,
+                end,
+                precision: _,
+                latent: _,
+            } => Self {
                 from: Some(start.to_string()),
                 to: Some(end.to_string()),
             },
