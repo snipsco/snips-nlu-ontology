@@ -5,11 +5,11 @@ use std::str::FromStr;
 
 use libc;
 
-use ffi_utils::CStringArray;
 use errors::*;
-use snips_nlu_ontology::*;
-use builtin_entity::*;
-use ffi_utils::*;
+use ffi_utils::CStringArray;
+use snips_nlu_ontology::BuiltinEntityParser;
+use builtin_entity::{CBuiltinEntity, CBuiltinEntityArray};
+use ffi_utils::CResult;
 
 #[repr(C)]
 pub struct CBuiltinEntityParser {

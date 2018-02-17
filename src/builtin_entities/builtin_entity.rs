@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use errors::*;
-use language::*;
+use language::Language;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct BuiltinEntity {

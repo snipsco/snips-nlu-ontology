@@ -9,7 +9,7 @@ use libc;
 
 use errors::*;
 use ffi_utils::{CResult, CStringArray};
-use snips_nlu_ontology::*;
+use snips_nlu_ontology::{BuiltinEntityKind, Language};
 
 #[repr(C)]
 #[derive(Debug)]
