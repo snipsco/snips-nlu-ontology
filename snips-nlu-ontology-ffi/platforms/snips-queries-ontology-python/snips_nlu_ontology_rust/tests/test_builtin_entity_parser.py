@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import unittest
 
 from snips_nlu_ontology_rust import BuiltinEntityParser
@@ -51,3 +53,25 @@ class TestBuiltinEntityParser(unittest.TestCase):
         ]
 
         self.assertListEqual(expected_result, res)
+
+    def test_should_not_accept_bytes_as_language(self):
+        with self.assertRaises(TypeError):
+            BuiltinEntityParser(b"en")
+
+    def test_should_not_accept_bytes_in_text(self):
+        # Given
+        parser = BuiltinEntityParser("en")
+        bytes_text = b"Raise to sixty"
+
+        # When/Then
+        with self.assertRaises(TypeError):
+            parser.parse(bytes_text)
+
+    def test_should_not_accept_bytes_in_scope(self):
+        # Given
+        scope = [b"snips/number", b"snips/datetime"]
+        parser = BuiltinEntityParser("en")
+
+        # When/Then
+        with self.assertRaises(TypeError):
+            parser.parse("Raise to sixty", scope)

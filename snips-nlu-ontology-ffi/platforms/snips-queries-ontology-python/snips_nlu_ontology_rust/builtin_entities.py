@@ -83,6 +83,9 @@ class BuiltinEntityParser(object):
     """
 
     def __init__(self, language):
+        if not isinstance(language, str):
+            raise TypeError("Expected language to be of type 'str' but found:"
+                            " %s" % type(language))
         self.language = language
         self._parser = pointer(c_void_p())
         exit_code = lib.nlu_ontology_create_builtin_entity_parser(
@@ -92,7 +95,8 @@ class BuiltinEntityParser(object):
                               "intent parser. See stderr.")
 
     def __del__(self):
-        lib.nlu_ontology_destroy_builtin_entity_parser(self._parser)
+        if hasattr(self, '_parser'):
+            lib.nlu_ontology_destroy_builtin_entity_parser(self._parser)
 
     def parse(self, text, scope=None):
         """Extract builtin entities from *text*
@@ -107,7 +111,13 @@ class BuiltinEntityParser(object):
         Returns:
             list of dict: The list of extracted entities
         """
+        if not isinstance(text, str):
+            raise TypeError("Expected language to be of type 'str' but found: "
+                            "%s" % type(text))
         if scope is not None:
+            if not all(isinstance(e, str) for e in scope):
+                raise TypeError(
+                    "Expected scope to contain objects of type 'str'")
             scope = [e.encode("utf8") for e in scope]
             arr = CStringArray()
             arr.size = c_int(len(scope))
