@@ -5,11 +5,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-from builtins import object
-from builtins import range
 from contextlib import contextmanager
 from ctypes import *
 from glob import glob
+
+from builtins import object, range, str
 
 dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
 dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
