@@ -5,43 +5,17 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-import os
+from _ctypes import pointer, byref
 from builtins import object, range, str
-from contextlib import contextmanager
-from ctypes import *
-from glob import glob
+from ctypes import c_char_p, c_void_p, c_int, string_at
 
-dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
-dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
-lib = cdll.LoadLibrary(dylib_path)
+from snips_nlu_ontology_rust.utils import (
+    string_array_pointer, string_pointer, CStringArray, lib)
 
 _ALL_LANGUAGES = None
 _SUPPORTED_ENTITIES = dict()
 _ALL_BUILTIN_ENTITIES = None
 _ONTOLOGY_VERSION = None
-
-
-@contextmanager
-def string_array_pointer(ptr):
-    try:
-        yield ptr
-    finally:
-        lib.nlu_ontology_destroy_string_array(ptr)
-
-
-@contextmanager
-def string_pointer(ptr):
-    try:
-        yield ptr
-    finally:
-        lib.nlu_ontology_destroy_string(ptr)
-
-
-class CStringArray(Structure):
-    _fields_ = [
-        ("data", POINTER(c_char_p)),
-        ("size", c_int32)
-    ]
 
 
 def get_ontology_version():
