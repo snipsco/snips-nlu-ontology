@@ -4,12 +4,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import json
 import os
+from builtins import object, range, str
 from contextlib import contextmanager
 from ctypes import *
 from glob import glob
-
-from builtins import object, range, str
 
 dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
 dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology*"))[0]
@@ -27,6 +27,14 @@ def string_array_pointer(ptr):
         yield ptr
     finally:
         lib.nlu_ontology_destroy_string_array(ptr)
+
+
+@contextmanager
+def string_pointer(ptr):
+    try:
+        yield ptr
+    finally:
+        lib.nlu_ontology_destroy_string(ptr)
 
 
 class CStringArray(Structure):
@@ -104,7 +112,7 @@ class BuiltinEntityParser(object):
         self.language = language
         self._parser = pointer(c_void_p())
         exit_code = lib.nlu_ontology_create_builtin_entity_parser(
-            language, byref(self._parser))
+            byref(self._parser), language.encode("utf8"))
         if exit_code:
             raise ImportError("Something wrong happened while creating the "
                               "intent parser. See stderr.")
@@ -118,22 +126,25 @@ class BuiltinEntityParser(object):
         Args:
             text (str): Input
             scope (list of str, optional): List of builtin entity labels. If
-            defined, the parser will extract entities using the provided scope
-            instead of the entire scope of all available entities. This allows
-            to look for specifics builtin entity kinds.
+                defined, the parser will extract entities using the provided
+                scope instead of the entire scope of all available entities.
+                This allows to look for specifics builtin entity kinds.
 
         Returns:
             list of dict: The list of extracted entities
         """
-        pointer = c_char_p()
-        exit_code = lib.nlu_ontology_extract_entities_json(
-            self._parser,
-            text.encode("utf-8"),
-            scope,
-            byref(pointer))
+        if scope is not None:
+            scope = [e.encode("utf8") for e in scope]
+            arr = CStringArray()
+            arr.size = c_int(len(scope))
+            arr.data = (c_char_p * len(scope))(*scope)
+            scope = byref(arr)
 
-        result = string_at(pointer)
-
-        lib.nlu_ontology_destroy_string(pointer)
-
-        return json.loads(bytes(result).decode())
+        with string_pointer(c_char_p()) as ptr:
+            exit_code = lib.nlu_ontology_extract_entities_json(
+                self._parser, text.encode("utf8"), scope, byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while extracting "
+                                 "builtin entities. See stderr.")
+            result = string_at(ptr)
+            return json.loads(result.decode("utf8"))

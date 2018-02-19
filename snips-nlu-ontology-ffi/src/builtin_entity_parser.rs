@@ -83,7 +83,7 @@ fn create_builtin_entity_parser(
     lang: *const libc::c_char,
 ) -> OntologyResult<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
-    let lang = ::Language::from_str(lang)?;
+    let lang = ::Language::from_str(&*lang.to_uppercase())?;
     let parser = BuiltinEntityParser::get(lang.into());
 
     unsafe {
