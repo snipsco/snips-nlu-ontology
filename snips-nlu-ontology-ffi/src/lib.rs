@@ -4,6 +4,8 @@ extern crate error_chain;
 extern crate lazy_static;
 extern crate libc;
 extern crate snips_nlu_ontology;
+extern crate serde;
+extern crate serde_json;
 
 pub mod errors;
 #[macro_use]
@@ -16,16 +18,20 @@ mod builtin_entity;
 mod ontology;
 mod language;
 
-use std::ffi::CString;
 use snips_nlu_ontology::*;
 
-pub use ffi_utils::{nlu_ontology_destroy_string_array, CStringArray};
 pub use ontology::*;
 pub use language::*;
 pub use builtin_entity::*;
 pub use builtin_entity_parser::*;
+pub use ffi_utils::{
+    nlu_ontology_destroy_string_array,
+    nlu_ontology_destroy_string,
+    nlu_ontology_get_last_error,
+    CStringArray
+};
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_version() -> *const libc::c_char {
-    CString::new(::ONTOLOGY_VERSION).unwrap().into_raw()
+    ::std::ffi::CString::new(::ONTOLOGY_VERSION).unwrap().into_raw()
 }

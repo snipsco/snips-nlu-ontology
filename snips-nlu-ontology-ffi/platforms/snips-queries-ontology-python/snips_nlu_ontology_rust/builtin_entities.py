@@ -125,13 +125,15 @@ class BuiltinEntityParser(object):
         Returns:
             list of dict: The list of extracted entities
         """
-        if scope is None:
-            scope = get_supported_entities(self.language)
-        return [{
-            "range": [0, len(text)],
-            "value": {
-                "kind": "Number",
-                "value": 2
-            },
-            "entity": "snips/number"
-        }]
+        pointer = c_char_p()
+        exit_code = lib.nlu_ontology_extract_entities_json(
+            self._parser,
+            text.encode("utf-8"),
+            scope,
+            byref(pointer))
+
+        result = string_at(pointer)
+
+        lib.nlu_ontology_destroy_string(pointer)
+
+        return json.loads(bytes(result).decode())

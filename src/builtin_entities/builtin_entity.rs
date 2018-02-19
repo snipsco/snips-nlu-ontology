@@ -1,14 +1,28 @@
 use std::ops::Range;
 
+use serde::Deserialize;
+
 use errors::*;
 use language::Language;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct BuiltinEntity {
     pub value: String,
     pub range: Range<usize>,
     pub entity: ::SlotValue,
-    pub entity_kind: ::BuiltinEntityKind,
+    #[serde(serialize_with = "serialize_builtin_entity_kind", deserialize_with = "deserialize_builtin_entity_kind")]
+    pub entity_kind: BuiltinEntityKind,
+}
+
+fn serialize_builtin_entity_kind<S>(value: &BuiltinEntityKind, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+where S: ::serde::Serializer {
+    serializer.serialize_str(value.identifier())
+}
+
+fn deserialize_builtin_entity_kind<'de, D>(deserializer: D) -> ::std::result::Result<BuiltinEntityKind, D::Error>
+    where D: ::serde::Deserializer<'de> {
+    String::deserialize(deserializer)
+        .and_then(|s| BuiltinEntityKind::from_identifier(&s).map_err(::serde::de::Error::custom))
 }
 
 enum_kind!(
@@ -144,5 +158,56 @@ impl BuiltinEntityKind {
                 &[Language::EN, Language::ES, Language::FR, Language::DE]
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_test::{Token, assert_tokens};
+
+    #[test]
+    fn test_builtin_entity_ser_de() {
+        let entity = BuiltinEntity {
+            value: "hello".to_string(),
+            range: 12..42,
+            entity: ::SlotValue::InstantTime(::InstantTimeValue {
+                value: "some_value".into(),
+                grain: ::Grain::Year,
+                precision: ::Precision::Exact,
+            }),
+            entity_kind: BuiltinEntityKind::Time,
+        };
+
+        assert_tokens(&entity, &[
+            Token::Struct { name: "BuiltinEntity", len: 4 },
+            Token::Str("value"),
+            Token::Str("hello"),
+
+            Token::Str("range"),
+            Token::Struct { name: "Range", len: 2 },
+            Token::Str("start"),
+            Token::U64(12),
+            Token::Str("end"),
+            Token::U64(42),
+            Token::StructEnd,
+
+            Token::Str("entity"),
+            Token::Struct { name: "InstantTimeValue", len: 4 },
+            Token::Str("kind"),
+            Token::Str("InstantTime"),
+            Token::Str("value"),
+            Token::String("some_value"),
+            Token::Str("grain"),
+            Token::UnitVariant { name: "Grain", variant: "Year" },
+            Token::Str("precision"),
+            Token::UnitVariant { name: "Precision", variant: "Exact" },
+            Token::StructEnd,
+
+            Token::Str("entity_kind"),
+            Token::Str("snips/datetime"),
+
+            Token::StructEnd,
+        ]);
     }
 }

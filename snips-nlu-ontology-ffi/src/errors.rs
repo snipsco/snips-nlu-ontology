@@ -10,5 +10,6 @@ error_chain! {
     foreign_links {
         Utf8Error(::std::str::Utf8Error);
         NulError(::std::ffi::NulError);
+        Serde(::serde_json::Error);
     }
 }
