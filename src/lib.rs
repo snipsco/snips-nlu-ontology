@@ -7,7 +7,6 @@ extern crate rustling_ontology;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[cfg(test)]
 extern crate serde_json;
 #[cfg(test)]
 extern crate serde_test;

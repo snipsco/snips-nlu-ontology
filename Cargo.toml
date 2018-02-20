@@ -20,8 +20,8 @@ itertools = "0.7"
 lazy_static = "1.0"
 rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.15.3" }
 serde = "1.0"
+serde_json = "1.0"
 serde_derive = "1.0"
 
 [dev-dependencies]
-serde_json = "1.0"
 serde_test = "1.0"
