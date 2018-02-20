@@ -214,7 +214,7 @@ mod tests {
         let description = BuiltinEntityKind::Temperature.result_description().unwrap();
 
         // When/Then
-        let expected_description = "[{\"kind\":\"Temperature\",\"value\":23.0,\"unit\":\"celsius\"},{\"kind\":\"Temperature\",\"value\":60.0,\"unit\":\"fahrenheit\"}]";
+        let expected_description = r#"[{"kind":"Temperature","value":23.0,"unit":"celsius"},{"kind":"Temperature","value":60.0,"unit":"fahrenheit"}]"#;
         assert_eq!(expected_description, description);
     }
 
