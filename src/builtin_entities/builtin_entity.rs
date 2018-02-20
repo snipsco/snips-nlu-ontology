@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 use serde::Deserialize;
+use serde_json;
 
 use errors::*;
 use language::Language;
@@ -15,7 +16,7 @@ pub struct BuiltinEntity {
 }
 
 fn serialize_builtin_entity_kind<S>(value: &BuiltinEntityKind, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
-where S: ::serde::Serializer {
+    where S: ::serde::Serializer {
     serializer.serialize_str(value.identifier())
 }
 
@@ -96,16 +97,57 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn result_description(&self) -> &str {
-        match *self {
-            BuiltinEntityKind::AmountOfMoney => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"AmountOfMoney\",\"value\":{\"value\":10.05,\"precision\":\"Approximate\",\"unit\":\"€\"}}}]",
-            BuiltinEntityKind::Duration => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Duration\",\"value\":{\"years\":0,\"quarters\":0,\"months\":3,\"weeks\":0,\"days\":0,\"hours\":0,\"minutes\":0,\"seconds\":0,\"precision\":\"Exact\"}}}]",
-            BuiltinEntityKind::Number => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Number\",\"value\":22}}, {\"kind\":\"Builtin\",\"value\":{\"kind\":\"Number\",\"value\":2.5}}]",
-            BuiltinEntityKind::Ordinal => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Ordinal\",\"value\":2}}]",
-            BuiltinEntityKind::Temperature => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Temperature\",\"value\":{\"value\":23.0,\"unit\":\"celsius\"}}},{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Temperature\",\"value\":{\"value\":60.0,\"unit\":\"fahrenheit\"}}}]",
-            BuiltinEntityKind::Time => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Time\",\"value\":{\"kind\":\"InstantTime\",\"value\":{\"value\":\"2017-06-13 18:00:00 +02:00\",\"grain\":\"Hour\",\"precision\":\"Exact\"}}}},{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Time\",\"value\":{\"kind\":\"TimeInterval\",\"value\":{\"from\":\"2017-06-07 18:00:00 +02:00\",\"to\":\"2017-06-08 00:00:00 +02:00\"}}}}]",
-            BuiltinEntityKind::Percentage => "[{\"kind\":\"Builtin\",\"value\":{\"kind\":\"Percentage\",\"value\":20}}, {\"kind\":\"Builtin\",\"value\":{\"kind\":\"Percentage\",\"value\": 25}}]",
-        }
+    pub fn result_description(&self) -> Result<String> {
+        Ok(match *self {
+            BuiltinEntityKind::AmountOfMoney => serde_json::to_string(&vec![
+                ::SlotValue::AmountOfMoney(::AmountOfMoneyValue {
+                    value: 10.05,
+                    precision: ::Precision::Approximate,
+                    unit: Some("€".to_string()),
+                })
+            ]),
+            BuiltinEntityKind::Duration => serde_json::to_string(&vec![
+                ::SlotValue::Duration(::DurationValue {
+                    years: 0,
+                    quarters: 0,
+                    months: 3,
+                    weeks: 0,
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    precision: ::Precision::Exact,
+                }),
+            ]),
+            BuiltinEntityKind::Number => serde_json::to_string(&vec![
+                ::SlotValue::Number(::NumberValue { value: 42. })
+            ]),
+            BuiltinEntityKind::Ordinal => serde_json::to_string(&vec![::SlotValue::Ordinal(::OrdinalValue { value: 2 })]),
+            BuiltinEntityKind::Temperature => serde_json::to_string(&vec![
+                ::SlotValue::Temperature(::TemperatureValue {
+                    value: 23.0,
+                    unit: Some("celsius".to_string()),
+                }),
+                ::SlotValue::Temperature(::TemperatureValue {
+                    value: 60.0,
+                    unit: Some("fahrenheit".to_string()),
+                }),
+            ]),
+            BuiltinEntityKind::Time => serde_json::to_string(&vec![
+                ::SlotValue::InstantTime(::InstantTimeValue {
+                    value: "2017-06-13 18:00:00 +02:00".to_string(),
+                    grain: ::Grain::Hour,
+                    precision: ::Precision::Exact,
+                }),
+                ::SlotValue::TimeInterval(::TimeIntervalValue {
+                    from: Some("2017-06-07 18:00:00 +02:00".to_string()),
+                    to: Some("2017-06-08 00:00:00 +02:00".to_string()),
+                }),
+            ]),
+            BuiltinEntityKind::Percentage => serde_json::to_string(&vec![
+                ::SlotValue::Percentage(::PercentageValue { value: 20. }),
+            ]),
+        }?)
     }
 }
 
@@ -167,6 +209,16 @@ mod tests {
     use serde_test::{Token, assert_tokens};
 
     #[test]
+    fn test_result_descriptions() {
+        // Given
+        let description = BuiltinEntityKind::Temperature.result_description().unwrap();
+
+        // When/Then
+        let expected_description = "[{\"kind\":\"Temperature\",\"value\":23.0,\"unit\":\"celsius\"},{\"kind\":\"Temperature\",\"value\":60.0,\"unit\":\"fahrenheit\"}]";
+        assert_eq!(expected_description, description);
+    }
+
+    #[test]
     fn test_builtin_entity_ser_de() {
         let entity = BuiltinEntity {
             value: "hello".to_string(),
@@ -183,7 +235,6 @@ mod tests {
             Token::Struct { name: "BuiltinEntity", len: 4 },
             Token::Str("value"),
             Token::Str("hello"),
-
             Token::Str("range"),
             Token::Struct { name: "Range", len: 2 },
             Token::Str("start"),
@@ -191,7 +242,6 @@ mod tests {
             Token::Str("end"),
             Token::U64(42),
             Token::StructEnd,
-
             Token::Str("entity"),
             Token::Struct { name: "InstantTimeValue", len: 4 },
             Token::Str("kind"),
@@ -203,10 +253,8 @@ mod tests {
             Token::Str("precision"),
             Token::UnitVariant { name: "Precision", variant: "Exact" },
             Token::StructEnd,
-
             Token::Str("entity_kind"),
             Token::Str("snips/datetime"),
-
             Token::StructEnd,
         ]);
     }
