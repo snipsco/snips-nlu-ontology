@@ -36,7 +36,7 @@ class RustBdistWheel(bdist_wheel):
 packages = [p for p in find_packages() if
             "tests" not in p and "debug" not in p]
 
-PACKAGE_NAME = "snips_nlu_ontology_rust"
+PACKAGE_NAME = "snips_nlu_ontology"
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_PATH = os.path.join(ROOT_PATH, PACKAGE_NAME)
 VERSION = "__version__"
@@ -54,15 +54,12 @@ setup(
     name=PACKAGE_NAME,
     version=version,
     description='Python wrapper of the Snips NLU ontology',
-    author='Kevin Lefevre',
-    author_email='kevin.lefevre@snips.ai',
+    author='Kevin Lefevre, Adrien Ball',
+    author_email='kevin.lefevre@snips.ai, adrien.ball@snips.ai',
     install_requires=required,
     packages=packages,
     include_package_data=True,
     distclass=RustDistribution,
-    entry_points={
-        'console_scripts': ['debug=snips_nlu_ontology_rust.debug:main_debug'],
-    },
     zip_safe=False,
     script_args=script_args,
 )

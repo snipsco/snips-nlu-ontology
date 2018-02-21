@@ -9,7 +9,7 @@ from _ctypes import pointer, byref
 from builtins import object, range, str
 from ctypes import c_char_p, c_void_p, c_int, string_at
 
-from snips_nlu_ontology_rust.utils import (
+from snips_nlu_ontology.utils import (
     string_array_pointer, string_pointer, CStringArray, lib)
 
 _ALL_LANGUAGES = None
