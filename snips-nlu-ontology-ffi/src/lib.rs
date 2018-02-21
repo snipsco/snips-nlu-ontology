@@ -20,6 +20,7 @@ mod language;
 
 use snips_nlu_ontology::*;
 
+pub use errors::*;
 pub use ontology::*;
 pub use language::*;
 pub use builtin_entity::*;
