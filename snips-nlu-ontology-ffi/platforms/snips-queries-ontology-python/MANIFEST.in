@@ -1,3 +1,0 @@
-include snips_nlu_ontology_rust/__version__
-recursive-include snips_nlu_ontology_rust/dylib/ *
-global-exclude __pycache__ *.py[cod]

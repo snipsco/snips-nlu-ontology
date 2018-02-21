@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from snips_nlu_ontology_rust import BuiltinEntityParser
+from snips_nlu_ontology import BuiltinEntityParser
 
 
 class TestBuiltinEntityParser(unittest.TestCase):

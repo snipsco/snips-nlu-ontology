@@ -1,7 +1,7 @@
 import unittest
 from builtins import str
 
-from snips_nlu_ontology_rust.builtin_entities import (
+from snips_nlu_ontology.builtin_entities import (
     get_all_languages, get_all_builtin_entities, get_supported_entities,
     get_ontology_version)
 

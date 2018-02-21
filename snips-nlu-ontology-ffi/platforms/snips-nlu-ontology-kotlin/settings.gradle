@@ -15,4 +15,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'snips-queries-ontology'
+rootProject.name = 'snips-nlu-ontology'

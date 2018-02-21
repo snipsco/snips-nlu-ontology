@@ -1,14 +1,14 @@
-package ai.snips.queries.ontology
+package ai.snips.nlu.ontology
 
-import ai.snips.queries.ontology.SlotValue.Type.AMOUNT_OF_MONEY
-import ai.snips.queries.ontology.SlotValue.Type.CUSTOM
-import ai.snips.queries.ontology.SlotValue.Type.DURATION
-import ai.snips.queries.ontology.SlotValue.Type.INSTANT_TIME
-import ai.snips.queries.ontology.SlotValue.Type.NUMBER
-import ai.snips.queries.ontology.SlotValue.Type.ORDINAL
-import ai.snips.queries.ontology.SlotValue.Type.TEMPERATURE
-import ai.snips.queries.ontology.SlotValue.Type.TIME_INTERVAL
-import ai.snips.queries.ontology.SlotValue.Type.PERCENTAGE
+import ai.snips.nlu.ontology.SlotValue.Type.AMOUNT_OF_MONEY
+import ai.snips.nlu.ontology.SlotValue.Type.CUSTOM
+import ai.snips.nlu.ontology.SlotValue.Type.DURATION
+import ai.snips.nlu.ontology.SlotValue.Type.INSTANT_TIME
+import ai.snips.nlu.ontology.SlotValue.Type.NUMBER
+import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
+import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
+import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
+import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
 
 data class Range(val start: Int, val end: Int)
 

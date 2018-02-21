@@ -19,7 +19,7 @@ fn main() {
 
     match result {
         Ok(generator) => {
-            generator.write_to_file("platforms/snips-queries-ontology-c/libsnips_nlu_ontology.h");
+            generator.write_to_file("platforms/snips-nlu-ontology-c/libsnips_nlu_ontology.h");
         }
         Err(e) => {
             eprintln!("Unable to generate bindings. Reason: {}", e);
