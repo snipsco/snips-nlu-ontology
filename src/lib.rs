@@ -19,7 +19,6 @@ pub mod language;
 
 mod ontology;
 
-pub use rustling_ontology::Lang as RustlingLang;
 pub use builtin_entities::*;
 pub use ontology::*;
 pub use language::*;

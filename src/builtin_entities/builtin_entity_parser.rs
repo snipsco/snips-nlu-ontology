@@ -4,16 +4,16 @@ use std::time::Instant;
 
 use itertools::Itertools;
 
-use rustling_ontology::{build_parser, Lang, OutputKind, Parser, ResolverContext};
+use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 use builtin_entities::BuiltinEntity;
 
 pub struct BuiltinEntityParser {
     parser: Parser,
-    lang: Lang,
+    lang: ::Language,
 }
 
 impl BuiltinEntityParser {
-    pub fn get(lang: Lang) -> Arc<BuiltinEntityParser> {
+    pub fn get(lang: ::Language) -> Arc<BuiltinEntityParser> {
         lazy_static! {
             static ref CACHED_PARSERS: Mutex<HashMap<String, Arc<BuiltinEntityParser>>> =
                 Mutex::new(HashMap::new());
@@ -25,7 +25,7 @@ impl BuiltinEntityParser {
             .entry(lang.to_string())
             .or_insert_with(|| {
                 Arc::new(BuiltinEntityParser {
-                    parser: build_parser(lang).unwrap(),
+                    parser: build_parser(lang.into()).unwrap(),
                     lang,
                 })
             })
@@ -153,7 +153,7 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let parser = BuiltinEntityParser::get(Lang::EN);
+        let parser = BuiltinEntityParser::get(::Language::EN);
         assert_eq!(
             vec![::BuiltinEntityKind::Number, ::BuiltinEntityKind::Time],
             parser
