@@ -18,4 +18,4 @@ serde_json = "1.0"
 cbindgen = "0.4"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["rlib", "cdylib", "staticlib"]
