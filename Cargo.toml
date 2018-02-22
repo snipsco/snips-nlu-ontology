@@ -12,6 +12,7 @@ description = "Ontology of the Rust NLU library API"
 [workspace]
 members = [
     "snips-nlu-ontology-ffi",
+    "snips-nlu-ontology-doc"
 ]
 
 [dependencies]
