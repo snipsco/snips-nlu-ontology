@@ -176,7 +176,9 @@ class CAmountOfMoneyValue(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var value: Float? = null
     @JvmField var precision: Int? = null
     @JvmField var unit: Pointer? = null
-    override fun getFieldOrder() = listOf("value", "precision", "unit")
+
+    override fun getFieldOrder() = listOf("unit", "value", "precision")
+
     fun toAmountOfMoneyValue() = AmountOfMoneyValue(value = value!!,
                                                     precision = precision.readPrecision(),
                                                     unit = unit.readString())
@@ -189,7 +191,9 @@ class CTemperatureValue(p: Pointer) : Structure(p), Structure.ByReference {
 
     @JvmField var value: Float? = null
     @JvmField var unit: Pointer? = null
-    override fun getFieldOrder() = listOf("value", "unit")
+
+    override fun getFieldOrder() = listOf("unit", "value")
+
     fun toTemperatureValue() = TemperatureValue(value = value!!,
                                                 unit = unit.readString())
 
@@ -209,7 +213,6 @@ class CDurationValue(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var minutes: Long? = null
     @JvmField var seconds: Long? = null
     @JvmField var precision: Int? = null
-
 
     override fun getFieldOrder() = listOf("years",
                                           "quarters",
@@ -245,12 +248,12 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var entity: Pointer? = null
     @JvmField var slot_name: Pointer? = null
 
-    override fun getFieldOrder() = listOf("raw_value",
-                                          "value",
-                                          "range_start",
-                                          "range_end",
+    override fun getFieldOrder() = listOf("value",
+                                          "raw_value",
                                           "entity",
-                                          "slot_name")
+                                          "slot_name",
+                                          "range_start",
+                                          "range_end")
 
     fun toSlot() = Slot(rawValue = raw_value.readString(),
                         value = value.readSlotValue(),
