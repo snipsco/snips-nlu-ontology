@@ -123,7 +123,7 @@ class CSlotValue : Structure(), Structure.ByValue {
     @JvmField var value_type: Int? = null
     @JvmField var value: Pointer? = null
 
-    override fun getFieldOrder() = listOf("value_type", "value")
+    override fun getFieldOrder() = listOf("value", "value_type")
 
     fun toSlotValue(): SlotValue = when (value_type!!) {
         CUSTOM -> CustomValue(value.readString())
