@@ -184,7 +184,7 @@ impl CPrecision {
 
 pub type CNumberValue = libc::c_double;
 pub type CPercentageValue = libc::c_double;
-pub type COrdinalValue = libc::c_long;
+pub type COrdinalValue = libc::int64_t;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -334,28 +334,28 @@ impl Drop for CTemperatureValue {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CDurationValue {
-    pub years: libc::c_long,
-    pub quarters: libc::c_long,
-    pub months: libc::c_long,
-    pub weeks: libc::c_long,
-    pub days: libc::c_long,
-    pub hours: libc::c_long,
-    pub minutes: libc::c_long,
-    pub seconds: libc::c_long,
+    pub years: libc::int64_t,
+    pub quarters: libc::int64_t,
+    pub months: libc::int64_t,
+    pub weeks: libc::int64_t,
+    pub days: libc::int64_t,
+    pub hours: libc::int64_t,
+    pub minutes: libc::int64_t,
+    pub seconds: libc::int64_t,
     pub precision: CPrecision,
 }
 
 impl From<::DurationValue> for CDurationValue {
     fn from(value: ::DurationValue) -> Self {
         Self {
-            years: value.years as libc::c_long,
-            quarters: value.quarters as libc::c_long,
-            months: value.months as libc::c_long,
-            weeks: value.weeks as libc::c_long,
-            days: value.days as libc::c_long,
-            hours: value.hours as libc::c_long,
-            minutes: value.minutes as libc::c_long,
-            seconds: value.seconds as libc::c_long,
+            years: value.years as libc::int64_t,
+            quarters: value.quarters as libc::int64_t,
+            months: value.months as libc::int64_t,
+            weeks: value.weeks as libc::int64_t,
+            days: value.days as libc::int64_t,
+            hours: value.hours as libc::int64_t,
+            minutes: value.minutes as libc::int64_t,
+            seconds: value.seconds as libc::int64_t,
             precision: CPrecision::from(value.precision),
         }
     }
