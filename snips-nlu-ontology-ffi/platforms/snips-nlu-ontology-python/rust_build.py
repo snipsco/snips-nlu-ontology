@@ -13,7 +13,7 @@ import sys
 from distutils.cmd import Command
 from distutils.command.install_lib import install_lib
 
-CARGO_ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
+CARGO_ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 GLOBAL_ROOT_PATH = os.path.dirname(CARGO_ROOT_PATH)
 
 
@@ -69,10 +69,10 @@ class RustBuildCommand(Command):
             suffix = "release"
 
         if target_tuple:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "../target", target_tuple,
+            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", target_tuple,
                                       suffix)
         else:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "../target", suffix)
+            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", suffix)
 
         if sys.platform == "win32":
             wildcard_so = "*snips_nlu_ontology*.dll"
