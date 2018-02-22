@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from snips_nlu_ontology import BuiltinEntityParser
+from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
 
 
 class TestBuiltinEntityParser(unittest.TestCase):
@@ -52,6 +52,16 @@ class TestBuiltinEntityParser(unittest.TestCase):
         ]
 
         self.assertListEqual(expected_result, res)
+
+    def test_should_parse_in_all_languages(self):
+        # Given
+        all_languages = get_all_languages()
+        text = "1234"
+
+        # When / Then
+        for language in all_languages:
+            parser = BuiltinEntityParser(language)
+            parser.parse(text)
 
     def test_should_not_accept_bytes_as_language(self):
         with self.assertRaises(TypeError):
