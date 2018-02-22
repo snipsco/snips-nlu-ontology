@@ -1,0 +1,45 @@
+buildscript {
+    ext.kotlin_version = '1.2.10'
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+version = "0.53.0"
+group = "ai.snips"
+
+
+apply plugin: 'kotlin'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile 'net.java.dev.jna:jna:4.5.0'
+}
+
+apply plugin: 'maven'
+
+def _nexusUsername = project.hasProperty("nexusUsername") ? nexusUsername : ""
+def _nexusPassword = project.hasProperty("nexusPassword") ? nexusPassword : ""
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://nexus-repository.snips.ai/repository/snips-maven-releases/") {
+                authentication(userName: _nexusUsername, password: _nexusPassword)
+            }
+            snapshotRepository(url: "https://nexus-repository.snips.ai/repository/snips-maven-snapshots/") {
+                authentication(userName: _nexusUsername, password: _nexusPassword)
+            }
+            pom.whenConfigured { pom ->
+                pom.dependencies.find { dep -> dep.groupId == 'net.java.dev.jna' && dep.artifactId == 'jna' }.scope = "provided"
+            }
+        }
+    }
+}
