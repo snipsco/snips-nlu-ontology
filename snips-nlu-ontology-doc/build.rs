@@ -54,21 +54,44 @@ fn add_supported_builtin_entities(readme: &mut String) {
     readme.push_str("\n");
     let mut table = Table::new();
     table.set_format(*prettytable::format::consts::FORMAT_DEFAULT);
-    table.set_titles(row!["Entity", "Identifier", "Supported languages", "Results Examples"]);
+    table.set_titles(row!["Entity", "Identifier", "Supported languages"]);
 
     let mut all_entities = ::BuiltinEntityKind::all().iter().collect::<Vec<_>>();
     all_entities.sort_by(|a, b| a.identifier().cmp(b.identifier()));
 
-    for entity in all_entities {
-        let supported_languages: String = entity.supported_languages().iter()
-            .map(|l| format!("{}\n", l.full_name()))
+    for entity in all_entities.clone() {
+        let supported_languages: String = entity.supported_languages()
+            .iter()
+            .map(|l| format!("| {}\n", l.full_name()))
             .collect();
-
-        table.add_row(row![entity.to_string(),
-                           entity.identifier(),
-                           supported_languages,
-                           entity.result_description().unwrap()]);
+        table.add_row(row![entity.to_string(), entity.identifier(), supported_languages]);
     }
     readme.push_str(&*table.to_string());
     readme.push_str("\n");
+
+    readme.push_str("Results Examples\n");
+    readme.push_str("----------------\n");
+
+    readme.push_str("\n");
+
+    readme.push_str("The following sections provide results examples for each builtin entity.\n");
+
+    readme.push_str("\n");
+
+    for entity in all_entities {
+        add_builtin_entity_results_examples(readme, *entity);
+    }
+}
+
+fn add_builtin_entity_results_examples(readme: &mut String, entity: BuiltinEntityKind) {
+    let mut entity_title = Table::new();
+    entity_title.set_format(*prettytable::format::consts::FORMAT_NO_COLSEP);
+    entity_title.add_row(row![entity.to_string()]);
+    let cleaned_title = entity_title.to_string().replace(" ", "").replace("--\n", "\n");
+    readme.push_str(&*cleaned_title);
+    readme.push_str("\n");
+    readme.push_str(".. code-block:: json\n");
+    readme.push_str("\n   ");
+    readme.push_str(&*entity.result_description().unwrap().replace("\n", "\n   "));
+    readme.push_str("\n\n");
 }
