@@ -40,16 +40,15 @@ PACKAGE_PATH = os.path.join(ROOT_PATH, PACKAGE_NAME)
 README = os.path.join(ROOT_PATH, "README.rst")
 VERSION = "__version__"
 
-timestamp = int(subprocess.check_output(["git", "log", "-1", "--format=%at"]))
-
 with io.open(os.path.join(PACKAGE_PATH, VERSION)) as f:
-    version = f.readline().strip().replace("-SNAPSHOT", ".dev%i" % timestamp)
+    version = f.readline()
 
 with io.open(README, "rt", encoding="utf8") as f:
     readme = f.read()
 
 required = [
-    "future==0.16.0"
+    "future==0.16.0",
+    "wheel==0.30.0"
 ]
 
 setup(name=PACKAGE_NAME,
