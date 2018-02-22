@@ -24,6 +24,8 @@ Supported languages
 +----------+------------+
 | Korean   | ko         |
 +----------+------------+
+| Japan    | ja         |
++----------+------------+
 
 Supported builtin entities
 --------------------------
