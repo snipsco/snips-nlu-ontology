@@ -99,14 +99,14 @@ impl BuiltinEntityKind {
 impl BuiltinEntityKind {
     pub fn result_description(&self) -> Result<String> {
         Ok(match *self {
-            BuiltinEntityKind::AmountOfMoney => serde_json::to_string(&vec![
+            BuiltinEntityKind::AmountOfMoney => serde_json::to_string_pretty(&vec![
                 ::SlotValue::AmountOfMoney(::AmountOfMoneyValue {
                     value: 10.05,
                     precision: ::Precision::Approximate,
                     unit: Some("€".to_string()),
                 })
             ]),
-            BuiltinEntityKind::Duration => serde_json::to_string(&vec![
+            BuiltinEntityKind::Duration => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Duration(::DurationValue {
                     years: 0,
                     quarters: 0,
@@ -119,11 +119,11 @@ impl BuiltinEntityKind {
                     precision: ::Precision::Exact,
                 }),
             ]),
-            BuiltinEntityKind::Number => serde_json::to_string(&vec![
+            BuiltinEntityKind::Number => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Number(::NumberValue { value: 42. })
             ]),
-            BuiltinEntityKind::Ordinal => serde_json::to_string(&vec![::SlotValue::Ordinal(::OrdinalValue { value: 2 })]),
-            BuiltinEntityKind::Temperature => serde_json::to_string(&vec![
+            BuiltinEntityKind::Ordinal => serde_json::to_string_pretty(&vec![::SlotValue::Ordinal(::OrdinalValue { value: 2 })]),
+            BuiltinEntityKind::Temperature => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Temperature(::TemperatureValue {
                     value: 23.0,
                     unit: Some("celsius".to_string()),
@@ -133,7 +133,7 @@ impl BuiltinEntityKind {
                     unit: Some("fahrenheit".to_string()),
                 }),
             ]),
-            BuiltinEntityKind::Time => serde_json::to_string(&vec![
+            BuiltinEntityKind::Time => serde_json::to_string_pretty(&vec![
                 ::SlotValue::InstantTime(::InstantTimeValue {
                     value: "2017-06-13 18:00:00 +02:00".to_string(),
                     grain: ::Grain::Hour,
@@ -144,7 +144,7 @@ impl BuiltinEntityKind {
                     to: Some("2017-06-08 00:00:00 +02:00".to_string()),
                 }),
             ]),
-            BuiltinEntityKind::Percentage => serde_json::to_string(&vec![
+            BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
             ]),
         }?)
@@ -211,10 +211,10 @@ mod tests {
     #[test]
     fn test_result_descriptions() {
         // Given
-        let description = BuiltinEntityKind::Temperature.result_description().unwrap();
+        let description = BuiltinEntityKind::Percentage.result_description().unwrap();
 
         // When/Then
-        let expected_description = r#"[{"kind":"Temperature","value":23.0,"unit":"celsius"},{"kind":"Temperature","value":60.0,"unit":"fahrenheit"}]"#;
+        let expected_description = "[\n  {\n    \"kind\": \"Percentage\",\n    \"value\": 20.0\n  }\n]";
         assert_eq!(expected_description, description);
     }
 
