@@ -13,45 +13,52 @@ macro_rules! language_enum {
                 ALL
             }
         }
+
+        impl ::std::str::FromStr for Language {
+            type Err=String;
+            fn from_str(s: &str) -> ::std::result::Result<Language, Self::Err> {
+                match &*s.to_uppercase() {
+                    $(
+                        stringify!($language) => Ok(Language::$language),
+                    )*
+                    _ => Err(format!("Unknown language: {}", s))
+                }
+            }
+        }
+
+        impl ::std::string::ToString for Language {
+            fn to_string(&self) -> String {
+                match self {
+                    $(
+                        &Language::$language => stringify!($language).to_lowercase(),
+                    )*
+                }
+            }
+        }
+
+        impl From<Language> for RustlingLang {
+            fn from(lang: Language) -> Self {
+                match lang {
+                    $(
+                        Language::$language => RustlingLang::$language,
+                    )*
+                }
+            }
+        }
+
     }
 }
 
 language_enum!([DE, EN, ES, FR, KO]);
 
-impl ::std::str::FromStr for Language {
-    type Err = String;
-    fn from_str(it: &str) -> Result<Self, Self::Err> {
-        match &*it.to_lowercase() {
-            "en" => Ok(Language::EN),
-            "fr" => Ok(Language::FR),
-            "es" => Ok(Language::ES),
-            "ko" => Ok(Language::KO),
-            "de" => Ok(Language::DE),
-            _ => Err(format!("Unknown language {}", it)),
-        }
-    }
-}
-
-impl ::std::string::ToString for Language {
-    fn to_string(&self) -> String {
+impl Language {
+    pub fn full_name(&self) -> &'static str {
         match *self {
-            Language::EN => "en",
-            Language::FR => "fr",
-            Language::ES => "es",
-            Language::KO => "ko",
-            Language::DE => "de",
-        }.to_string()
-    }
-}
-
-impl From<Language> for RustlingLang {
-    fn from(lang: Language) -> Self {
-        match lang {
-            Language::DE => RustlingLang::DE,
-            Language::EN => RustlingLang::EN,
-            Language::ES => RustlingLang::ES,
-            Language::FR => RustlingLang::FR,
-            Language::KO => RustlingLang::KO,
+            Language::EN => "English",
+            Language::FR => "French",
+            Language::ES => "Spanish",
+            Language::KO => "Korean",
+            Language::DE => "German",
         }
     }
 }
