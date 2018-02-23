@@ -13,8 +13,10 @@ import sys
 from distutils.cmd import Command
 from distutils.command.install_lib import install_lib
 
-CARGO_ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-GLOBAL_ROOT_PATH = os.path.dirname(CARGO_ROOT_PATH)
+RUST_CRATE_NAME = "snips-nlu-ontology-rs"
+RUST_CRATE_NAME_SNAKED = RUST_CRATE_NAME.replace("-", "_")
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+CARGO_ROOT_PATH = os.path.join(ROOT_PATH, RUST_CRATE_NAME)
 
 
 class RustBuildCommand(Command):
@@ -69,27 +71,25 @@ class RustBuildCommand(Command):
             suffix = "release"
 
         if target_tuple:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", target_tuple,
+            target_dir = os.path.join(CARGO_ROOT_PATH, "target", target_tuple,
                                       suffix)
         else:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", suffix)
+            target_dir = os.path.join(CARGO_ROOT_PATH, "target", suffix)
 
         if sys.platform == "win32":
-            wildcard_so = "*snips_nlu_ontology*.dll"
+            wildcard_so = "*%s*.dll" % RUST_CRATE_NAME_SNAKED
         elif sys.platform == "darwin":
-            wildcard_so = "*snips_nlu_ontology*.dylib"
+            wildcard_so = "*%s*.dylib" % RUST_CRATE_NAME_SNAKED
         else:
-            wildcard_so = "*snips_nlu_ontology*.so"
+            wildcard_so = "*%s*.so" % RUST_CRATE_NAME_SNAKED
 
         try:
             dylib_path = glob.glob(os.path.join(target_dir, wildcard_so))[0]
         except IndexError:
-            raise Exception(
-                "rust build failed; unable to find any .dylib in %s" %
-                target_dir)
+            raise Exception("rust build failed; unable to find any .dylib in "
+                            "%s" % target_dir)
         package_name = self.distribution.metadata.name
-        root_path = os.path.dirname(os.path.abspath(__file__))
-        dylib_resource_path = os.path.join(root_path, package_name, "dylib",
+        dylib_resource_path = os.path.join(ROOT_PATH, package_name, "dylib",
                                            os.path.basename(dylib_path))
         print("from: ", dylib_path)
         print("to: ", dylib_resource_path)
