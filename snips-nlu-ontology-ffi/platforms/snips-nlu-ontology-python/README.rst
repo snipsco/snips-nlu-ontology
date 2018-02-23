@@ -4,15 +4,25 @@ Snips NLU Ontology
 Installation
 ------------
 
-To manage dependencies properly, it is recommended to work in a virtual environment:
+This package can be installed via pip from a source distribution. As it contains
+some ``rust`` code ``rust`` must be installed on your machine.
+
+To install Rust, run the following in your terminal, then follow the onscreen instructions:
 
 .. code-block:: console
 
-    virtualenv venv
-    . venv/bin/activate
+    curl https://sh.rustup.rs -sSf | sh
 
-This package can be installed via pip with the following command:
 
-.. code-block:: python
+You will also need the python lib ``setuptools_rust``:
+
+.. code-block:: console
+
+    pip install setuptools_rust
+
+Finally, you can install ``snips-nlu-ontology`` using pip:
+
+.. code-block:: console
 
     pip install snips-nlu-ontology
+

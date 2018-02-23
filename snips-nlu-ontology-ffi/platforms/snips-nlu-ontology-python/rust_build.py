@@ -13,8 +13,9 @@ import sys
 from distutils.cmd import Command
 from distutils.command.install_lib import install_lib
 
-CARGO_ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-GLOBAL_ROOT_PATH = os.path.dirname(CARGO_ROOT_PATH)
+RUST_CRATE_NAME = "snips-nlu-ontology-rs"
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+CARGO_ROOT_PATH = os.path.join(ROOT_PATH, RUST_CRATE_NAME)
 
 
 class RustBuildCommand(Command):
@@ -40,7 +41,9 @@ class RustBuildCommand(Command):
     def run(self):
         # Execute cargo.
         try:
-            target_tuple = os.environ.get('CARGO_TARGET')
+            target_tuple = os.environ.get("CARGO_TARGET")
+            os.environ["CARGO_TARGET_DIR"] = os.path.join(CARGO_ROOT_PATH,
+                                                          "target")
             # TODO Switch to make build-<TARGET>
             args = (["cargo", "build"] + list(self.extra_cargo_args or []))
             if not self.debug:
@@ -69,27 +72,27 @@ class RustBuildCommand(Command):
             suffix = "release"
 
         if target_tuple:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", target_tuple,
-                                      suffix)
+            target_dir = os.path.join(CARGO_ROOT_PATH, "target", target_tuple,
+                                      suffix, "deps")
         else:
-            target_dir = os.path.join(GLOBAL_ROOT_PATH, "target", suffix)
+            target_dir = os.path.join(CARGO_ROOT_PATH, "target", suffix,
+                                      "deps")
 
         if sys.platform == "win32":
-            wildcard_so = "*snips_nlu_ontology*.dll"
+            wildcard_so = "*snips_nlu_ontology_ffi*.dll"
         elif sys.platform == "darwin":
-            wildcard_so = "*snips_nlu_ontology*.dylib"
+            wildcard_so = "*snips_nlu_ontology_ffi*.dylib"
         else:
-            wildcard_so = "*snips_nlu_ontology*.so"
+            wildcard_so = "*snips_nlu_ontology_ffi*.so"
 
         try:
             dylib_path = glob.glob(os.path.join(target_dir, wildcard_so))[0]
         except IndexError:
-            raise Exception(
-                "rust build failed; unable to find any .dylib in %s" %
-                target_dir)
+            raise Exception("rust build failed; unable to find any .dylib in "
+                            "%s" % target_dir)
         package_name = self.distribution.metadata.name
-        root_path = os.path.dirname(os.path.abspath(__file__))
-        dylib_resource_path = os.path.join(root_path, package_name, "dylib",
+
+        dylib_resource_path = os.path.join(ROOT_PATH, package_name, "dylib",
                                            os.path.basename(dylib_path))
         print("from: ", dylib_path)
         print("to: ", dylib_resource_path)
