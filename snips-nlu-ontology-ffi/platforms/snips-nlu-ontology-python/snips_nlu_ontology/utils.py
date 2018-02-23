@@ -5,7 +5,7 @@ from ctypes import c_char_p, c_int32, cdll
 from glob import glob
 
 dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
-dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology_rs*"))[0]
+dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology_ffi*"))[0]
 lib = cdll.LoadLibrary(dylib_path)
 
 

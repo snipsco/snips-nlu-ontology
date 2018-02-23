@@ -14,7 +14,6 @@ from distutils.cmd import Command
 from distutils.command.install_lib import install_lib
 
 RUST_CRATE_NAME = "snips-nlu-ontology-rs"
-RUST_CRATE_NAME_SNAKED = RUST_CRATE_NAME.replace("-", "_")
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 CARGO_ROOT_PATH = os.path.join(ROOT_PATH, RUST_CRATE_NAME)
 
@@ -42,7 +41,9 @@ class RustBuildCommand(Command):
     def run(self):
         # Execute cargo.
         try:
-            target_tuple = os.environ.get('CARGO_TARGET')
+            target_tuple = os.environ.get("CARGO_TARGET")
+            os.environ["CARGO_TARGET_DIR"] = os.path.join(CARGO_ROOT_PATH,
+                                                          "target")
             # TODO Switch to make build-<TARGET>
             args = (["cargo", "build"] + list(self.extra_cargo_args or []))
             if not self.debug:
@@ -72,16 +73,17 @@ class RustBuildCommand(Command):
 
         if target_tuple:
             target_dir = os.path.join(CARGO_ROOT_PATH, "target", target_tuple,
-                                      suffix)
+                                      suffix, "deps")
         else:
-            target_dir = os.path.join(CARGO_ROOT_PATH, "target", suffix)
+            target_dir = os.path.join(CARGO_ROOT_PATH, "target", suffix,
+                                      "deps")
 
         if sys.platform == "win32":
-            wildcard_so = "*%s*.dll" % RUST_CRATE_NAME_SNAKED
+            wildcard_so = "*snips_nlu_ontology_ffi*.dll"
         elif sys.platform == "darwin":
-            wildcard_so = "*%s*.dylib" % RUST_CRATE_NAME_SNAKED
+            wildcard_so = "*snips_nlu_ontology_ffi*.dylib"
         else:
-            wildcard_so = "*%s*.so" % RUST_CRATE_NAME_SNAKED
+            wildcard_so = "*snips_nlu_ontology_ffi*.so"
 
         try:
             dylib_path = glob.glob(os.path.join(target_dir, wildcard_so))[0]
@@ -89,6 +91,7 @@ class RustBuildCommand(Command):
             raise Exception("rust build failed; unable to find any .dylib in "
                             "%s" % target_dir)
         package_name = self.distribution.metadata.name
+
         dylib_resource_path = os.path.join(ROOT_PATH, package_name, "dylib",
                                            os.path.basename(dylib_path))
         print("from: ", dylib_path)
