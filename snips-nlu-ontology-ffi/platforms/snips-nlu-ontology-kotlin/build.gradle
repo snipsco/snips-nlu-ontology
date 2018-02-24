@@ -14,6 +14,9 @@ group = "ai.snips"
 
 apply plugin: 'kotlin'
 
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
 repositories {
     jcenter()
 }
@@ -21,6 +24,16 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile 'net.java.dev.jna:jna:4.5.0'
+    compile 'org.parceler:parceler-api:1.1.9'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 apply plugin: 'maven'
@@ -37,9 +50,13 @@ uploadArchives {
             snapshotRepository(url: "https://nexus-repository.snips.ai/repository/snips-maven-snapshots/") {
                 authentication(userName: _nexusUsername, password: _nexusPassword)
             }
-            pom.whenConfigured { pom ->
-                pom.dependencies.find { dep -> dep.groupId == 'net.java.dev.jna' && dep.artifactId == 'jna' }.scope = "provided"
-            }
         }
     }
+}
+
+def installer = install.repositories.mavenInstaller
+def deployer = uploadArchives.repositories.mavenDeployer
+
+[installer, deployer]*.pom*.whenConfigured { pom ->
+    pom.dependencies.find { dep -> dep.groupId == 'net.java.dev.jna' && dep.artifactId == 'jna' }.scope = "provided"
 }
