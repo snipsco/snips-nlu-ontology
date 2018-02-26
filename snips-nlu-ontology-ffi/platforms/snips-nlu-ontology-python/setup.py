@@ -2,34 +2,10 @@ from __future__ import print_function
 
 import io
 import os
-import subprocess
 import sys
 
 from setuptools import setup, find_packages
-from setuptools.dist import Distribution
-from wheel.bdist_wheel import bdist_wheel
-
-from rust_build import build_rust_cmdclass, RustInstallLib
-
-script_args = [i for i in sys.argv[1:] if "build-mode" not in i]
-debug = "--build-mode=release" not in sys.argv
-
-
-class RustDistribution(Distribution):
-    def __init__(self, *attrs):
-        Distribution.__init__(self, *attrs)
-        self.cmdclass["install_lib"] = RustInstallLib
-        self.cmdclass["bdist_wheel"] = RustBdistWheel
-        self.cmdclass["build_rust"] = build_rust_cmdclass(debug=debug)
-
-        print("Building in {} mode".format("debug" if debug else "release"))
-
-
-class RustBdistWheel(bdist_wheel):
-    def finalize_options(self):
-        bdist_wheel.finalize_options(self)
-        self.root_is_pure = False
-
+from setuptools_rust import Binding, RustExtension
 
 packages = [p for p in find_packages() if
             "tests" not in p and "debug" not in p]
@@ -39,6 +15,12 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_PATH = os.path.join(ROOT_PATH, PACKAGE_NAME)
 README = os.path.join(ROOT_PATH, "README.rst")
 VERSION = "__version__"
+
+RUST_EXTENSION_NAME = 'snips_nlu_ontology.dylib.libsnips_nlu_ontology_ffi'
+CARGO_ROOT_PATH = os.path.join(ROOT_PATH, 'snips-nlu-ontology-rs')
+CARGO_FILE_PATH = os.path.join(CARGO_ROOT_PATH, 'Cargo.toml')
+CARGO_TARGET_DIR = os.path.join(CARGO_ROOT_PATH, 'target')
+os.environ['CARGO_TARGET_DIR'] = CARGO_TARGET_DIR
 
 with io.open(os.path.join(PACKAGE_PATH, VERSION)) as f:
     version = f.readline()
@@ -66,9 +48,10 @@ setup(name=PACKAGE_NAME,
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6",
       ],
+      rust_extensions=[RustExtension(RUST_EXTENSION_NAME, CARGO_FILE_PATH,
+                                     debug="develop" in sys.argv,
+                                     binding=Binding.NoBinding)],
       install_requires=required,
       packages=packages,
       include_package_data=True,
-      distclass=RustDistribution,
-      zip_safe=False,
-      script_args=script_args)
+      zip_safe=False)
