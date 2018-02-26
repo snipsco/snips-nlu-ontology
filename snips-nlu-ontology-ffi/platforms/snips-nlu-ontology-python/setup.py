@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import io
 import os
-import subprocess
 import sys
 
 from setuptools import setup, find_packages
@@ -11,8 +10,10 @@ from wheel.bdist_wheel import bdist_wheel
 
 from rust_build import build_rust_cmdclass, RustInstallLib
 
-script_args = [i for i in sys.argv[1:] if "build-mode" not in i]
-debug = "--build-mode=release" not in sys.argv
+script_args = [i for i in sys.argv[1:] if "--debug" not in i
+               and "--use-workspace-build" not in i]
+debug = "--debug" in sys.argv
+use_workspace_build = "--use-workspace-build" in sys.argv
 
 
 class RustDistribution(Distribution):
@@ -20,9 +21,12 @@ class RustDistribution(Distribution):
         Distribution.__init__(self, *attrs)
         self.cmdclass["install_lib"] = RustInstallLib
         self.cmdclass["bdist_wheel"] = RustBdistWheel
-        self.cmdclass["build_rust"] = build_rust_cmdclass(debug=debug)
+        self.cmdclass["build_rust"] = build_rust_cmdclass(
+            debug=debug, use_workspace_build=use_workspace_build)
 
         print("Building in {} mode".format("debug" if debug else "release"))
+        if use_workspace_build:
+            print("Using workspace build")
 
 
 class RustBdistWheel(bdist_wheel):

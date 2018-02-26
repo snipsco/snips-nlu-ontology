@@ -15,7 +15,6 @@ from distutils.command.install_lib import install_lib
 
 RUST_CRATE_NAME = "snips-nlu-ontology-rs"
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-CARGO_ROOT_PATH = os.path.join(ROOT_PATH, RUST_CRATE_NAME)
 
 
 class RustBuildCommand(Command):
@@ -41,8 +40,12 @@ class RustBuildCommand(Command):
     def run(self):
         # Execute cargo.
         try:
+            cargo_root_path = os.path.join(ROOT_PATH, RUST_CRATE_NAME)
+            if self.use_workspace_build:
+                cargo_root_path = os.path.join(cargo_root_path, "../../../..")
+
             target_tuple = os.environ.get("CARGO_TARGET")
-            os.environ["CARGO_TARGET_DIR"] = os.path.join(CARGO_ROOT_PATH,
+            os.environ["CARGO_TARGET_DIR"] = os.path.join(cargo_root_path,
                                                           "target")
             # TODO Switch to make build-<TARGET>
             args = (["cargo", "build"] + list(self.extra_cargo_args or []))
@@ -52,7 +55,7 @@ class RustBuildCommand(Command):
                 args.append("--target=%s" % target_tuple)
             if not self.quiet:
                 print(" ".join(args), file=sys.stderr)
-            output = subprocess.check_output(args, cwd=CARGO_ROOT_PATH)
+            output = subprocess.check_output(args, cwd=cargo_root_path)
         except subprocess.CalledProcessError as e:
             msg = "cargo failed with code: %d\n%s" % (e.returncode, e.output)
             raise Exception(msg)
@@ -72,10 +75,10 @@ class RustBuildCommand(Command):
             suffix = "release"
 
         if target_tuple:
-            target_dir = os.path.join(CARGO_ROOT_PATH, "target", target_tuple,
+            target_dir = os.path.join(cargo_root_path, "target", target_tuple,
                                       suffix, "deps")
         else:
-            target_dir = os.path.join(CARGO_ROOT_PATH, "target", suffix,
+            target_dir = os.path.join(cargo_root_path, "target", suffix,
                                       "deps")
 
         if sys.platform == "win32":
@@ -99,12 +102,15 @@ class RustBuildCommand(Command):
         shutil.copyfile(dylib_path, dylib_resource_path)
 
 
-def build_rust_cmdclass(debug=False, extra_cargo_args=None, quiet=False):
+def build_rust_cmdclass(debug=False, use_workspace_build=False,
+                        extra_cargo_args=None, quiet=False):
     """
     Build a Command subclass suitable for passing to the cmdclass argument of
     distutils.
 
     :param debug: if True --debug is passed to cargo, otherwise --release
+    :param use_workspace_build: if True, will use snips-nlu-ontology workspace
+        target directory instead of local target directory
     :param extra_cargo_args: list of extra arguments to be passed to cargo
     :param quiet: If True, doesn't echo cargo's output
     """
