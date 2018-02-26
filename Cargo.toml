@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology"
-version = "0.53.0"
+version = "0.53.1"
 authors = [
     "Adrien Ball <adrien.ball@snips.ai>",
     "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
@@ -12,7 +12,8 @@ description = "Ontology of the Rust NLU library API"
 [workspace]
 members = [
     "snips-nlu-ontology-ffi",
-    "snips-nlu-ontology-doc"
+    "snips-nlu-ontology-doc",
+    "snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs"
 ]
 
 [dependencies]
