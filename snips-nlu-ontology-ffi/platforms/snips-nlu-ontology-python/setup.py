@@ -5,14 +5,7 @@ import os
 import sys
 
 from setuptools import setup, find_packages
-from setuptools_rust import RustExtension
-
-try:
-    from setuptools_rust import Binding
-
-    rust_kwargs = {'binding': Binding.NoBinding}
-except ImportError:
-    rust_kwargs = dict()
+from setuptools_rust import Binding, RustExtension
 
 packages = [p for p in find_packages() if
             "tests" not in p and "debug" not in p]
@@ -57,7 +50,7 @@ setup(name=PACKAGE_NAME,
       ],
       rust_extensions=[RustExtension(RUST_EXTENSION_NAME, CARGO_FILE_PATH,
                                      debug="develop" in sys.argv,
-                                     **rust_kwargs)],
+                                     binding=Binding.NoBinding)],
       install_requires=required,
       packages=packages,
       include_package_data=True,
