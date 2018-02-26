@@ -2,4 +2,5 @@ include snips_nlu_ontology/__version__
 include LICENSE README.rst rust_build.py
 recursive-include snips_nlu_ontology/dylib/ *
 recursive-include snips-nlu-ontology-rs/ *
+recursive-exclude snips-nlu-ontology-rs/target/ *
 global-exclude __pycache__ *.py[cod]
