@@ -14,13 +14,7 @@ To install Rust, run the following in your terminal, then follow the onscreen in
     curl https://sh.rustup.rs -sSf | sh
 
 
-You will also need the python lib ``setuptools_rust``:
-
-.. code-block:: console
-
-    pip install setuptools_rust
-
-Finally, you can install ``snips-nlu-ontology`` using pip:
+Then, you can install ``snips-nlu-ontology`` using pip:
 
 .. code-block:: console
 
