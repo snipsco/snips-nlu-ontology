@@ -29,7 +29,8 @@ pub use ffi_utils::{
     nlu_ontology_destroy_string_array,
     nlu_ontology_destroy_string,
     nlu_ontology_get_last_error,
-    CStringArray
+    CStringArray,
+    CResult
 };
 
 #[no_mangle]
