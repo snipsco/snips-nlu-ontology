@@ -16,7 +16,7 @@ PACKAGE_PATH = os.path.join(ROOT_PATH, PACKAGE_NAME)
 README = os.path.join(ROOT_PATH, "README.rst")
 VERSION = "__version__"
 
-RUST_EXTENSION_NAME = 'snips_nlu_ontology.dylib.libsnips_nlu_ontology_ffi'
+RUST_EXTENSION_NAME = 'snips_nlu_ontology.dylib.libsnips_nlu_ontology_rs'
 CARGO_ROOT_PATH = os.path.join(ROOT_PATH, 'snips-nlu-ontology-rs')
 CARGO_FILE_PATH = os.path.join(CARGO_ROOT_PATH, 'Cargo.toml')
 CARGO_TARGET_DIR = os.path.join(CARGO_ROOT_PATH, 'target')
