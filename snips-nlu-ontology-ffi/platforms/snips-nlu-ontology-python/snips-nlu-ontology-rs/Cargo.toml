@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-rs"
-version = "0.53.1"
+version = "0.53.2"
 authors = ["Adrien Ball <adrien.ball@snips.ai>"]
 
 [lib]
@@ -9,4 +9,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 libc = "0.2"
-snips-nlu-ontology-ffi = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.53.1" }
+snips-nlu-ontology-ffi = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.53.2" }
