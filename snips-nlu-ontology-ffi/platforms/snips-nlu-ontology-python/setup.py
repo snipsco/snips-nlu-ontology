@@ -7,8 +7,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools_rust import Binding, RustExtension
 
-packages = [p for p in find_packages() if
-            "tests" not in p and "debug" not in p]
+packages = [p for p in find_packages() if "tests" not in p]
 
 PACKAGE_NAME = "snips_nlu_ontology"
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
