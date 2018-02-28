@@ -1,5 +1,5 @@
-pub mod builtin_entity_parser;
-pub mod builtin_entity;
+mod builtin_entity;
+mod builtin_entity_parser;
 mod rustling_converters;
 
 pub use self::builtin_entity::*;
