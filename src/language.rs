@@ -1,5 +1,3 @@
-use rustling_ontology::Lang as RustlingLang;
-
 macro_rules! language_enum {
     ([$($language:ident),*]) => {
         #[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Hash, Eq)]
@@ -36,11 +34,12 @@ macro_rules! language_enum {
             }
         }
 
-        impl From<Language> for RustlingLang {
+        #[cfg(feature = "builtin_entities")]
+        impl From<Language> for ::rustling_ontology::Lang {
             fn from(lang: Language) -> Self {
                 match lang {
                     $(
-                        Language::$language => RustlingLang::$language,
+                        Language::$language => ::rustling_ontology::Lang::$language,
                     )*
                 }
             }

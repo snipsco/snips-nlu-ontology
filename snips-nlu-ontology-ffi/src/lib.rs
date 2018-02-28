@@ -13,7 +13,9 @@ pub mod macros;
 
 #[macro_use]
 mod ffi_utils;
+#[cfg(feature = "builtin_entities")]
 mod builtin_entity_parser;
+#[cfg(feature = "builtin_entities")]
 mod builtin_entity;
 mod ontology;
 mod language;
@@ -23,7 +25,9 @@ use snips_nlu_ontology::*;
 pub use errors::*;
 pub use ontology::*;
 pub use language::*;
+#[cfg(feature = "builtin_entities")]
 pub use builtin_entity::*;
+#[cfg(feature = "builtin_entities")]
 pub use builtin_entity_parser::*;
 pub use ffi_utils::{
     nlu_ontology_destroy_string_array,
