@@ -9,7 +9,7 @@ use libc;
 use errors::*;
 
 lazy_static! {
-    pub static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
+    pub(crate) static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
 }
 
 #[repr(C)]
@@ -94,14 +94,14 @@ fn get_last_error(error: *mut *const libc::c_char) -> OntologyResult<()> {
     Ok(())
 }
 
-pub fn destroy_string(string: *mut libc::c_char) -> OntologyResult<()> {
+pub(crate) fn destroy_string(string: *mut libc::c_char) -> OntologyResult<()> {
     unsafe {
         let _ = ::std::ffi::CString::from_raw(string);
     }
     Ok(())
 }
 
-pub fn destroy<T>(ptr: *mut T) -> OntologyResult<()> {
+pub(crate) fn destroy<T>(ptr: *mut T) -> OntologyResult<()> {
     unsafe {
         let _ = Box::from_raw(ptr);
     }

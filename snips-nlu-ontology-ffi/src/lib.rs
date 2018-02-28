@@ -29,13 +29,7 @@ pub use language::*;
 pub use builtin_entity::*;
 #[cfg(feature = "builtin_entities")]
 pub use builtin_entity_parser::*;
-pub use ffi_utils::{
-    nlu_ontology_destroy_string_array,
-    nlu_ontology_destroy_string,
-    nlu_ontology_get_last_error,
-    CStringArray,
-    CResult
-};
+pub use ffi_utils::*;
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_version() -> *const libc::c_char {
