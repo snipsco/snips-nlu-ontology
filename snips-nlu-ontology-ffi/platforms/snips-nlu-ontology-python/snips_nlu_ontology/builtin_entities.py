@@ -22,8 +22,8 @@ def get_ontology_version():
     """Get the version of the ontology"""
     global _ONTOLOGY_VERSION
     if _ONTOLOGY_VERSION is None:
-        lib.nlu_ontology_version.restype = c_char_p
-        _ONTOLOGY_VERSION = lib.nlu_ontology_version().decode("utf8")
+        lib.ffi_nlu_ontology_version.restype = c_char_p
+        _ONTOLOGY_VERSION = lib.ffi_nlu_ontology_version().decode("utf8")
     return _ONTOLOGY_VERSION
 
 
@@ -31,8 +31,8 @@ def get_all_languages():
     """Lists all the supported languages"""
     global _ALL_LANGUAGES
     if _ALL_LANGUAGES is None:
-        lib.nlu_ontology_supported_languages.restype = CStringArray
-        array = lib.nlu_ontology_supported_languages()
+        lib.ffi_nlu_ontology_supported_languages.restype = CStringArray
+        array = lib.ffi_nlu_ontology_supported_languages()
         _ALL_LANGUAGES = set(
             array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_LANGUAGES
@@ -43,8 +43,8 @@ def get_all_builtin_entities():
     language"""
     global _ALL_BUILTIN_ENTITIES
     if _ALL_BUILTIN_ENTITIES is None:
-        lib.nlu_ontology_all_builtin_entities.restype = CStringArray
-        array = lib.nlu_ontology_all_builtin_entities()
+        lib.ffi_nlu_ontology_all_builtin_entities.restype = CStringArray
+        array = lib.ffi_nlu_ontology_all_builtin_entities()
         _ALL_BUILTIN_ENTITIES = set(
             array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_BUILTIN_ENTITIES
@@ -64,7 +64,7 @@ def get_supported_entities(language):
 
     if language not in _SUPPORTED_ENTITIES:
         with string_array_pointer(pointer(CStringArray())) as ptr:
-            exit_code = lib.nlu_ontology_supported_builtin_entities(
+            exit_code = lib.ffi_nlu_ontology_supported_builtin_entities(
                 language.encode("utf8"), byref(ptr))
             if exit_code:
                 raise ValueError("Something wrong happened while retrieving "
@@ -88,7 +88,7 @@ class BuiltinEntityParser(object):
                             " %s" % type(language))
         self.language = language
         self._parser = pointer(c_void_p())
-        exit_code = lib.nlu_ontology_create_builtin_entity_parser(
+        exit_code = lib.ffi_nlu_ontology_create_builtin_entity_parser(
             byref(self._parser), language.encode("utf8"))
         if exit_code:
             raise ImportError("Something wrong happened while creating the "
@@ -96,7 +96,7 @@ class BuiltinEntityParser(object):
 
     def __del__(self):
         if hasattr(self, '_parser'):
-            lib.nlu_ontology_destroy_builtin_entity_parser(self._parser)
+            lib.ffi_nlu_ontology_destroy_builtin_entity_parser(self._parser)
 
     def parse(self, text, scope=None):
         """Extract builtin entities from *text*
@@ -125,7 +125,7 @@ class BuiltinEntityParser(object):
             scope = byref(arr)
 
         with string_pointer(c_char_p()) as ptr:
-            exit_code = lib.nlu_ontology_extract_entities_json(
+            exit_code = lib.ffi_nlu_ontology_extract_entities_json(
                 self._parser, text.encode("utf8"), scope, byref(ptr))
             if exit_code:
                 raise ValueError("Something wrong happened while extracting "
