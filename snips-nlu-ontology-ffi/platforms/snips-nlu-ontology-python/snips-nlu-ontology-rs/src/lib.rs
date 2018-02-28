@@ -1,7 +1,7 @@
 extern crate libc;
 extern crate snips_nlu_ontology_ffi;
 
-use snips_nlu_ontology_ffi::{CResult, CStringArray, CBuiltinEntityParser, CBuiltinEntityArray};
+use snips_nlu_ontology_ffi::{CBuiltinEntityArray, CBuiltinEntityParser, CResult, CStringArray};
 
 #[doc(hidden)]
 #[macro_export]

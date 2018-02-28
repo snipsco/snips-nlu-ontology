@@ -3,9 +3,9 @@ extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
 extern crate libc;
-extern crate snips_nlu_ontology;
 extern crate serde;
 extern crate serde_json;
+extern crate snips_nlu_ontology;
 
 pub mod errors;
 #[macro_use]
@@ -33,5 +33,7 @@ pub use ffi_utils::*;
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_version() -> *const libc::c_char {
-    ::std::ffi::CString::new(::ONTOLOGY_VERSION).unwrap().into_raw()
+    ::std::ffi::CString::new(::ONTOLOGY_VERSION)
+        .unwrap()
+        .into_raw()
 }
