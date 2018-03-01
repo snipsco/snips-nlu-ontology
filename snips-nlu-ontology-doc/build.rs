@@ -1,6 +1,6 @@
-extern crate snips_nlu_ontology;
 #[macro_use]
 extern crate prettytable;
+extern crate snips_nlu_ontology;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -23,7 +23,9 @@ fn add_header(readme: &mut String) {
     readme.push_str("==================\n");
     readme.push_str("\n");
 
-    readme.push_str(".. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=master\n");
+    readme.push_str(
+        ".. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=master\n",
+    );
     readme.push_str("   :target: https://travis-ci.org/snipsco/snips-nlu-ontology\n");
     readme.push_str("\n");
 
@@ -60,11 +62,16 @@ fn add_supported_builtin_entities(readme: &mut String) {
     all_entities.sort_by(|a, b| a.identifier().cmp(b.identifier()));
 
     for entity in all_entities.clone() {
-        let supported_languages: String = entity.supported_languages()
+        let supported_languages: String = entity
+            .supported_languages()
             .iter()
             .map(|l| format!("| {}\n", l.full_name()))
             .collect();
-        table.add_row(row![entity.to_string(), entity.identifier(), supported_languages]);
+        table.add_row(row![
+            entity.to_string(),
+            entity.identifier(),
+            supported_languages
+        ]);
     }
     readme.push_str(&*table.to_string());
     readme.push_str("\n");
@@ -87,7 +94,10 @@ fn add_builtin_entity_results_examples(readme: &mut String, entity: BuiltinEntit
     let mut entity_title = Table::new();
     entity_title.set_format(*prettytable::format::consts::FORMAT_NO_COLSEP);
     entity_title.add_row(row![entity.to_string()]);
-    let cleaned_title = entity_title.to_string().replace(" ", "").replace("--\n", "\n");
+    let cleaned_title = entity_title
+        .to_string()
+        .replace(" ", "")
+        .replace("--\n", "\n");
     readme.push_str(&*cleaned_title);
     readme.push_str("\n");
     readme.push_str(".. code-block:: json\n");

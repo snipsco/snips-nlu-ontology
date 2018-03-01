@@ -47,7 +47,12 @@ pub extern "C" fn nlu_ontology_extract_entities(
     filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
 ) -> CResult {
-    wrap!(extract_entity_c(ptr, sentence, filter_entity_kinds, results))
+    wrap!(extract_entity_c(
+        ptr,
+        sentence,
+        filter_entity_kinds,
+        results
+    ))
 }
 
 #[no_mangle]
@@ -57,7 +62,12 @@ pub extern "C" fn nlu_ontology_extract_entities_json(
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
 ) -> CResult {
-    wrap!(extract_entity_json(ptr, sentence, filter_entity_kinds, results))
+    wrap!(extract_entity_json(
+        ptr,
+        sentence,
+        filter_entity_kinds,
+        results
+    ))
 }
 
 #[no_mangle]
@@ -107,7 +117,9 @@ fn extract_entity_c(
         .collect::<Vec<CBuiltinEntity>>();
     let c_entities = Box::new(CBuiltinEntityArray::from(c_entities));
 
-    unsafe { *results = Box::into_raw(c_entities); }
+    unsafe {
+        *results = Box::into_raw(c_entities);
+    }
 
     Ok(())
 }

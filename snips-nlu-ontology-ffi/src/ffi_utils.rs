@@ -9,7 +9,7 @@ use libc;
 use errors::*;
 
 lazy_static! {
-    pub static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
+    pub(crate) static ref LAST_ERROR: Mutex<String> = Mutex::new("".to_string());
 }
 
 #[repr(C)]
@@ -77,7 +77,7 @@ pub extern "C" fn nlu_ontology_get_last_error(error: *mut *const libc::c_char) -
 
 #[no_mangle]
 pub extern "C" fn nlu_ontology_destroy_string_array(ptr: *mut CStringArray) -> CResult {
-   wrap!(destroy(ptr))
+    wrap!(destroy(ptr))
 }
 
 #[no_mangle]
@@ -86,7 +86,10 @@ pub extern "C" fn nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> CResult
 }
 
 fn get_last_error(error: *mut *const libc::c_char) -> OntologyResult<()> {
-    let last_error = LAST_ERROR.lock().map_err(|e| format!("Can't retrieve last error: {}", e))?.clone();
+    let last_error = LAST_ERROR
+        .lock()
+        .map_err(|e| format!("Can't retrieve last error: {}", e))?
+        .clone();
     let c_last_error = CString::new(last_error).unwrap().into_raw(); // String cannot contain 0
     unsafe {
         *error = c_last_error;
@@ -94,14 +97,14 @@ fn get_last_error(error: *mut *const libc::c_char) -> OntologyResult<()> {
     Ok(())
 }
 
-pub fn destroy_string(string: *mut libc::c_char) -> OntologyResult<()> {
+pub(crate) fn destroy_string(string: *mut libc::c_char) -> OntologyResult<()> {
     unsafe {
         let _ = ::std::ffi::CString::from_raw(string);
     }
     Ok(())
 }
 
-pub fn destroy<T>(ptr: *mut T) -> OntologyResult<()> {
+pub(crate) fn destroy<T>(ptr: *mut T) -> OntologyResult<()> {
     unsafe {
         let _ = Box::from_raw(ptr);
     }
