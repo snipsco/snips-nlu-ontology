@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 extern crate itertools;
 #[cfg(feature = "builtin_entities")]
 #[macro_use]
