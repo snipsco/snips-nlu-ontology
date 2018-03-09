@@ -3,6 +3,7 @@ use std::slice;
 use std::sync::Arc;
 use std::str::FromStr;
 
+use failure::ResultExt;
 use libc;
 use serde_json;
 
@@ -91,7 +92,7 @@ pub extern "C" fn nlu_ontology_destroy_builtin_entity_parser(
 fn create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
     lang: *const libc::c_char,
-) -> OntologyResult<()> {
+) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
     let lang = ::Language::from_str(&*lang.to_uppercase())?;
     let parser = BuiltinEntityParser::get(lang);
@@ -110,7 +111,7 @@ fn extract_entity_c(
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
-) -> OntologyResult<()> {
+) -> Result<()> {
     let c_entities = extract_entity(ptr, sentence, filter_entity_kinds)?
         .into_iter()
         .map(CBuiltinEntity::from)
@@ -129,7 +130,7 @@ fn extract_entity_json(
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
-) -> OntologyResult<()> {
+) -> Result<()> {
     let entities = extract_entity(ptr, sentence, filter_entity_kinds)?;
     let json = serde_json::to_string(&entities)?;
 
@@ -143,7 +144,7 @@ fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
-) -> OntologyResult<Vec<::BuiltinEntity>> {
+) -> Result<Vec<::BuiltinEntity>> {
     let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
 
@@ -153,12 +154,16 @@ fn extract_entity(
             slice::from_raw_parts(array.data, array.size as usize)
         }.into_iter()
             .map(|&ptr| {
-                Ok(unsafe { CStr::from_ptr(ptr) }.to_str()?).and_then(|s| {
-                    ::BuiltinEntityKind::from_identifier(s)
-                        .chain_err(|| format!("`{}` isn't a known builtin entity kind", s))
-                })
+                Ok(unsafe { CStr::from_ptr(ptr) }
+                    .to_str()
+                    .map_err(::failure::Error::from)
+                    .and_then(|s| {
+                        ::BuiltinEntityKind::from_identifier(s)
+                            .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))
+                            .map_err(::failure::Error::from)
+                    })?)
             })
-            .collect::<OntologyResult<Vec<_>>>()?;
+            .collect::<Result<Vec<_>>>()?;
         Some(filters)
     } else {
         None

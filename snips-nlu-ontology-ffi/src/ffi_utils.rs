@@ -22,8 +22,8 @@ macro_rules! wrap {
     ($e:expr) => { match $e {
         Ok(_) => { CResult::RESULT_OK }
         Err(e) => {
-            use error_chain::ChainedError;
-            let msg = e.display_chain().to_string();
+            use failure_ext::ErrorExt;
+            let msg = e.pretty().to_string();
             eprintln!("{}", msg);
             match ::ffi_utils::LAST_ERROR.lock() {
                 Ok(mut guard) => *guard = msg,
@@ -85,10 +85,10 @@ pub extern "C" fn nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> CResult
     wrap!(destroy_string(ptr))
 }
 
-fn get_last_error(error: *mut *const libc::c_char) -> OntologyResult<()> {
+fn get_last_error(error: *mut *const libc::c_char) -> Result<()> {
     let last_error = LAST_ERROR
         .lock()
-        .map_err(|e| format!("Can't retrieve last error: {}", e))?
+        .map_err(|e| format_err!("Can't retrieve last error: {}", e))?
         .clone();
     let c_last_error = CString::new(last_error).unwrap().into_raw(); // String cannot contain 0
     unsafe {
@@ -97,14 +97,14 @@ fn get_last_error(error: *mut *const libc::c_char) -> OntologyResult<()> {
     Ok(())
 }
 
-pub(crate) fn destroy_string(string: *mut libc::c_char) -> OntologyResult<()> {
+pub(crate) fn destroy_string(string: *mut libc::c_char) -> Result<()> {
     unsafe {
         let _ = ::std::ffi::CString::from_raw(string);
     }
     Ok(())
 }
 
-pub(crate) fn destroy<T>(ptr: *mut T) -> OntologyResult<()> {
+pub(crate) fn destroy<T>(ptr: *mut T) -> Result<()> {
     unsafe {
         let _ = Box::from_raw(ptr);
     }

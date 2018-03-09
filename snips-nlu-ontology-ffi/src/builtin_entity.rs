@@ -105,7 +105,7 @@ pub extern "C" fn nlu_ontology_supported_builtin_entities(
 fn get_supported_builtin_entities(
     language: *const libc::c_char,
     results: *mut *const CStringArray,
-) -> OntologyResult<()> {
+) -> Result<()> {
     let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
     let language = Language::from_str(&*language_str.to_uppercase())?;
     let entities = BuiltinEntityKind::all()

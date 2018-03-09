@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 #[macro_use]
 extern crate lazy_static;
 extern crate libc;
@@ -17,6 +17,7 @@ mod ffi_utils;
 mod builtin_entity_parser;
 #[cfg(feature = "builtin_entities")]
 mod builtin_entity;
+mod failure_ext;
 mod ontology;
 mod language;
 

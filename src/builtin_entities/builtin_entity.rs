@@ -67,7 +67,7 @@ impl BuiltinEntityKind {
             .iter()
             .find(|kind| kind.identifier() == identifier)
             .map(|k| k.clone())
-            .ok_or(format!("Unknown EntityKind identifier: {}", identifier).into())
+            .ok_or(format_err!("Unknown EntityKind identifier: {}", identifier))
     }
 }
 

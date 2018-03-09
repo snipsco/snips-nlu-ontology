@@ -13,13 +13,13 @@ macro_rules! language_enum {
         }
 
         impl ::std::str::FromStr for Language {
-            type Err=String;
+            type Err=::failure::Error;
             fn from_str(s: &str) -> ::std::result::Result<Language, Self::Err> {
                 match &*s.to_uppercase() {
                     $(
                         stringify!($language) => Ok(Language::$language),
                     )*
-                    _ => Err(format!("Unknown language: {}", s))
+                    _ => bail!("Unknown language: {}", s)
                 }
             }
         }
