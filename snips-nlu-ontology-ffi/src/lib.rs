@@ -17,6 +17,7 @@ mod ffi_utils;
 mod builtin_entity_parser;
 #[cfg(feature = "builtin_entities")]
 mod builtin_entity;
+mod failure_ext;
 mod ontology;
 mod language;
 

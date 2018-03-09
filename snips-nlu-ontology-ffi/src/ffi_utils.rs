@@ -22,7 +22,8 @@ macro_rules! wrap {
     ($e:expr) => { match $e {
         Ok(_) => { CResult::RESULT_OK }
         Err(e) => {
-            let msg = e.cause().to_string();
+            use failure_ext::ErrorExt;
+            let msg = e.pretty().to_string();
             eprintln!("{}", msg);
             match ::ffi_utils::LAST_ERROR.lock() {
                 Ok(mut guard) => *guard = msg,
