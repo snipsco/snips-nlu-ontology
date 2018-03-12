@@ -20,10 +20,14 @@ pub mod errors;
 pub mod builtin_entities;
 pub mod language;
 
+#[cfg(feature = "builtin_entities")]
+pub mod builtin_entity;
 mod ontology;
 
 #[cfg(feature = "builtin_entities")]
 pub use builtin_entities::*;
+#[cfg(feature = "builtin_entities")]
+pub use builtin_entity::{BuiltinEntity, BuiltinEntityKind};
 pub use ontology::*;
 pub use language::*;
 

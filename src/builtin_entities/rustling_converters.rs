@@ -1,4 +1,4 @@
-use builtin_entities::BuiltinEntityKind;
+use builtin_entity::BuiltinEntityKind;
 use rustling_ontology::Grain as RustlingGrain;
 use rustling_ontology::dimension::Precision as RustlingPrecision;
 use rustling_ontology::output::{AmountOfMoneyOutput, DurationOutput, FloatOutput, IntegerOutput,

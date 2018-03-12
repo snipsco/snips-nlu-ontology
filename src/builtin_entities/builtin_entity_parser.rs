@@ -5,7 +5,6 @@ use std::time::Instant;
 use itertools::Itertools;
 
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
-use builtin_entities::BuiltinEntity;
 
 pub struct BuiltinEntityParser {
     parser: Parser,
@@ -36,7 +35,7 @@ impl BuiltinEntityParser {
         &self,
         sentence: &str,
         filter_entity_kinds: Option<&[::BuiltinEntityKind]>,
-    ) -> Vec<BuiltinEntity> {
+    ) -> Vec<::BuiltinEntity> {
         lazy_static! {
             static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
         }
@@ -63,7 +62,7 @@ impl BuiltinEntityParser {
                         .filter_map(|m| {
                             let entity_kind = ::BuiltinEntityKind::from(&m.value);
                             kinds.iter().find(|kind| **kind == entity_kind).map(|kind| {
-                                BuiltinEntity {
+                                ::BuiltinEntity {
                                     value: sentence[m.byte_range.0..m.byte_range.1].into(),
                                     range: m.char_range.0..m.char_range.1,
                                     entity: m.value.clone().into(),
@@ -77,7 +76,7 @@ impl BuiltinEntityParser {
                         .parse(&sentence.to_lowercase(), &context)
                         .unwrap_or(Vec::new())
                         .iter()
-                        .map(|entity| BuiltinEntity {
+                        .map(|entity| ::BuiltinEntity {
                             value: sentence[entity.byte_range.0..entity.byte_range.1].into(),
                             range: entity.char_range.0..entity.char_range.1,
                             entity: entity.value.clone().into(),
@@ -103,7 +102,7 @@ impl EntityCache {
         }
     }
 
-    fn cache<F: Fn(&CacheKey) -> Vec<BuiltinEntity>>(
+    fn cache<F: Fn(&CacheKey) -> Vec<::BuiltinEntity>>(
         &mut self,
         key: &CacheKey,
         producer: F,
@@ -129,12 +128,12 @@ struct CacheKey {
 
 #[derive(Debug, Clone)]
 struct CacheValue {
-    entities: Vec<BuiltinEntity>,
+    entities: Vec<::BuiltinEntity>,
     instant: Instant,
 }
 
 impl CacheValue {
-    fn new(entities: Vec<BuiltinEntity>) -> CacheValue {
+    fn new(entities: Vec<::BuiltinEntity>) -> CacheValue {
         CacheValue {
             entities,
             instant: Instant::now(),
@@ -196,15 +195,15 @@ mod test {
 
     #[test]
     fn test_entity_cache() {
-        fn parse(_: &CacheKey) -> Vec<BuiltinEntity> {
+        fn parse(_: &CacheKey) -> Vec<::BuiltinEntity> {
             vec![
-                BuiltinEntity {
+                ::BuiltinEntity {
                     value: "two".into(),
                     range: 23..26,
                     entity_kind: ::BuiltinEntityKind::Number,
                     entity: ::SlotValue::Number(::NumberValue { value: 2.0 }),
                 },
-                BuiltinEntity {
+                ::BuiltinEntity {
                     value: "4.5".into(),
                     range: 34..42,
                     entity_kind: ::BuiltinEntityKind::Number,
