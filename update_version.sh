@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-parseRustVersion() {
-    grep -w snips-nlu-ontology/Cargo.toml -e '^version = ".*' | sed -- 's/version = "//g' | sed -- 's/"//g'
-}
 
-NEW_VERSION=$(parseRustVersion)
+NEW_VERSION=$1
+
 echo "Updating versions to version ${NEW_VERSION}"
 find . -name "Cargo.toml" -exec perl -p -i -e "s/^version = \".*\"$/version = \"$NEW_VERSION\"/g" {} \;
 find . -name "build.gradle" -exec perl -p -i -e "s/^version = \".*\"$/version = \"$NEW_VERSION\"/g" {} \;
