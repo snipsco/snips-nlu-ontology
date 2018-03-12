@@ -7,10 +7,11 @@ use failure::ResultExt;
 use libc;
 use serde_json;
 
-use errors::*;
-use ffi_utils::{destroy, CResult, CStringArray};
-use snips_nlu_ontology::BuiltinEntityParser;
-use builtin_entity::{CBuiltinEntity, CBuiltinEntityArray};
+use Result;
+use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind, Language};
+use snips_nlu_ontology_ffi_macros::{destroy, CResult, CStringArray};
+use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray};
+use snips_nlu_ontology_parsers::BuiltinEntityParser;
 
 #[repr(C)]
 pub struct CBuiltinEntityParser {
@@ -20,7 +21,7 @@ pub struct CBuiltinEntityParser {
 macro_rules! get_parser {
     ($opaque:ident) => {{
         let container: &CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *const ::BuiltinEntityParser;
+        let x = container.parser as *const BuiltinEntityParser;
         unsafe { &*x }
     }};
 }
@@ -28,7 +29,7 @@ macro_rules! get_parser {
 macro_rules! get_parser_mut {
     ($opaque:ident) => {{
         let container: &CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *mut ::BuiltinEntityParser;
+        let x = container.parser as *mut BuiltinEntityParser;
         unsafe { &mut *x }
     }};
 }
@@ -94,7 +95,7 @@ fn create_builtin_entity_parser(
     lang: *const libc::c_char,
 ) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
-    let lang = ::Language::from_str(&*lang.to_uppercase())?;
+    let lang = Language::from_str(&*lang.to_uppercase())?;
     let parser = BuiltinEntityParser::get(lang);
 
     unsafe {
@@ -144,7 +145,7 @@ fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
-) -> Result<Vec<::BuiltinEntity>> {
+) -> Result<Vec<BuiltinEntity>> {
     let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
 
@@ -158,7 +159,7 @@ fn extract_entity(
                     .to_str()
                     .map_err(::failure::Error::from)
                     .and_then(|s| {
-                        ::BuiltinEntityKind::from_identifier(s)
+                        BuiltinEntityKind::from_identifier(s)
                             .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))
                             .map_err(::failure::Error::from)
                     })?)

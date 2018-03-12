@@ -4,15 +4,17 @@ use std::time::Instant;
 
 use itertools::Itertools;
 
+use rustling_converters::{FromRustling, IntoBuiltin};
+use nlu_ontology::*;
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
-    lang: ::Language,
+    lang: Language,
 }
 
 impl BuiltinEntityParser {
-    pub fn get(lang: ::Language) -> Arc<BuiltinEntityParser> {
+    pub fn get(lang: Language) -> Arc<BuiltinEntityParser> {
         lazy_static! {
             static ref CACHED_PARSERS: Mutex<HashMap<String, Arc<BuiltinEntityParser>>> =
                 Mutex::new(HashMap::new());
@@ -24,7 +26,7 @@ impl BuiltinEntityParser {
             .entry(lang.to_string())
             .or_insert_with(|| {
                 Arc::new(BuiltinEntityParser {
-                    parser: build_parser(lang.into()).unwrap(),
+                    parser: build_parser(lang.into_builtin()).unwrap(),
                     lang,
                 })
             })
@@ -34,8 +36,8 @@ impl BuiltinEntityParser {
     pub fn extract_entities(
         &self,
         sentence: &str,
-        filter_entity_kinds: Option<&[::BuiltinEntityKind]>,
-    ) -> Vec<::BuiltinEntity> {
+        filter_entity_kinds: Option<&[BuiltinEntityKind]>,
+    ) -> Vec<BuiltinEntity> {
         lazy_static! {
             static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
         }
@@ -53,19 +55,19 @@ impl BuiltinEntityParser {
                 if let Some(kinds) = key.kinds.as_ref() {
                     let kind_order = kinds
                         .iter()
-                        .map(|kind| kind.into())
+                        .map(|kind| kind.into_builtin())
                         .collect::<Vec<OutputKind>>();
                     self.parser
                         .parse_with_kind_order(&sentence.to_lowercase(), &context, &kind_order)
                         .unwrap_or(Vec::new())
                         .iter()
                         .filter_map(|m| {
-                            let entity_kind = ::BuiltinEntityKind::from(&m.value);
+                            let entity_kind = BuiltinEntityKind::from_rustling(&m.value);
                             kinds.iter().find(|kind| **kind == entity_kind).map(|kind| {
-                                ::BuiltinEntity {
+                                BuiltinEntity {
                                     value: sentence[m.byte_range.0..m.byte_range.1].into(),
                                     range: m.char_range.0..m.char_range.1,
-                                    entity: m.value.clone().into(),
+                                    entity: m.value.clone().into_builtin(),
                                     entity_kind: kind.clone(),
                                 }
                             })
@@ -76,11 +78,11 @@ impl BuiltinEntityParser {
                         .parse(&sentence.to_lowercase(), &context)
                         .unwrap_or(Vec::new())
                         .iter()
-                        .map(|entity| ::BuiltinEntity {
+                        .map(|entity| BuiltinEntity {
                             value: sentence[entity.byte_range.0..entity.byte_range.1].into(),
                             range: entity.char_range.0..entity.char_range.1,
-                            entity: entity.value.clone().into(),
-                            entity_kind: ::BuiltinEntityKind::from(&entity.value),
+                            entity: entity.value.clone().into_builtin(),
+                            entity_kind: BuiltinEntityKind::from_rustling(&entity.value),
                         })
                         .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
                 }
@@ -102,7 +104,7 @@ impl EntityCache {
         }
     }
 
-    fn cache<F: Fn(&CacheKey) -> Vec<::BuiltinEntity>>(
+    fn cache<F: Fn(&CacheKey) -> Vec<BuiltinEntity>>(
         &mut self,
         key: &CacheKey,
         producer: F,
@@ -123,17 +125,17 @@ impl EntityCache {
 struct CacheKey {
     lang: String,
     input: String,
-    kinds: Option<Vec<::BuiltinEntityKind>>,
+    kinds: Option<Vec<BuiltinEntityKind>>,
 }
 
 #[derive(Debug, Clone)]
 struct CacheValue {
-    entities: Vec<::BuiltinEntity>,
+    entities: Vec<BuiltinEntity>,
     instant: Instant,
 }
 
 impl CacheValue {
-    fn new(entities: Vec<::BuiltinEntity>) -> CacheValue {
+    fn new(entities: Vec<BuiltinEntity>) -> CacheValue {
         CacheValue {
             entities,
             instant: Instant::now(),
@@ -152,9 +154,9 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let parser = BuiltinEntityParser::get(::Language::EN);
+        let parser = BuiltinEntityParser::get(Language::EN);
         assert_eq!(
-            vec![::BuiltinEntityKind::Number, ::BuiltinEntityKind::Time],
+            vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
                 .extract_entities("Book me restaurant for two people tomorrow", None)
                 .iter()
@@ -163,7 +165,7 @@ mod test {
         );
 
         assert_eq!(
-            vec![::BuiltinEntityKind::Duration],
+            vec![BuiltinEntityKind::Duration],
             parser
                 .extract_entities("The weather during two weeks", None)
                 .iter()
@@ -172,7 +174,7 @@ mod test {
         );
 
         assert_eq!(
-            vec![::BuiltinEntityKind::Percentage],
+            vec![BuiltinEntityKind::Percentage],
             parser
                 .extract_entities("Set light to ten percents", None)
                 .iter()
@@ -181,7 +183,7 @@ mod test {
         );
 
         assert_eq!(
-            vec![::BuiltinEntityKind::AmountOfMoney],
+            vec![BuiltinEntityKind::AmountOfMoney],
             parser
                 .extract_entities(
                     "I would like to do a bank transfer of ten euros for my friends",
@@ -195,19 +197,19 @@ mod test {
 
     #[test]
     fn test_entity_cache() {
-        fn parse(_: &CacheKey) -> Vec<::BuiltinEntity> {
+        fn parse(_: &CacheKey) -> Vec<BuiltinEntity> {
             vec![
-                ::BuiltinEntity {
+                BuiltinEntity {
                     value: "two".into(),
                     range: 23..26,
-                    entity_kind: ::BuiltinEntityKind::Number,
-                    entity: ::SlotValue::Number(::NumberValue { value: 2.0 }),
+                    entity_kind: BuiltinEntityKind::Number,
+                    entity: SlotValue::Number(NumberValue { value: 2.0 }),
                 },
-                ::BuiltinEntity {
+                BuiltinEntity {
                     value: "4.5".into(),
                     range: 34..42,
-                    entity_kind: ::BuiltinEntityKind::Number,
-                    entity: ::SlotValue::Number(::NumberValue { value: 4.5 }),
+                    entity_kind: BuiltinEntityKind::Number,
+                    entity: SlotValue::Number(NumberValue { value: 4.5 }),
                 },
             ]
         }

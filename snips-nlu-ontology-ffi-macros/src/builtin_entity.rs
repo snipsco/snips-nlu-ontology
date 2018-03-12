@@ -8,7 +8,7 @@ use std::str::FromStr;
 use libc;
 
 use errors::*;
-use ffi_utils::{CResult, CStringArray};
+use ffi_utils::CStringArray;
 use snips_nlu_ontology::{BuiltinEntityKind, Language};
 
 #[repr(C)]
@@ -73,8 +73,7 @@ struct DummyWrapper(Box<[*const libc::c_char]>);
 
 unsafe impl Sync for DummyWrapper {}
 
-#[no_mangle]
-pub extern "C" fn nlu_ontology_all_builtin_entities() -> CStringArray {
+pub fn all_builtin_entities() -> CStringArray {
     lazy_static! {
         static ref ALL: DummyWrapper = {
             DummyWrapper(
@@ -94,15 +93,7 @@ pub extern "C" fn nlu_ontology_all_builtin_entities() -> CStringArray {
     }
 }
 
-#[no_mangle]
-pub extern "C" fn nlu_ontology_supported_builtin_entities(
-    language: *const libc::c_char,
-    results: *mut *const CStringArray,
-) -> CResult {
-    wrap!(get_supported_builtin_entities(language, results))
-}
-
-fn get_supported_builtin_entities(
+pub fn get_supported_builtin_entities(
     language: *const libc::c_char,
     results: *mut *const CStringArray,
 ) -> Result<()> {

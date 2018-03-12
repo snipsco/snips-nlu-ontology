@@ -9,4 +9,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 libc = "0.2"
-snips-nlu-ontology-ffi = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.53.2" }
+snips-nlu-ontology-ffi-with-parsers = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.53.2" }

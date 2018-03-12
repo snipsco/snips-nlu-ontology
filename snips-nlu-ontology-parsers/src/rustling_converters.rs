@@ -1,54 +1,74 @@
-use builtin_entity::BuiltinEntityKind;
+use nlu_ontology::*;
 use rustling_ontology::Grain as RustlingGrain;
 use rustling_ontology::dimension::Precision as RustlingPrecision;
+use rustling_ontology::Lang as RustlingLanguage;
 use rustling_ontology::output::{AmountOfMoneyOutput, DurationOutput, FloatOutput, IntegerOutput,
                                 OrdinalOutput, Output, OutputKind, PercentageOutput,
                                 TemperatureOutput, TimeIntervalOutput, TimeOutput};
 
-impl From<IntegerOutput> for ::NumberValue {
-    fn from(rustling_output: IntegerOutput) -> Self {
+pub trait FromRustling<T> {
+    fn from_rustling(T) -> Self;
+}
+
+pub trait IntoBuiltin<T>: Sized {
+    fn into_builtin(self) -> T;
+}
+
+impl<T, U> IntoBuiltin<U> for T where U: FromRustling<T> {
+    fn into_builtin(self) -> U {
+        U::from_rustling(self)
+    }
+}
+
+// From (and thus Into) is reflexive
+impl<T> FromRustling<T> for T {
+    fn from_rustling(t: T) -> T { t }
+}
+
+impl FromRustling<IntegerOutput> for NumberValue {
+    fn from_rustling(rustling_output: IntegerOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl From<FloatOutput> for ::NumberValue {
-    fn from(rustling_output: FloatOutput) -> Self {
+impl FromRustling<FloatOutput> for NumberValue {
+    fn from_rustling(rustling_output: FloatOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl From<OrdinalOutput> for ::OrdinalValue {
-    fn from(rustling_output: OrdinalOutput) -> Self {
+impl FromRustling<OrdinalOutput> for OrdinalValue {
+    fn from_rustling(rustling_output: OrdinalOutput) -> Self {
         Self {
             value: rustling_output.0,
         }
     }
 }
 
-impl From<PercentageOutput> for ::PercentageValue {
-    fn from(rustling_output: PercentageOutput) -> Self {
+impl FromRustling<PercentageOutput> for PercentageValue {
+    fn from_rustling(rustling_output: PercentageOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl From<TimeOutput> for ::InstantTimeValue {
-    fn from(rustling_output: TimeOutput) -> Self {
+impl FromRustling<TimeOutput> for InstantTimeValue {
+    fn from_rustling(rustling_output: TimeOutput) -> Self {
         Self {
             value: rustling_output.moment.to_string(),
-            grain: ::Grain::from(rustling_output.grain),
-            precision: ::Precision::from(rustling_output.precision),
+            grain: Grain::from_rustling(rustling_output.grain),
+            precision: Precision::from_rustling(rustling_output.precision),
         }
     }
 }
 
-impl From<TimeIntervalOutput> for ::TimeIntervalValue {
-    fn from(rustling_output: TimeIntervalOutput) -> Self {
+impl FromRustling<TimeIntervalOutput> for TimeIntervalValue {
+    fn from_rustling(rustling_output: TimeIntervalOutput) -> Self {
         match rustling_output {
             TimeIntervalOutput::After(after) => Self {
                 from: Some(after.moment.to_string()),
@@ -71,18 +91,18 @@ impl From<TimeIntervalOutput> for ::TimeIntervalValue {
     }
 }
 
-impl From<AmountOfMoneyOutput> for ::AmountOfMoneyValue {
-    fn from(rustling_output: AmountOfMoneyOutput) -> Self {
+impl FromRustling<AmountOfMoneyOutput> for AmountOfMoneyValue {
+    fn from_rustling(rustling_output: AmountOfMoneyOutput) -> Self {
         Self {
             value: rustling_output.value,
-            precision: rustling_output.precision.into(),
+            precision: rustling_output.precision.into_builtin(),
             unit: rustling_output.unit.map(|s| s.to_string()),
         }
     }
 }
 
-impl From<TemperatureOutput> for ::TemperatureValue {
-    fn from(rustling_output: TemperatureOutput) -> Self {
+impl FromRustling<TemperatureOutput> for TemperatureValue {
+    fn from_rustling(rustling_output: TemperatureOutput) -> Self {
         Self {
             value: rustling_output.value,
             unit: rustling_output.unit.map(|s| s.to_string()),
@@ -90,8 +110,8 @@ impl From<TemperatureOutput> for ::TemperatureValue {
     }
 }
 
-impl From<DurationOutput> for ::DurationValue {
-    fn from(rustling_output: DurationOutput) -> Self {
+impl FromRustling<DurationOutput> for DurationValue {
+    fn from_rustling(rustling_output: DurationOutput) -> Self {
         let mut years: i64 = 0;
         let mut quarters: i64 = 0;
         let mut months: i64 = 0;
@@ -122,53 +142,53 @@ impl From<DurationOutput> for ::DurationValue {
             hours,
             minutes,
             seconds,
-            precision: rustling_output.precision.into(),
+            precision: rustling_output.precision.into_builtin(),
         }
     }
 }
 
-impl From<RustlingGrain> for ::Grain {
-    fn from(rustling_output: RustlingGrain) -> Self {
+impl FromRustling<RustlingGrain> for Grain {
+    fn from_rustling(rustling_output: RustlingGrain) -> Self {
         match rustling_output {
-            RustlingGrain::Year => ::Grain::Year,
-            RustlingGrain::Quarter => ::Grain::Quarter,
-            RustlingGrain::Month => ::Grain::Month,
-            RustlingGrain::Week => ::Grain::Week,
-            RustlingGrain::Day => ::Grain::Day,
-            RustlingGrain::Hour => ::Grain::Hour,
-            RustlingGrain::Minute => ::Grain::Minute,
-            RustlingGrain::Second => ::Grain::Second,
+            RustlingGrain::Year => Grain::Year,
+            RustlingGrain::Quarter => Grain::Quarter,
+            RustlingGrain::Month => Grain::Month,
+            RustlingGrain::Week => Grain::Week,
+            RustlingGrain::Day => Grain::Day,
+            RustlingGrain::Hour => Grain::Hour,
+            RustlingGrain::Minute => Grain::Minute,
+            RustlingGrain::Second => Grain::Second,
         }
     }
 }
 
-impl From<RustlingPrecision> for ::Precision {
-    fn from(rustling_output: RustlingPrecision) -> Self {
+impl FromRustling<RustlingPrecision> for Precision {
+    fn from_rustling(rustling_output: RustlingPrecision) -> Self {
         match rustling_output {
-            RustlingPrecision::Approximate => ::Precision::Approximate,
-            RustlingPrecision::Exact => ::Precision::Exact,
+            RustlingPrecision::Approximate => Precision::Approximate,
+            RustlingPrecision::Exact => Precision::Exact,
         }
     }
 }
 
-impl From<Output> for ::SlotValue {
-    fn from(rustling_output: Output) -> Self {
+impl FromRustling<Output> for SlotValue {
+    fn from_rustling(rustling_output: Output) -> Self {
         match rustling_output {
-            Output::AmountOfMoney(v) => ::SlotValue::AmountOfMoney(v.into()),
-            Output::Percentage(v) => ::SlotValue::Percentage(v.into()),
-            Output::Duration(v) => ::SlotValue::Duration(v.into()),
-            Output::Float(v) => ::SlotValue::Number(v.into()),
-            Output::Integer(v) => ::SlotValue::Number(v.into()),
-            Output::Ordinal(v) => ::SlotValue::Ordinal(v.into()),
-            Output::Temperature(v) => ::SlotValue::Temperature(v.into()),
-            Output::Time(v) => ::SlotValue::InstantTime(v.into()),
-            Output::TimeInterval(v) => ::SlotValue::TimeInterval(v.into()),
+            Output::AmountOfMoney(v) => SlotValue::AmountOfMoney(v.into_builtin()),
+            Output::Percentage(v) => SlotValue::Percentage(v.into_builtin()),
+            Output::Duration(v) => SlotValue::Duration(v.into_builtin()),
+            Output::Float(v) => SlotValue::Number(v.into_builtin()),
+            Output::Integer(v) => SlotValue::Number(v.into_builtin()),
+            Output::Ordinal(v) => SlotValue::Ordinal(v.into_builtin()),
+            Output::Temperature(v) => SlotValue::Temperature(v.into_builtin()),
+            Output::Time(v) => SlotValue::InstantTime(v.into_builtin()),
+            Output::TimeInterval(v) => SlotValue::TimeInterval(v.into_builtin()),
         }
     }
 }
 
-impl<'a> From<&'a Output> for BuiltinEntityKind {
-    fn from(v: &Output) -> Self {
+impl<'a> FromRustling<&'a Output> for BuiltinEntityKind {
+    fn from_rustling(v: &Output) -> Self {
         match *v {
             Output::AmountOfMoney(_) => BuiltinEntityKind::AmountOfMoney,
             Output::Duration(_) => BuiltinEntityKind::Duration,
@@ -183,8 +203,8 @@ impl<'a> From<&'a Output> for BuiltinEntityKind {
     }
 }
 
-impl<'a> From<&'a BuiltinEntityKind> for OutputKind {
-    fn from(v: &BuiltinEntityKind) -> Self {
+impl<'a> FromRustling<&'a BuiltinEntityKind> for OutputKind {
+    fn from_rustling(v: &BuiltinEntityKind) -> Self {
         match *v {
             BuiltinEntityKind::AmountOfMoney => OutputKind::AmountOfMoney,
             BuiltinEntityKind::Duration => OutputKind::Duration,
@@ -196,3 +216,17 @@ impl<'a> From<&'a BuiltinEntityKind> for OutputKind {
         }
     }
 }
+
+impl FromRustling<Language> for RustlingLanguage {
+    fn from_rustling(lang: Language) -> Self {
+        match lang {
+            Language::EN => RustlingLanguage::EN,
+            Language::FR => RustlingLanguage::FR,
+            Language::ES => RustlingLanguage::ES,
+            Language::KO => RustlingLanguage::KO,
+            Language::DE => RustlingLanguage::DE,
+            Language::JA => RustlingLanguage::JA,
+        }
+    }
+}
+

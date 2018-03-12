@@ -9,8 +9,7 @@ struct DummyWrapper(Box<[*const libc::c_char]>);
 
 unsafe impl Sync for DummyWrapper {}
 
-#[no_mangle]
-pub extern "C" fn nlu_ontology_supported_languages() -> CStringArray {
+pub fn supported_languages() -> CStringArray {
     lazy_static! {
         static ref ALL: DummyWrapper = {
             DummyWrapper(
