@@ -10,8 +10,8 @@ repository = "https://github.com/snipsco/snips-nlu-ontology"
 description = "Ontology of the Rust NLU library API"
 
 [features]
-default = ["builtin_entities"]
-builtin_entities = ["rustling-ontology", "lazy_static"]
+default = ["parsers"]
+parsers = ["rustling-ontology", "lazy_static"]
 
 [workspace]
 members = [

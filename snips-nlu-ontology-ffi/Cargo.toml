@@ -7,8 +7,8 @@ authors = [
 ]
 
 [features]
-default = ["builtin_entities"]
-builtin_entities = ["snips-nlu-ontology/builtin_entities"]
+default = ["parsers"]
+parsers = ["snips-nlu-ontology/parsers"]
 
 [dependencies]
 snips-nlu-ontology = { path = "..", default-features = false }
