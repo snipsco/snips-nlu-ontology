@@ -9,16 +9,6 @@ authors = [
 repository = "https://github.com/snipsco/snips-nlu-ontology"
 description = "Ontology of the Rust NLU library API"
 
-[workspace]
-members = [
-    "snips-nlu-ontology-parsers",
-    "snips-nlu-ontology-ffi-macros",
-    "snips-nlu-ontology-ffi",
-    "snips-nlu-ontology-ffi-with-parsers",
-    "snips-nlu-ontology-doc",
-    "snips-nlu-ontology-ffi-with-parsers/platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs"
-]
-
 [dependencies]
 failure = "0.1"
 serde = "1.0"
