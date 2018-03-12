@@ -1,7 +1,7 @@
 Snips NLU Ontology
 ==================
 
-.. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=master
+.. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=develop
    :target: https://travis-ci.org/snipsco/snips-nlu-ontology
 
 Ontology of the Snips NLU library API which describes supported languages and builtin entities.
