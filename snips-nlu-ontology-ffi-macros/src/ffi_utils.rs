@@ -21,7 +21,7 @@ pub enum CResult {
 #[macro_export]
 macro_rules! wrap {
     ($e:expr) => { match $e {
-        Ok(_) => { CResult::RESULT_OK }
+        Ok(_) => { $crate::CResult::RESULT_OK }
         Err(e) => {
             use $crate::failure_ext::ErrorExt;
             let msg = e.pretty().to_string();
@@ -30,7 +30,7 @@ macro_rules! wrap {
                 Ok(mut guard) => *guard = msg,
                 Err(_) => () /* curl up and cry */
             }
-            CResult::RESULT_KO
+            $crate::CResult::RESULT_KO
         }
     }}
 }

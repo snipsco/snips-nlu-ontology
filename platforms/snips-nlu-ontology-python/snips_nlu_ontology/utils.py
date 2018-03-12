@@ -14,7 +14,7 @@ def string_array_pointer(ptr):
     try:
         yield ptr
     finally:
-        lib.ffi_nlu_ontology_destroy_string_array(ptr)
+        lib.nlu_ontology_destroy_string_array(ptr)
 
 
 @contextmanager
@@ -22,7 +22,7 @@ def string_pointer(ptr):
     try:
         yield ptr
     finally:
-        lib.ffi_nlu_ontology_destroy_string(ptr)
+        lib.nlu_ontology_destroy_string(ptr)
 
 
 class CStringArray(Structure):

@@ -33,17 +33,17 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_get_last_error(error: *mut *const libc::c_char) -> $crate::CResult {
+        pub extern "C" fn nlu_ontology_get_last_error(error: *mut *const libc::c_char) -> $crate::ffi_utils::CResult {
             wrap!($crate::get_last_error(error))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_string_array(ptr: *mut $crate::CStringArray) -> $crate::CResult {
+        pub extern "C" fn nlu_ontology_destroy_string_array(ptr: *mut $crate::CStringArray) -> $crate::ffi_utils::CResult {
             wrap!($crate::destroy(ptr))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> $crate::CResult {
+        pub extern "C" fn nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> $crate::ffi_utils::CResult {
             wrap!($crate::destroy_string(ptr))
         }
 
@@ -61,7 +61,7 @@ macro_rules! export_nlu_ontology_c_symbols {
         pub extern "C" fn nlu_ontology_supported_builtin_entities(
             language: *const libc::c_char,
             results: *mut *const $crate::CStringArray,
-        ) -> $crate::CResult {
+        ) -> $crate::ffi_utils::CResult {
             wrap!($crate::get_supported_builtin_entities(language, results))
         }
     };
