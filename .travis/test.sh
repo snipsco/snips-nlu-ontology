@@ -1,12 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -ev
+
 source .travis/common.sh
 
-echo "Rust tests..."
-export PATH="/usr/local/bin:$HOME/.cargo/bin:$PATH"
-export CARGO_TARGET_DIR="$TRAVIS_BUILD_DIR/snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/target"
-cargo test --all || die "Rust tests failed"
+echo "Running rust tests..."
+export PATH="$HOME/.cargo/bin:$PATH"
+cargo test --all
 
-echo "Python tests..."
-cd snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-python
+echo "Running python tests..."
+cd platforms/snips-nlu-ontology-python
 python -m pip install tox
-tox || die "Python tests failed"
+tox

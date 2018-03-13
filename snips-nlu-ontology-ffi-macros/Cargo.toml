@@ -1,0 +1,18 @@
+[package]
+name = "snips-nlu-ontology-ffi-macros"
+version = "0.54.0"
+authors = [
+    "Kevin Lefevre <kevin.lefevre@snips.ai>",
+    "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
+]
+
+[dependencies]
+snips-nlu-ontology = { path = "../snips-nlu-ontology" }
+failure = "0.1"
+lazy_static = "1.0"
+libc = "0.2"
+serde = "1.0"
+serde_json = "1.0"
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
