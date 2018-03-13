@@ -24,7 +24,7 @@ fn add_header(readme: &mut String) {
     readme.push_str("\n");
 
     readme.push_str(
-        ".. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=master\n",
+        ".. image:: https://travis-ci.org/snipsco/snips-nlu-ontology.svg?branch=develop\n",
     );
     readme.push_str("   :target: https://travis-ci.org/snipsco/snips-nlu-ontology\n");
     readme.push_str("\n");
