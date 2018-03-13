@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+export PATH="/usr/local/bin:$HOME/.cargo/bin:$PATH"
 
 PYTHON_PATH=$(which python"$PYTHON_VERSION")
 COMMIT_ID=$(git rev-parse --short HEAD)

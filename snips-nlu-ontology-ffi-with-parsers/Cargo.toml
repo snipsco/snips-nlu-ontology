@@ -1,5 +1,5 @@
 [package]
-name = "snips-nlu-ontology-ffi"
+name = "snips-nlu-ontology-ffi-with-parsers"
 version = "0.1.0"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
@@ -7,3 +7,7 @@ authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 libc = "0.2"
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
 snips-nlu-ontology-ffi-macros = { path = "../snips-nlu-ontology-ffi-macros" }
+snips-nlu-ontology-parsers-ffi-macros = { path = "../snips-nlu-ontology-parsers-ffi-macros" }
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]

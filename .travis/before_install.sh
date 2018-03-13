@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
 # Install Rust
 curl https://sh.rustup.rs -sSf | bash -s -- -y
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then

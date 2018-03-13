@@ -4,5 +4,5 @@ version = "0.53.2"
 authors = ["Adrien Ball <adrien.ball@snips.ai>"]
 
 [build-dependencies]
-snips-nlu-ontology = { path = ".." }
+snips-nlu-ontology = { path = "../snips-nlu-ontology" }
 prettytable-rs = "0.6"

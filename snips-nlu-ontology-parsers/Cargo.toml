@@ -1,0 +1,10 @@
+[package]
+name = "snips-nlu-ontology-parsers"
+version = "0.1.0"
+authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
+
+[dependencies]
+itertools = "0.7"
+lazy_static = "1.0"
+rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.16.3" }
+snips-nlu-ontology = { path = "../snips-nlu-ontology" }

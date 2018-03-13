@@ -7,10 +7,10 @@ use failure::ResultExt;
 use libc;
 use serde_json;
 
-use errors::*;
-use ffi_utils::{destroy, CResult, CStringArray};
-use snips_nlu_ontology::BuiltinEntityParser;
-use builtin_entity::{CBuiltinEntity, CBuiltinEntityArray};
+use Result;
+use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind, Language};
+use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray, CStringArray};
+use snips_nlu_ontology_parsers::BuiltinEntityParser;
 
 #[repr(C)]
 pub struct CBuiltinEntityParser {
@@ -19,82 +19,26 @@ pub struct CBuiltinEntityParser {
 
 macro_rules! get_parser {
     ($opaque:ident) => {{
-        let container: &CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *const ::BuiltinEntityParser;
+        let container: &$crate::CBuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *const ::snips_nlu_ontology_parsers::BuiltinEntityParser;
         unsafe { &*x }
     }};
 }
 
 macro_rules! get_parser_mut {
     ($opaque:ident) => {{
-        let container: &CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *mut ::BuiltinEntityParser;
+        let container: &$crate::CBuiltinEntityParser = unsafe { &*$opaque };
+        let x = container.parser as *mut ::snips_nlu_ontology_parsers::BuiltinEntityParser;
         unsafe { &mut *x }
     }};
 }
 
-#[no_mangle]
-pub extern "C" fn nlu_ontology_create_builtin_entity_parser(
-    ptr: *mut *const CBuiltinEntityParser,
-    lang: *const libc::c_char,
-) -> CResult {
-    wrap!(create_builtin_entity_parser(ptr, lang))
-}
-
-#[no_mangle]
-pub extern "C" fn nlu_ontology_extract_entities(
-    ptr: *const CBuiltinEntityParser,
-    sentence: *const libc::c_char,
-    filter_entity_kinds: *const CStringArray,
-    results: *mut *const CBuiltinEntityArray,
-) -> CResult {
-    wrap!(extract_entity_c(
-        ptr,
-        sentence,
-        filter_entity_kinds,
-        results
-    ))
-}
-
-#[no_mangle]
-pub extern "C" fn nlu_ontology_extract_entities_json(
-    ptr: *const CBuiltinEntityParser,
-    sentence: *const libc::c_char,
-    filter_entity_kinds: *const CStringArray,
-    results: *mut *const libc::c_char,
-) -> CResult {
-    wrap!(extract_entity_json(
-        ptr,
-        sentence,
-        filter_entity_kinds,
-        results
-    ))
-}
-
-#[no_mangle]
-pub extern "C" fn nlu_ontology_destroy_builtin_entity_array(
-    ptr: *mut CBuiltinEntityArray,
-) -> CResult {
-    wrap!(destroy(ptr))
-}
-
-#[no_mangle]
-pub extern "C" fn nlu_ontology_destroy_builtin_entity_parser(
-    ptr: *mut CBuiltinEntityParser,
-) -> CResult {
-    let parser = get_parser_mut!(ptr);
-    unsafe {
-        let _ = Arc::from_raw(parser);
-    }
-    CResult::RESULT_OK
-}
-
-fn create_builtin_entity_parser(
+pub fn create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
     lang: *const libc::c_char,
 ) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
-    let lang = ::Language::from_str(&*lang.to_uppercase())?;
+    let lang = Language::from_str(&*lang.to_uppercase())?;
     let parser = BuiltinEntityParser::get(lang);
 
     unsafe {
@@ -106,7 +50,7 @@ fn create_builtin_entity_parser(
     Ok(())
 }
 
-fn extract_entity_c(
+pub fn extract_entity_c(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
@@ -125,7 +69,7 @@ fn extract_entity_c(
     Ok(())
 }
 
-fn extract_entity_json(
+pub fn extract_entity_json(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
@@ -140,11 +84,11 @@ fn extract_entity_json(
     Ok(())
 }
 
-fn extract_entity(
+pub fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
-) -> Result<Vec<::BuiltinEntity>> {
+) -> Result<Vec<BuiltinEntity>> {
     let parser = get_parser!(ptr);
     let sentence = unsafe { CStr::from_ptr(sentence) }.to_str()?;
 
@@ -158,7 +102,7 @@ fn extract_entity(
                     .to_str()
                     .map_err(::failure::Error::from)
                     .and_then(|s| {
-                        ::BuiltinEntityKind::from_identifier(s)
+                        BuiltinEntityKind::from_identifier(s)
                             .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))
                             .map_err(::failure::Error::from)
                     })?)
@@ -171,4 +115,12 @@ fn extract_entity(
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
     Ok(parser.extract_entities(sentence, opt_filters))
+}
+
+pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
+    let parser = get_parser_mut!(ptr);
+    unsafe {
+        let _ = Arc::from_raw(parser);
+    }
+    Ok(())
 }

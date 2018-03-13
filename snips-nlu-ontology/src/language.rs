@@ -33,18 +33,6 @@ macro_rules! language_enum {
                 }
             }
         }
-
-        #[cfg(feature = "builtin_entities")]
-        impl From<Language> for ::rustling_ontology::Lang {
-            fn from(lang: Language) -> Self {
-                match lang {
-                    $(
-                        Language::$language => ::rustling_ontology::Lang::$language,
-                    )*
-                }
-            }
-        }
-
     }
 }
 
