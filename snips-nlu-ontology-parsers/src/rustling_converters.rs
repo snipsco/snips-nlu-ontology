@@ -14,7 +14,10 @@ pub trait IntoBuiltin<T>: Sized {
     fn into_builtin(self) -> T;
 }
 
-impl<T, U> IntoBuiltin<U> for T where U: FromRustling<T> {
+impl<T, U> IntoBuiltin<U> for T
+where
+    U: FromRustling<T>,
+{
     fn into_builtin(self) -> U {
         U::from_rustling(self)
     }
@@ -22,7 +25,9 @@ impl<T, U> IntoBuiltin<U> for T where U: FromRustling<T> {
 
 // From (and thus Into) is reflexive
 impl<T> FromRustling<T> for T {
-    fn from_rustling(t: T) -> T { t }
+    fn from_rustling(t: T) -> T {
+        t
+    }
 }
 
 impl FromRustling<IntegerOutput> for NumberValue {
@@ -229,4 +234,3 @@ impl FromRustling<Language> for RustlingLanguage {
         }
     }
 }
-

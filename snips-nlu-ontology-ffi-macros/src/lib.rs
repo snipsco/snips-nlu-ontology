@@ -66,4 +66,3 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
     };
 }
-
