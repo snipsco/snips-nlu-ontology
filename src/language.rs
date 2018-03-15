@@ -59,7 +59,7 @@ impl Language {
             Language::ES => "Spanish",
             Language::KO => "Korean",
             Language::DE => "German",
-            Language::JA => "Japan",
+            Language::JA => "Japanese",
         }
     }
 }
