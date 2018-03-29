@@ -1,8 +1,11 @@
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
+use std::ops::Range;
 use std::time::Instant;
+use std::sync::{Arc, Mutex};
 
 use itertools::Itertools;
+use regex::Regex;
 
 use rustling_converters::{FromRustling, IntoBuiltin};
 use nlu_ontology::*;
@@ -11,6 +14,15 @@ use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
+
+}
+
+lazy_static! {
+    static ref NON_SPACE_REGEX: Regex = Regex::new(r"[^\s]+").unwrap();
+}
+
+lazy_static! {
+    static ref NON_SPACE_SEPARATED_LANGUAGES: HashSet<Language> = hashset!(Language::JA);
 }
 
 impl BuiltinEntityParser {
@@ -38,10 +50,81 @@ impl BuiltinEntityParser {
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
+        if NON_SPACE_SEPARATED_LANGUAGES.contains(&self.lang) {
+            let original_tokens_bytes_ranges: Vec<Range<usize>> = NON_SPACE_REGEX
+                .find_iter(sentence)
+                .map(|m| Range { start: m.start(), end: m.end() })
+                .collect();
+
+            let joined_sentence = original_tokens_bytes_ranges
+                .iter()
+                .map(|r| &sentence[r.start..r.end])
+                .join("");
+
+            if original_tokens_bytes_ranges.len() == 0 {
+                return vec![];
+            }
+
+            let joined_sentence_match_end_byte_index_to_token_index = HashMap::<usize, usize>::from_iter(
+                original_tokens_bytes_ranges
+                    .iter()
+                    .enumerate()
+                    .fold(vec![], |mut acc: Vec<(usize, usize)>, (i, ref r)| {
+                        let previous_end = if i == 0 {
+                            0 as usize
+                        } else {
+                            acc[acc.len() - 1].0
+                        };
+                        acc.push((previous_end + r.end - r.start, i));
+                        acc
+                    })
+            );
+
+            let entities = self._extract_entities(&*joined_sentence, filter_entity_kinds);
+            entities
+                .into_iter()
+                .filter_map(|ent| {
+                    let byte_range = convert_to_byte_range(&*joined_sentence, &ent.range);
+                    let start = byte_range.start;
+                    let end = byte_range.end;
+                    // Check if match range correspond to original tokens otherwise skip the entity
+                    if (start == 0 as usize || joined_sentence_match_end_byte_index_to_token_index.contains_key(&start))
+                        && (joined_sentence_match_end_byte_index_to_token_index.contains_key(&end)) {
+                        let start_token_index = if start == 0 as usize {
+                            0 as usize
+                        } else {
+                            joined_sentence_match_end_byte_index_to_token_index[&start]
+                        };
+                        let end_token_index = joined_sentence_match_end_byte_index_to_token_index[&end];
+
+                        let original_start = original_tokens_bytes_ranges[start_token_index].start;
+                        let original_end = original_tokens_bytes_ranges[end_token_index].end;
+                        let value = sentence[original_start..original_end].to_string();
+
+                        let original_ent = BuiltinEntity {
+                            value,
+                            range: Range { start: original_start, end: original_end },
+                            entity: ent.entity,
+                            entity_kind: ent.entity_kind,
+                        };
+                        Some(original_ent)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        } else {
+            self._extract_entities(sentence, filter_entity_kinds)
+        }
+    }
+
+    fn _extract_entities(&self,
+                         sentence: &str,
+                         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
+    ) -> Vec<BuiltinEntity> {
         lazy_static! {
             static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
         }
-
         let key = CacheKey {
             lang: self.lang.to_string(),
             input: sentence.into(),
@@ -147,6 +230,26 @@ impl CacheValue {
     }
 }
 
+
+fn convert_to_byte_range(string: &str, range: &Range<usize>) -> Range<usize> {
+    Range {
+        start: convert_to_byte_index(string, range.start),
+        end: convert_to_byte_index(string, range.end),
+    }
+}
+
+fn convert_to_byte_index(string: &str, char_index: usize) -> usize {
+    let mut result = 0;
+    for (current_char_index, char) in string.chars().enumerate() {
+        if current_char_index == char_index {
+            return result;
+        }
+        result += char.len_utf8()
+    }
+    result
+}
+
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -187,8 +290,30 @@ mod test {
             parser
                 .extract_entities(
                     "I would like to do a bank transfer of ten euros for my friends",
-                    None
+                    None,
                 )
+                .iter()
+                .map(|e| e.entity_kind)
+                .collect_vec()
+        );
+    }
+
+    #[test]
+    fn test_entities_extraction_for_non_space_separated_languages() {
+        let parser = BuiltinEntityParser::get(Language::JA);
+        assert_eq!(
+            vec![BuiltinEntityKind::Time],
+            parser
+                .extract_entities(" 明 日 の カリフォルニア州の天気予報は？", None)
+                .iter()
+                .map(|e| e.entity_kind)
+                .collect_vec()
+        );
+
+        assert_eq!(
+            Vec::<BuiltinEntityKind>::new(),
+            parser
+                .extract_entities(" 明 日の カリフォルニア州の天気予報は？", None)
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
