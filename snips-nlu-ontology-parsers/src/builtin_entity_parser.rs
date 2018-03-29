@@ -62,21 +62,21 @@ impl BuiltinEntityParser {
                 .map(|r| &sentence[r.clone()])
                 .join("");
 
-            if original_tokens_bytes_ranges.len() == 0 {
+            if original_tokens_bytes_ranges.is_empty() {
                 return vec![];
             }
 
-            let joined_sentence_match_end_byte_index_to_token_index = HashMap::<usize, usize>::from_iter(
+            let ranges_mapping = HashMap::<usize, usize>::from_iter(
                 original_tokens_bytes_ranges
                     .iter()
                     .enumerate()
-                    .fold(vec![], |mut acc: Vec<(usize, usize)>, (i, ref r)| {
-                        let previous_end = if i == 0 {
+                    .fold(vec![], |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
+                        let previous_end = if token_index == 0 {
                             0 as usize
                         } else {
                             acc[acc.len() - 1].0
                         };
-                        acc.push((previous_end + r.end - r.start, i));
+                        acc.push((previous_end + original_range.end - original_range.start, token_index));
                         acc
                     })
             );
@@ -89,14 +89,14 @@ impl BuiltinEntityParser {
                     let start = byte_range.start;
                     let end = byte_range.end;
                     // Check if match range correspond to original tokens otherwise skip the entity
-                    if (start == 0 as usize || joined_sentence_match_end_byte_index_to_token_index.contains_key(&start))
-                        && (joined_sentence_match_end_byte_index_to_token_index.contains_key(&end)) {
+                    if (start == 0 as usize || ranges_mapping.contains_key(&start))
+                        && (ranges_mapping.contains_key(&end)) {
                         let start_token_index = if start == 0 as usize {
                             0 as usize
                         } else {
-                            joined_sentence_match_end_byte_index_to_token_index[&start] + 1
+                            ranges_mapping[&start] + 1
                         };
-                        let end_token_index = joined_sentence_match_end_byte_index_to_token_index[&end];
+                        let end_token_index = ranges_mapping[&end];
 
                         let original_start = original_tokens_bytes_ranges[start_token_index].start;
                         let original_end = original_tokens_bytes_ranges[end_token_index].end;
