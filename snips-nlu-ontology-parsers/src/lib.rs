@@ -6,6 +6,7 @@ extern crate maplit;
 extern crate regex;
 extern crate rustling_ontology;
 extern crate snips_nlu_ontology as nlu_ontology;
+extern crate snips_nlu_utils as nlu_utils;
 
 mod builtin_entity_parser;
 mod rustling_converters;

@@ -9,6 +9,7 @@ use regex::Regex;
 
 use rustling_converters::{FromRustling, IntoBuiltin};
 use nlu_ontology::*;
+use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 
 pub struct BuiltinEntityParser {
@@ -53,12 +54,12 @@ impl BuiltinEntityParser {
         if NON_SPACE_SEPARATED_LANGUAGES.contains(&self.lang) {
             let original_tokens_bytes_ranges: Vec<Range<usize>> = NON_SPACE_REGEX
                 .find_iter(sentence)
-                .map(|m| Range { start: m.start(), end: m.end() })
+                .map(|m| m.start()..m.end())
                 .collect();
 
             let joined_sentence = original_tokens_bytes_ranges
                 .iter()
-                .map(|r| &sentence[r.start..r.end])
+                .map(|r| &sentence[r.clone()])
                 .join("");
 
             if original_tokens_bytes_ranges.len() == 0 {
@@ -93,7 +94,7 @@ impl BuiltinEntityParser {
                         let start_token_index = if start == 0 as usize {
                             0 as usize
                         } else {
-                            joined_sentence_match_end_byte_index_to_token_index[&start]
+                            joined_sentence_match_end_byte_index_to_token_index[&start] + 1
                         };
                         let end_token_index = joined_sentence_match_end_byte_index_to_token_index[&end];
 
@@ -103,7 +104,7 @@ impl BuiltinEntityParser {
 
                         let original_ent = BuiltinEntity {
                             value,
-                            range: Range { start: original_start, end: original_end },
+                            range: convert_to_char_index(&sentence, original_start)..convert_to_char_index(&sentence, original_end),
                             entity: ent.entity,
                             entity_kind: ent.entity_kind,
                         };
@@ -230,30 +231,12 @@ impl CacheValue {
     }
 }
 
-
-fn convert_to_byte_range(string: &str, range: &Range<usize>) -> Range<usize> {
-    Range {
-        start: convert_to_byte_index(string, range.start),
-        end: convert_to_byte_index(string, range.end),
-    }
-}
-
-fn convert_to_byte_index(string: &str, char_index: usize) -> usize {
-    let mut result = 0;
-    for (current_char_index, char) in string.chars().enumerate() {
-        if current_char_index == char_index {
-            return result;
-        }
-        result += char.len_utf8()
-    }
-    result
-}
-
-
 #[cfg(test)]
 mod test {
     use super::*;
     use itertools::Itertools;
+
+    use nlu_ontology::SlotValue::InstantTime;
 
     #[test]
     fn test_entities_extraction() {
@@ -301,22 +284,25 @@ mod test {
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
         let parser = BuiltinEntityParser::get(Language::JA);
+        let expected_entity = BuiltinEntity {
+            value: "明 日".to_string(),
+            range: 10..13,
+            entity_kind: BuiltinEntityKind::Time,
+            entity: InstantTime(
+                InstantTimeValue {
+                    value: "2018-03-30 00:00:00 +02:00".to_string(),
+                    grain: Grain::Day,
+                    precision: Precision::Exact,
+                }),
+        };
         assert_eq!(
-            vec![BuiltinEntityKind::Time],
-            parser
-                .extract_entities(" 明 日 の カリフォルニア州の天気予報は？", None)
-                .iter()
-                .map(|e| e.entity_kind)
-                .collect_vec()
+            vec![expected_entity],
+            parser.extract_entities(" の カリフォル  明 日  ニア州の天気予報は？", None)
         );
 
         assert_eq!(
-            Vec::<BuiltinEntityKind>::new(),
-            parser
-                .extract_entities(" 明 日の カリフォルニア州の天気予報は？", None)
-                .iter()
-                .map(|e| e.entity_kind)
-                .collect_vec()
+            Vec::<BuiltinEntity>::new(),
+            parser.extract_entities(" 明 日の カリフォルニア州の天気予報は？", None)
         );
     }
 
