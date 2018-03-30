@@ -15,7 +15,6 @@ use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
-
 }
 
 lazy_static! {
@@ -67,18 +66,21 @@ impl BuiltinEntityParser {
             }
 
             let ranges_mapping = HashMap::<usize, usize>::from_iter(
-                original_tokens_bytes_ranges
-                    .iter()
-                    .enumerate()
-                    .fold(vec![], |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
+                original_tokens_bytes_ranges.iter().enumerate().fold(
+                    vec![],
+                    |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
                         let previous_end = if token_index == 0 {
                             0 as usize
                         } else {
                             acc[acc.len() - 1].0
                         };
-                        acc.push((previous_end + original_range.end - original_range.start, token_index));
+                        acc.push((
+                            previous_end + original_range.end - original_range.start,
+                            token_index,
+                        ));
                         acc
-                    })
+                    },
+                ),
             );
 
             let entities = self._extract_entities(&*joined_sentence, filter_entity_kinds);
@@ -90,7 +92,8 @@ impl BuiltinEntityParser {
                     let end = byte_range.end;
                     // Check if match range correspond to original tokens otherwise skip the entity
                     if (start == 0 as usize || ranges_mapping.contains_key(&start))
-                        && (ranges_mapping.contains_key(&end)) {
+                        && (ranges_mapping.contains_key(&end))
+                    {
                         let start_token_index = if start == 0 as usize {
                             0 as usize
                         } else {
@@ -104,7 +107,8 @@ impl BuiltinEntityParser {
 
                         let original_ent = BuiltinEntity {
                             value,
-                            range: convert_to_char_index(&sentence, original_start)..convert_to_char_index(&sentence, original_end),
+                            range: convert_to_char_index(&sentence, original_start)
+                                ..convert_to_char_index(&sentence, original_end),
                             entity: ent.entity,
                             entity_kind: ent.entity_kind,
                         };
@@ -119,9 +123,10 @@ impl BuiltinEntityParser {
         }
     }
 
-    fn _extract_entities(&self,
-                         sentence: &str,
-                         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
+    fn _extract_entities(
+        &self,
+        sentence: &str,
+        filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
         lazy_static! {
             static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
@@ -273,7 +278,7 @@ mod test {
             parser
                 .extract_entities(
                     "I would like to do a bank transfer of ten euros for my friends",
-                    None,
+                    None
                 )
                 .iter()
                 .map(|e| e.entity_kind)
@@ -284,25 +289,43 @@ mod test {
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
         let parser = BuiltinEntityParser::get(Language::JA);
-        let expected_entity = BuiltinEntity {
-            value: "明 日".to_string(),
-            range: 10..13,
-            entity_kind: BuiltinEntityKind::Time,
-            entity: InstantTime(
-                InstantTimeValue {
-                    value: "2018-03-30 00:00:00 +02:00".to_string(),
-                    grain: Grain::Day,
-                    precision: Precision::Exact,
-                }),
+        let expected_time_value = InstantTimeValue {
+            value: "2013-02-10 00:00:00 +01:00".to_string(),
+            grain: Grain::Day,
+            precision: Precision::Exact,
         };
-        assert_eq!(
-            vec![expected_entity],
-            parser.extract_entities(" の カリフォル  明 日  ニア州の天気予報は？", None)
+
+        let expected_entity = BuiltinEntity {
+            value: "二 千 十三 年二 月十 日".to_string(),
+            range: 10..24,
+            entity_kind: BuiltinEntityKind::Time,
+            entity: InstantTime(expected_time_value.clone()),
+        };
+
+        let parsed_entities = parser.extract_entities(
+            " の カリフォル  二 千 十三 年二 月十 日  ニア州の天気予報は？",
+            None,
         );
+        assert_eq!(1, parsed_entities.len());
+        let parsed_entity = &parsed_entities[0];
+        assert_eq!(expected_entity.value, parsed_entity.value);
+        assert_eq!(expected_entity.range, parsed_entity.range);
+        assert_eq!(expected_entity.entity_kind, parsed_entity.entity_kind);
+
+        if let SlotValue::InstantTime(ref parsed_time) = parsed_entity.entity {
+            assert_eq!(expected_time_value.grain, parsed_time.grain);
+            assert_eq!(expected_time_value.precision, parsed_time.precision);
+            assert_eq!(expected_time_value.value, parsed_time.value);
+        } else {
+            panic!("")
+        }
 
         assert_eq!(
             Vec::<BuiltinEntity>::new(),
-            parser.extract_entities(" 明 日の カリフォルニア州の天気予報は？", None)
+            parser.extract_entities(
+                "二 千 十三 年二 月十 日の カリフォルニア州の天気予報は？",
+                None
+            )
         );
     }
 
