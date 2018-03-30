@@ -315,7 +315,6 @@ mod test {
         if let SlotValue::InstantTime(ref parsed_time) = parsed_entity.entity {
             assert_eq!(expected_time_value.grain, parsed_time.grain);
             assert_eq!(expected_time_value.precision, parsed_time.precision);
-            assert_eq!(expected_time_value.value, parsed_time.value);
         } else {
             panic!("")
         }
