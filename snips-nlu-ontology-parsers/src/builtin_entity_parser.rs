@@ -65,23 +65,7 @@ impl BuiltinEntityParser {
                 return vec![];
             }
 
-            let ranges_mapping = HashMap::<usize, usize>::from_iter(
-                original_tokens_bytes_ranges.iter().enumerate().fold(
-                    vec![],
-                    |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
-                        let previous_end = if token_index == 0 {
-                            0 as usize
-                        } else {
-                            acc[acc.len() - 1].0
-                        };
-                        acc.push((
-                            previous_end + original_range.end - original_range.start,
-                            token_index,
-                        ));
-                        acc
-                    },
-                ),
-            );
+            let ranges_mapping = get_ranges_mapping(&original_tokens_bytes_ranges);
 
             let entities = self._extract_entities(&*joined_sentence, filter_entity_kinds);
             entities
@@ -178,6 +162,33 @@ impl BuiltinEntityParser {
             })
             .entities
     }
+}
+
+fn get_ranges_mapping(tokens_ranges: &Vec<Range<usize>>) -> HashMap<usize, usize> {
+    /* Given tokens ranges returns a mapping of byte index to a token index
+    The byte indexes corresponds to indexes of the end of tokens in string given by joining all
+    the tokens. The tokens index gives the index of the tokens preceding the byte index.
+
+    For instance, if range_mapping[65] -> 5, this means that the token of index 6 starts at the
+    65th byte in the joined string
+    */
+    let ranges_mapping =
+        HashMap::<usize, usize>::from_iter(tokens_ranges.iter().enumerate().fold(
+            vec![],
+            |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
+                let previous_end = if token_index == 0 {
+                    0 as usize
+                } else {
+                    acc[acc.len() - 1].0
+                };
+                acc.push((
+                    previous_end + original_range.end - original_range.start,
+                    token_index,
+                ));
+                acc
+            },
+        ));
+    ranges_mapping
 }
 
 struct EntityCache {
@@ -323,7 +334,7 @@ mod test {
             Vec::<BuiltinEntity>::new(),
             parser.extract_entities(
                 "二 千 十三 年二 月十 日の カリフォルニア州の天気予報は？",
-                None
+                None,
             )
         );
     }
