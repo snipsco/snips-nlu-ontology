@@ -30,7 +30,7 @@ fn add_header(readme: &mut String) {
     readme.push_str("\n");
 
     readme.push_str("Ontology of the Snips NLU library API which describes supported languages and builtin entities.\n");
-    readme.push_str("Please refer to `this page <snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-python>`_ for the python wrapper.\n");
+    readme.push_str("Please refer to `this page <platforms/snips-nlu-ontology-python>`_ for the python wrapper.\n");
     readme.push_str("\n");
 
     readme.push_str(&*format!("Ontology version: {}\n", ::ONTOLOGY_VERSION));

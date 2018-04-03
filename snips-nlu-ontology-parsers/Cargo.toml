@@ -1,10 +1,13 @@
 [package]
 name = "snips-nlu-ontology-parsers"
-version = "0.54.0"
+version = "0.55.0-SNAPSHOT"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]
 itertools = "0.7"
 lazy_static = "1.0"
-rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.16.3" }
+maplit = "1.0"
+snips-nlu-utils = { git = "https://github.com/snipsco/snips-nlu-utils", tag = "0.6.0" }
+regex = "0.2"
+rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.16.4" }
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
