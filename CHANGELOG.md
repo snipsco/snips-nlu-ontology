@@ -17,4 +17,4 @@ All notable changes to this project will be documented in this file.
 
 
 [Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.55.0...HEAD
-[0.55.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.0..0.55.0
+[0.55.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.0...0.55.0
