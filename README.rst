@@ -5,7 +5,7 @@ Snips NLU Ontology
    :target: https://travis-ci.org/snipsco/snips-nlu-ontology
 
 Ontology of the Snips NLU library API which describes supported languages and builtin entities.
-Please refer to `this page <snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-python>`_ for the python wrapper.
+Please refer to `this page <platforms/snips-nlu-ontology-python>`_ for the python wrapper.
 
 Ontology version: 0.6.0
 
@@ -25,7 +25,7 @@ Supported languages
 +----------+------------+
 | Korean   | ko         |
 +----------+------------+
-| Japan    | ja         |
+| Japanese | ja         |
 +----------+------------+
 
 Supported builtin entities
