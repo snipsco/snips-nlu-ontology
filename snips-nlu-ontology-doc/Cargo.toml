@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-doc"
-version = "0.54.1"
+version = "0.55.0"
 authors = ["Adrien Ball <adrien.ball@snips.ai>"]
 
 [build-dependencies]

@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-ffi-macros"
-version = "0.54.1"
+version = "0.55.0"
 authors = [
     "Kevin Lefevre <kevin.lefevre@snips.ai>",
     "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
