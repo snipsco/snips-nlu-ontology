@@ -167,50 +167,53 @@ impl BuiltinEntityKind {
     pub fn supported_languages(&self) -> &[Language] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                Language::EN,
-                Language::FR,
                 Language::DE,
+                Language::EN,
                 Language::ES,
+                Language::FR,
                 Language::KO,
             ],
             BuiltinEntityKind::Duration => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Number => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Ordinal => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Temperature => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Time => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
                 Language::KO,
-                Language::DE,
             ],
-            BuiltinEntityKind::Percentage => {
-                &[Language::EN, Language::ES, Language::FR, Language::DE]
-            }
+            BuiltinEntityKind::Percentage => &[
+                Language::DE,
+                Language::EN,
+                Language::ES,
+                Language::FR,
+            ]
         }
     }
 }

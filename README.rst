@@ -23,9 +23,9 @@ Supported languages
 +----------+------------+
 | French   | fr         |
 +----------+------------+
-| Korean   | ko         |
-+----------+------------+
 | Japanese | ja         |
++----------+------------+
+| Korean   | ko         |
 +----------+------------+
 
 Supported builtin entities
@@ -34,46 +34,46 @@ Supported builtin entities
 +---------------+---------------------+---------------------+
 | Entity        | Identifier          | Supported languages |
 +===============+=====================+=====================+
-| AmountOfMoney | snips/amountOfMoney | | English           |
-|               |                     | | French            |
-|               |                     | | German            |
-|               |                     | | Spanish           |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| Time          | snips/datetime      | | English           |
+| AmountOfMoney | snips/amountOfMoney | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Duration      | snips/duration      | | English           |
+| Time          | snips/datetime      | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Number        | snips/number        | | English           |
+| Duration      | snips/duration      | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Ordinal       | snips/ordinal       | | English           |
+| Number        | snips/number        | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Percentage    | snips/percentage    | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | German            |
-+---------------+---------------------+---------------------+
-| Temperature   | snips/temperature   | | English           |
+| Ordinal       | snips/ordinal       | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
 |               |                     | | Korean            |
-|               |                     | | German            |
++---------------+---------------------+---------------------+
+| Percentage    | snips/percentage    | | German            |
+|               |                     | | English           |
+|               |                     | | Spanish           |
+|               |                     | | French            |
++---------------+---------------------+---------------------+
+| Temperature   | snips/temperature   | | German            |
+|               |                     | | English           |
+|               |                     | | Spanish           |
+|               |                     | | French            |
+|               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 
 Results Examples
