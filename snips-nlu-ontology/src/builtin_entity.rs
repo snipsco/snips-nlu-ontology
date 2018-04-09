@@ -280,17 +280,39 @@ impl BuiltinEntityKind {
 
     fn ja_examples(&self) -> &[&str] {
         match *self {
-            BuiltinEntityKind::AmountOfMoney => &[],
-            BuiltinEntityKind::Duration => &[],
+            BuiltinEntityKind::AmountOfMoney => &[
+                "八ドル",
+                "五十二アメリカドル",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "一秒間",
+                "五日間",
+                "十ヶ月間",
+            ],
             BuiltinEntityKind::Number => &[
                 "十二",
                 "二千五",
                 "四千三百二",
             ],
-            BuiltinEntityKind::Ordinal => &[],
-            BuiltinEntityKind::Temperature => &[],
-            BuiltinEntityKind::Time => &[],
-            BuiltinEntityKind::Percentage => &[],
+            BuiltinEntityKind::Ordinal => &[
+                "十一番目",
+                "九十一番目",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "五度",
+                "二十五度",
+                "マイナス十度",
+            ],
+            BuiltinEntityKind::Time => &[
+                "一昨日",
+                "次の水曜日",
+                "十三時三十分",
+                "二千十三年十二月二十三日",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "十五%",
+                "五パーセント",
+            ],
         }
     }
 
@@ -464,6 +486,18 @@ mod tests {
         let expected_description =
             "[\n  {\n    \"kind\": \"Percentage\",\n    \"value\": 20.0\n  }\n]";
         assert_eq!(expected_description, description);
+    }
+
+    #[test]
+    fn test_entity_examples_should_be_provided_for_all_supported_languages() {
+        for entity_kind in BuiltinEntityKind::all() {
+            for language in entity_kind.supported_languages() {
+                let examples = entity_kind.examples(*language);
+                assert!(examples.len() >= 1,
+                        "No examples provided for entity '{:?}' in language '{:?}'", entity_kind,
+                        language)
+            }
+        }
     }
 
     #[test]
