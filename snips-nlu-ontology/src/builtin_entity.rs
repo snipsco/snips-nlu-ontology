@@ -396,6 +396,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Duration => &[
@@ -403,6 +404,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Number => &[
@@ -410,6 +412,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Ordinal => &[
@@ -417,6 +420,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Temperature => &[
@@ -424,6 +428,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Time => &[
@@ -431,6 +436,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Percentage => &[
@@ -438,6 +444,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
             ]
         }
     }

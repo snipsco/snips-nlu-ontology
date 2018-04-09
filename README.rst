@@ -38,41 +38,48 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 | Time          | snips/datetime      | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 | Duration      | snips/duration      | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 | Number        | snips/number        | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 | Ordinal       | snips/ordinal       | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 | Percentage    | snips/percentage    | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 +---------------+---------------------+---------------------+
 | Temperature   | snips/temperature   | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
 
