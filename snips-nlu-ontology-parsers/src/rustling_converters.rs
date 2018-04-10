@@ -208,6 +208,20 @@ impl<'a> FromRustling<&'a Output> for BuiltinEntityKind {
     }
 }
 
+impl<'a> FromRustling<&'a OutputKind> for BuiltinEntityKind {
+    fn from_rustling(v: &OutputKind) -> Self {
+        match *v {
+            OutputKind::AmountOfMoney => BuiltinEntityKind::AmountOfMoney,
+            OutputKind::Duration => BuiltinEntityKind::Duration,
+            OutputKind::Number => BuiltinEntityKind::Number,
+            OutputKind::Ordinal => BuiltinEntityKind::Ordinal,
+            OutputKind::Temperature => BuiltinEntityKind::Temperature,
+            OutputKind::Time => BuiltinEntityKind::Time,
+            OutputKind::Percentage => BuiltinEntityKind::Percentage,
+        }
+    }
+}
+
 impl<'a> FromRustling<&'a BuiltinEntityKind> for OutputKind {
     fn from_rustling(v: &BuiltinEntityKind) -> Self {
         match *v {

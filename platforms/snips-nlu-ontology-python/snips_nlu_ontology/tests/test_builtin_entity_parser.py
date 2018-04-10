@@ -32,7 +32,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
     def test_should_parse_with_scope(self):
         # Given
         parser = BuiltinEntityParser("en")
-        scope = ["snips/temperature", "snips/number"]
+        scope = ["snips/duration", "snips/temperature"]
 
         # When
         res = parser.parse("Raise to sixty two", scope)

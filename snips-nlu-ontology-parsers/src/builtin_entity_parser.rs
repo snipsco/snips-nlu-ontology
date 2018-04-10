@@ -15,6 +15,7 @@ use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
+    supported_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
 lazy_static! {
@@ -37,9 +38,17 @@ impl BuiltinEntityParser {
             .unwrap()
             .entry(lang.to_string())
             .or_insert_with(|| {
+                let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(lang);
+                let ordered_entity_kinds = OutputKind::all()
+                    .iter()
+                    .map(|output_kind| output_kind.into_builtin())
+                    .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
+                    .collect();
+
                 Arc::new(BuiltinEntityParser {
                     parser: build_parser(lang.into_builtin()).unwrap(),
                     lang,
+                    supported_entity_kinds: ordered_entity_kinds,
                 })
             })
             .clone()
@@ -118,47 +127,38 @@ impl BuiltinEntityParser {
         let key = CacheKey {
             lang: self.lang.to_string(),
             input: sentence.into(),
-            kinds: filter_entity_kinds.map(|kinds| kinds.to_vec()),
+            kinds: filter_entity_kinds
+                .map(|kinds|
+                    self.supported_entity_kinds.clone()
+                        .into_iter()
+                        .filter(|entity_kind| kinds.contains(&entity_kind))
+                        .collect())
+                .unwrap_or_else(|| self.supported_entity_kinds.clone()),
         };
         CACHED_ENTITY
             .lock()
             .unwrap()
             .cache(&key, |key| {
                 let context = ResolverContext::default();
-                if let Some(kinds) = key.kinds.as_ref() {
-                    let kind_order = kinds
-                        .iter()
-                        .map(|kind| kind.into_builtin())
-                        .collect::<Vec<OutputKind>>();
-                    self.parser
-                        .parse_with_kind_order(&sentence.to_lowercase(), &context, &kind_order)
-                        .unwrap_or(Vec::new())
-                        .iter()
-                        .filter_map(|m| {
-                            let entity_kind = BuiltinEntityKind::from_rustling(&m.value);
-                            kinds.iter().find(|kind| **kind == entity_kind).map(|kind| {
-                                BuiltinEntity {
-                                    value: sentence[m.byte_range.0..m.byte_range.1].into(),
-                                    range: m.char_range.0..m.char_range.1,
-                                    entity: m.value.clone().into_builtin(),
-                                    entity_kind: kind.clone(),
-                                }
-                            })
+                let kind_order = key.kinds.iter()
+                    .map(|kind| kind.into_builtin())
+                    .collect::<Vec<OutputKind>>();
+                self.parser
+                    .parse_with_kind_order(&sentence.to_lowercase(), &context, &kind_order)
+                    .unwrap_or_else(|_| vec![])
+                    .iter()
+                    .filter_map(|m| {
+                        let entity_kind = BuiltinEntityKind::from_rustling(&m.value);
+                        key.kinds.iter().find(|kind| **kind == entity_kind).map(|kind| {
+                            BuiltinEntity {
+                                value: sentence[m.byte_range.0..m.byte_range.1].into(),
+                                range: m.char_range.0..m.char_range.1,
+                                entity: m.value.clone().into_builtin(),
+                                entity_kind: kind.clone(),
+                            }
                         })
-                        .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
-                } else {
-                    self.parser
-                        .parse(&sentence.to_lowercase(), &context)
-                        .unwrap_or(Vec::new())
-                        .iter()
-                        .map(|entity| BuiltinEntity {
-                            value: sentence[entity.byte_range.0..entity.byte_range.1].into(),
-                            range: entity.char_range.0..entity.char_range.1,
-                            entity: entity.value.clone().into_builtin(),
-                            entity_kind: BuiltinEntityKind::from_rustling(&entity.value),
-                        })
-                        .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
-                }
+                    })
+                    .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
             })
             .entities
     }
@@ -225,7 +225,7 @@ impl EntityCache {
 struct CacheKey {
     lang: String,
     input: String,
-    kinds: Option<Vec<BuiltinEntityKind>>,
+    kinds: Vec<BuiltinEntityKind>,
 }
 
 #[derive(Debug, Clone)]
@@ -290,7 +290,7 @@ mod test {
             parser
                 .extract_entities(
                     "I would like to do a bank transfer of ten euros for my friends",
-                    None
+                    None,
                 )
                 .iter()
                 .map(|e| e.entity_kind)
@@ -362,7 +362,7 @@ mod test {
         let key = CacheKey {
             lang: "en".into(),
             input: "test".into(),
-            kinds: None,
+            kinds: vec![],
         };
 
         let mut cache = EntityCache::new(10); // caching for 10s
