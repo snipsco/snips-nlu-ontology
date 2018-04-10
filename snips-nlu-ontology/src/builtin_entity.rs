@@ -472,6 +472,16 @@ impl BuiltinEntityKind {
     }
 }
 
+impl BuiltinEntityKind {
+    pub fn supported_entity_kinds(language: Language) -> Vec<BuiltinEntityKind> {
+        Self::all()
+            .to_vec()
+            .into_iter()
+            .filter(|e| e.supported_languages().contains(&language))
+            .collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
