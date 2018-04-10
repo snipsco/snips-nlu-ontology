@@ -86,22 +86,269 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn examples(&self) -> &[&str] {
+    pub fn examples(&self, language: Language) -> &[&str] {
+        match language {
+            Language::DE => self.de_examples(),
+            Language::EN => self.en_examples(),
+            Language::ES => self.es_examples(),
+            Language::FR => self.fr_examples(),
+            Language::JA => self.ja_examples(),
+            Language::KO => self.ko_examples(),
+        }
+    }
+
+    fn de_examples(&self) -> &[&str] {
         match *self {
-            BuiltinEntityKind::AmountOfMoney => &["ten dollars and five cents", "around 5€"],
-            BuiltinEntityKind::Duration => &["3 month", "4 seconds", "8 years"],
-            BuiltinEntityKind::Number => &["twenty-two", "1.2"],
-            BuiltinEntityKind::Ordinal => &["the second"],
-            BuiltinEntityKind::Temperature => &["Twenty three degrees celsius", "3°C"],
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "ungefähr 5€",
+                "zwei tausend Dollar",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "2stdn",
+                "drei monate",
+                "ein halbe Stunde",
+                "8 Jahre und zwei Tage",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "einundzwanzig",
+                "zwei tausend",
+                "zwei tausend und drei"
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "Erste",
+                "der zweite",
+                "zwei und zwanzigster"
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "70K",
+                "3°C",
+                "Dreiundzwanzig Grad",
+                "zweiunddreißig Grad Fahrenheit",
+            ],
+            BuiltinEntityKind::Time => &[
+                "Heute",
+                "16.30 Uhr",
+                "in 1 Stunde",
+                "dritter Dienstag im Juni",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "zwanzig Prozent",
+                "zwei tausend und fünfzig Prozent",
+            ],
+        }
+    }
+
+    fn en_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "around 5€",
+                "ten dollars and five cents",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "1h",
+                "3 months",
+                "half an hour",
+                "8 years and two days",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "twenty one",
+                "three hundred and four",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "1st",
+                "the second",
+                "the twenty third",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "70K",
+                "3°C",
+                "Twenty three degrees",
+                "one hundred degrees fahrenheit",
+            ],
             BuiltinEntityKind::Time => &[
                 "Today",
                 "4:30 pm",
-                "next monday at 8p.m.",
-                "yesterday morning",
+                "in 1 hour",
                 "3rd tuesday of June",
-                "June 2nd at 9 pm",
             ],
-            BuiltinEntityKind::Percentage => &["twenty percent", "25%"],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "twenty percent",
+                "two hundred and fifty percents",
+            ],
+        }
+    }
+
+    fn es_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "cinco euros",
+                "diez dólares y cinco centavos",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "1h",
+                "3 meses",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "ciento dos minutos",
+                // "8 años y dos dias",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "diez y ocho",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "ciento dos",
+                // "tres mil nueve",
+                // "ciento cuarenta y nueve",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "primer",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "vigésimo primero",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "70K",
+                "3°C",
+                "veintitrés grados",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "tres mil grados Fahrenheit",
+            ],
+            BuiltinEntityKind::Time => &[
+                "hoy",
+                "esta noche",
+                "a la 1:30",
+                "el primer jueves de junio",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "quince porcientos",
+                "20 por ciento",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "tres mil por ciento",
+            ],
+        }
+    }
+
+    fn fr_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "environ 5€",
+                "dix dollars et cinq centimes",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "1h",
+                "3 mois",
+                "une demi heure",
+                "8 ans et deux jours",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "vingt deux",
+                "deux cent trois",
+                "quatre vingt dix neuf"
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "1er",
+                "le deuxième",
+                "vingt et unieme",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "70K",
+                "3°C",
+                "vingt trois degrés",
+                "deux cent degrés Fahrenheit",
+            ],
+            BuiltinEntityKind::Time => &[
+                "Aujourd'hui",
+                "à 14:30",
+                "dans 1 heure",
+                "le premier jeudi de Juin",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "20 pourcents",
+                "quatre vingt dix pourcents",
+            ],
+        }
+    }
+
+    fn ja_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "八ドル",
+                "五十二アメリカドル",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "一秒間",
+                "五日間",
+                "十ヶ月間",
+            ],
+            BuiltinEntityKind::Number => &[
+                "十二",
+                "二千五",
+                "四千三百二",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "十一番目",
+                "九十一番目",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "五度",
+                "二十五度",
+                "マイナス十度",
+            ],
+            BuiltinEntityKind::Time => &[
+                "一昨日",
+                "次の水曜日",
+                "十三時三十分",
+                "二千十三年十二月二十三日",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "十五%",
+                "五パーセント",
+            ],
+        }
+    }
+
+    fn ko_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "약 5 유로",
+                "10 달러 5 센트",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "양일",
+                "1시간",
+                "3 개월",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "삼천",
+                "스물 둘",
+                "천 아흔 아홉",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "첫",
+                "첫번째"
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "5도",
+                "섭씨 20도",
+                "화씨 백 도",
+            ],
+            BuiltinEntityKind::Time => &[
+                "오늘",
+                "14시 30 분에",
+                "5 월 첫째 목요일",
+            ],
+            BuiltinEntityKind::Percentage => &[],
         }
     }
 }
@@ -167,51 +414,71 @@ impl BuiltinEntityKind {
     pub fn supported_languages(&self) -> &[Language] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                Language::EN,
-                Language::FR,
                 Language::DE,
+                Language::EN,
                 Language::ES,
+                Language::FR,
+                Language::JA,
                 Language::KO,
             ],
             BuiltinEntityKind::Duration => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Number => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Ordinal => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Temperature => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
-                Language::DE,
             ],
             BuiltinEntityKind::Time => &[
+                Language::DE,
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::JA,
                 Language::KO,
-                Language::DE,
             ],
-            BuiltinEntityKind::Percentage => {
-                &[Language::EN, Language::ES, Language::FR, Language::DE]
-            }
+            BuiltinEntityKind::Percentage => &[
+                Language::DE,
+                Language::EN,
+                Language::ES,
+                Language::FR,
+                Language::JA,
+            ]
         }
+    }
+}
+
+impl BuiltinEntityKind {
+    pub fn supported_entity_kinds(language: Language) -> Vec<BuiltinEntityKind> {
+        Self::all()
+            .to_vec()
+            .into_iter()
+            .filter(|e| e.supported_languages().contains(&language))
+            .collect()
     }
 }
 
@@ -229,6 +496,18 @@ mod tests {
         let expected_description =
             "[\n  {\n    \"kind\": \"Percentage\",\n    \"value\": 20.0\n  }\n]";
         assert_eq!(expected_description, description);
+    }
+
+    #[test]
+    fn test_entity_examples_should_be_provided_for_all_supported_languages() {
+        for entity_kind in BuiltinEntityKind::all() {
+            for language in entity_kind.supported_languages() {
+                let examples = entity_kind.examples(*language);
+                assert!(examples.len() >= 1,
+                        "No examples provided for entity '{:?}' in language '{:?}'", entity_kind,
+                        language)
+            }
+        }
     }
 
     #[test]

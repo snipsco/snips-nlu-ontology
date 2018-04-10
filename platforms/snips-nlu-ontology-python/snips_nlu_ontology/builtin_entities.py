@@ -14,6 +14,7 @@ from snips_nlu_ontology.utils import (
 
 _ALL_LANGUAGES = None
 _SUPPORTED_ENTITIES = dict()
+_ENTITIES_EXAMPLES = dict()
 _ALL_BUILTIN_ENTITIES = None
 _ONTOLOGY_VERSION = None
 
@@ -73,6 +74,35 @@ def get_supported_entities(language):
             _SUPPORTED_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
     return _SUPPORTED_ENTITIES[language]
+
+
+def get_builtin_entity_examples(builtin_entity_kind, language):
+    """Provides some examples of the builtin entity in the specified language
+    """
+    global _ENTITIES_EXAMPLES
+
+    if not isinstance(builtin_entity_kind, str):
+        raise TypeError("Expected `builtin_entity_kind` to be of type 'str' "
+                        "but found: %s" % type(builtin_entity_kind))
+    if not isinstance(language, str):
+        raise TypeError("Expected `language` to be of type 'str' but found: %s"
+                        % type(language))
+
+    if builtin_entity_kind not in _ENTITIES_EXAMPLES:
+        _ENTITIES_EXAMPLES[builtin_entity_kind] = dict()
+
+    if language not in _ENTITIES_EXAMPLES[builtin_entity_kind]:
+        with string_array_pointer(pointer(CStringArray())) as ptr:
+            exit_code = lib.nlu_ontology_builtin_entity_examples(
+                builtin_entity_kind.encode("utf8"),
+                language.encode("utf8"), byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while retrieving "
+                                 "builtin entity examples. See stderr.")
+            array = ptr.contents
+            _ENTITIES_EXAMPLES[builtin_entity_kind][language] = list(
+                array.data[i].decode("utf8") for i in range(array.size))
+    return _ENTITIES_EXAMPLES[builtin_entity_kind][language]
 
 
 class BuiltinEntityParser(object):

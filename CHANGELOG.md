@@ -1,7 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.54.2] - 2018-04-10
+
+### Added
+- Examples for builtin entities in all languages
+- Japanese support for all builtin entities
+
+### Fixed
+- Issue with the entity kinds order used in BuiltinEntityParser
 
 ## [0.54.1] - 2018-04-03
 
@@ -15,6 +22,5 @@ All notable changes to this project will be documented in this file.
 ### Modified
 - Updated Rustling ontoloty to `0.16.4`
 
-
-[Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.1...HEAD
+[0.54.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.1...0.54.2
 [0.54.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.0...0.54.1

@@ -110,3 +110,23 @@ pub fn get_supported_builtin_entities(
     }
     Ok(())
 }
+
+pub fn get_builtin_entity_examples(
+    builtin_entity_kind: *const libc::c_char,
+    language: *const libc::c_char,
+    results: *mut *const CStringArray,
+) -> Result<()> {
+    let entity_kind_str = unsafe { CStr::from_ptr(builtin_entity_kind) }.to_str()?;
+    let entity_kind = BuiltinEntityKind::from_identifier(&*entity_kind_str)?;
+    let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
+    let language = Language::from_str(&*language_str.to_uppercase())?;
+    let examples = entity_kind.examples(language)
+        .iter()
+        .map(|example| example.to_string())
+        .collect::<Vec<String>>();
+    let c_examples = CStringArray::from(examples);
+    unsafe {
+        *results = Box::into_raw(Box::new(c_examples));
+    }
+    Ok(())
+}

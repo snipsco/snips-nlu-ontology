@@ -64,5 +64,14 @@ macro_rules! export_nlu_ontology_c_symbols {
         ) -> $crate::ffi_utils::CResult {
             wrap!($crate::get_supported_builtin_entities(language, results))
         }
+
+        #[no_mangle]
+        pub extern "C" fn nlu_ontology_builtin_entity_examples(
+            builtin_entity_kind: *const libc::c_char,
+            language: *const libc::c_char,
+            results: *mut *const $crate::CStringArray,
+        ) -> $crate::ffi_utils::CResult {
+            wrap!($crate::get_builtin_entity_examples(builtin_entity_kind, language, results))
+        }
     };
 }
