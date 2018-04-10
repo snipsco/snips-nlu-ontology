@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-ffi"
-version = "0.55.0-SNAPSHOT"
+version = "0.54.2"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]
