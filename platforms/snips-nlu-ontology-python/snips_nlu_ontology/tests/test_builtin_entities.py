@@ -2,8 +2,8 @@ import unittest
 from builtins import str
 
 from snips_nlu_ontology.builtin_entities import (
-    get_all_languages, get_all_builtin_entities, get_supported_entities,
-    get_ontology_version)
+    get_all_languages, get_all_builtin_entities, get_builtin_entity_examples,
+    get_supported_entities, get_ontology_version)
 
 
 class TestBuiltinEntities(unittest.TestCase):
@@ -39,3 +39,10 @@ class TestBuiltinEntities(unittest.TestCase):
 
     def test_should_get_ontology_version(self):
         get_ontology_version()
+
+    def test_should_get_builtin_entity_examples(self):
+        for language in get_all_languages():
+            for builtin_entity in get_supported_entities(language):
+                examples = get_builtin_entity_examples(builtin_entity,
+                                                       language)
+                self.assertGreaterEqual(len(examples), 1)

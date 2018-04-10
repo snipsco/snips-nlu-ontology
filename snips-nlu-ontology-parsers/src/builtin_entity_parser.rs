@@ -253,6 +253,7 @@ mod test {
     use itertools::Itertools;
 
     use nlu_ontology::SlotValue::InstantTime;
+    use nlu_ontology::language::Language;
 
     #[test]
     fn test_entities_extraction() {
@@ -375,5 +376,22 @@ mod test {
             cache.cache(&key, parse).instant,
             cache.cache(&key, parse).instant
         );
+    }
+
+    #[test]
+    fn test_entity_examples_should_be_parsed() {
+        for language in Language::all() {
+            let parser = BuiltinEntityParser::get(*language);
+            for entity_kind in BuiltinEntityKind::all() {
+                for example in entity_kind.examples(*language) {
+                    let results = parser.extract_entities(example, Some(&[*entity_kind]));
+                    assert_eq!(
+                        1, results.len(),
+                        "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \
+                        {:?}, but found: {:?}", entity_kind, language, example, results);
+                    assert_eq!(example.to_string(), results[0].value);
+                }
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@ macro_rules! language_enum {
     }
 }
 
-language_enum!([DE, EN, ES, FR, KO, JA]);
+language_enum!([DE, EN, ES, FR, JA, KO]);
 
 impl Language {
     pub fn full_name(&self) -> &'static str {

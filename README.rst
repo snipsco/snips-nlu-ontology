@@ -23,9 +23,9 @@ Supported languages
 +----------+------------+
 | French   | fr         |
 +----------+------------+
-| Korean   | ko         |
-+----------+------------+
 | Japanese | ja         |
++----------+------------+
+| Korean   | ko         |
 +----------+------------+
 
 Supported builtin entities
@@ -34,46 +34,53 @@ Supported builtin entities
 +---------------+---------------------+---------------------+
 | Entity        | Identifier          | Supported languages |
 +===============+=====================+=====================+
-| AmountOfMoney | snips/amountOfMoney | | English           |
-|               |                     | | French            |
-|               |                     | | German            |
+| AmountOfMoney | snips/amountOfMoney | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
+|               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
-| Time          | snips/datetime      | | English           |
+| Time          | snips/datetime      | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Duration      | snips/duration      | | English           |
+| Duration      | snips/duration      | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Number        | snips/number        | | English           |
+| Number        | snips/number        | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Ordinal       | snips/ordinal       | | English           |
+| Ordinal       | snips/ordinal       | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
-| Percentage    | snips/percentage    | | English           |
+| Percentage    | snips/percentage    | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
-|               |                     | | German            |
+|               |                     | | Japanese          |
 +---------------+---------------------+---------------------+
-| Temperature   | snips/temperature   | | English           |
+| Temperature   | snips/temperature   | | German            |
+|               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Japanese          |
 |               |                     | | Korean            |
-|               |                     | | German            |
 +---------------+---------------------+---------------------+
 
 Results Examples
