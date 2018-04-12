@@ -13,7 +13,7 @@ pub mod errors;
 pub mod language;
 
 pub mod builtin_entity;
-mod ontology;
+pub mod ontology;
 
 pub use builtin_entity::{BuiltinEntity, BuiltinEntityKind};
 pub use ontology::*;
