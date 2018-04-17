@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 use std::ffi::CString;
 use std::ptr::null;
 use std::slice;
@@ -138,46 +140,46 @@ impl Drop for CSlot {
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
-pub enum CSlotValueType {
-    CUSTOM = 1,
-    NUMBER = 2,
-    ORDINAL = 3,
-    INSTANTTIME = 4,
-    TIMEINTERVAL = 5,
-    AMOUNTOFMONEY = 6,
-    TEMPERATURE = 7,
-    DURATION = 8,
-    PERCENTAGE = 9,
+pub enum SNIPS_SLOT_VALUE_TYPE {
+    SNIPS_SLOT_VALUE_TYPE_CUSTOM = 1,
+    SNIPS_SLOT_VALUE_TYPE_NUMBER = 2,
+    SNIPS_SLOT_VALUE_TYPE_ORDINAL = 3,
+    SNIPS_SLOT_VALUE_TYPE_INSTANTTIME = 4,
+    SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL = 5,
+    SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY = 6,
+    SNIPS_SLOT_VALUE_TYPE_TEMPERATURE = 7,
+    SNIPS_SLOT_VALUE_TYPE_DURATION = 8,
+    SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
 }
 
-impl CSlotValueType {
+impl SNIPS_SLOT_VALUE_TYPE {
     pub fn from(slot_value: &::SlotValue) -> Self {
         match slot_value {
-            &::SlotValue::Custom(_) => CSlotValueType::CUSTOM,
-            &::SlotValue::Number(_) => CSlotValueType::NUMBER,
-            &::SlotValue::Ordinal(_) => CSlotValueType::ORDINAL,
-            &::SlotValue::InstantTime(_) => CSlotValueType::INSTANTTIME,
-            &::SlotValue::TimeInterval(_) => CSlotValueType::TIMEINTERVAL,
-            &::SlotValue::AmountOfMoney(_) => CSlotValueType::AMOUNTOFMONEY,
-            &::SlotValue::Temperature(_) => CSlotValueType::TEMPERATURE,
-            &::SlotValue::Duration(_) => CSlotValueType::DURATION,
-            &::SlotValue::Percentage(_) => CSlotValueType::PERCENTAGE,
+            &::SlotValue::Custom(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM,
+            &::SlotValue::Number(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER,
+            &::SlotValue::Ordinal(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL,
+            &::SlotValue::InstantTime(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME,
+            &::SlotValue::TimeInterval(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL,
+            &::SlotValue::AmountOfMoney(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY,
+            &::SlotValue::Temperature(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE,
+            &::SlotValue::Duration(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION,
+            &::SlotValue::Percentage(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE,
         }
     }
 }
 
 #[repr(C)]
 #[derive(Debug)]
-pub enum CPrecision {
-    APPROXIMATE = 0,
-    EXACT = 1,
+pub enum SNIPS_PRECISION {
+    SNIPS_PRECISION_APPROXIMATE = 0,
+    SNIPS_PRECISION_EXACT = 1,
 }
 
-impl CPrecision {
+impl SNIPS_PRECISION {
     pub fn from(value: ::Precision) -> Self {
         match value {
-            ::Precision::Approximate => CPrecision::APPROXIMATE,
-            ::Precision::Exact => CPrecision::EXACT,
+            ::Precision::Approximate => SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE,
+            ::Precision::Exact => SNIPS_PRECISION::SNIPS_PRECISION_EXACT,
         }
     }
 }
@@ -188,28 +190,28 @@ pub type COrdinalValue = libc::int64_t;
 
 #[repr(C)]
 #[derive(Debug)]
-pub enum CGrain {
-    YEAR = 0,
-    QUARTER = 1,
-    MONTH = 2,
-    WEEK = 3,
-    DAY = 4,
-    HOUR = 5,
-    MINUTE = 6,
-    SECOND = 7,
+pub enum SNIPS_GRAIN {
+    SNIPS_GRAIN_YEAR = 0,
+    SNIPS_GRAIN_QUARTER = 1,
+    SNIPS_GRAIN_MONTH = 2,
+    SNIPS_GRAIN_WEEK = 3,
+    SNIPS_GRAIN_DAY = 4,
+    SNIPS_GRAIN_HOUR = 5,
+    SNIPS_GRAIN_MINUTE = 6,
+    SNIPS_GRAIN_SECOND = 7,
 }
 
-impl CGrain {
+impl SNIPS_GRAIN {
     pub fn from(value: ::Grain) -> Self {
         match value {
-            ::Grain::Year => CGrain::YEAR,
-            ::Grain::Quarter => CGrain::QUARTER,
-            ::Grain::Month => CGrain::MONTH,
-            ::Grain::Week => CGrain::WEEK,
-            ::Grain::Day => CGrain::DAY,
-            ::Grain::Hour => CGrain::HOUR,
-            ::Grain::Minute => CGrain::MINUTE,
-            ::Grain::Second => CGrain::SECOND,
+            ::Grain::Year => SNIPS_GRAIN::SNIPS_GRAIN_YEAR,
+            ::Grain::Quarter => SNIPS_GRAIN::SNIPS_GRAIN_QUARTER,
+            ::Grain::Month => SNIPS_GRAIN::SNIPS_GRAIN_MONTH,
+            ::Grain::Week => SNIPS_GRAIN::SNIPS_GRAIN_WEEK,
+            ::Grain::Day => SNIPS_GRAIN::SNIPS_GRAIN_DAY,
+            ::Grain::Hour => SNIPS_GRAIN::SNIPS_GRAIN_HOUR,
+            ::Grain::Minute => SNIPS_GRAIN::SNIPS_GRAIN_MINUTE,
+            ::Grain::Second => SNIPS_GRAIN::SNIPS_GRAIN_SECOND,
         }
     }
 }
@@ -218,16 +220,16 @@ impl CGrain {
 #[derive(Debug)]
 pub struct CInstantTimeValue {
     pub value: *const libc::c_char,
-    pub grain: CGrain,
-    pub precision: CPrecision,
+    pub grain: SNIPS_GRAIN,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::InstantTimeValue> for CInstantTimeValue {
     fn from(value: ::InstantTimeValue) -> Self {
         Self {
             value: CString::new(value.value).unwrap().into_raw(), // String can not contains 0
-            grain: CGrain::from(value.grain),
-            precision: CPrecision::from(value.precision),
+            grain: SNIPS_GRAIN::from(value.grain),
+            precision: SNIPS_PRECISION::from(value.precision),
         }
     }
 }
@@ -278,14 +280,14 @@ impl Drop for CTimeIntervalValue {
 pub struct CAmountOfMoneyValue {
     pub unit: *const libc::c_char,
     pub value: libc::c_float,
-    pub precision: CPrecision,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
     fn from(value: ::AmountOfMoneyValue) -> Self {
         Self {
             value: value.value as libc::c_float,
-            precision: CPrecision::from(value.precision),
+            precision: SNIPS_PRECISION::from(value.precision),
             unit: if let Some(s) = value.unit {
                 CString::new(s).unwrap().into_raw() // String can not contains 0
             } else {
@@ -342,7 +344,7 @@ pub struct CDurationValue {
     pub hours: libc::int64_t,
     pub minutes: libc::int64_t,
     pub seconds: libc::int64_t,
-    pub precision: CPrecision,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::DurationValue> for CDurationValue {
@@ -356,7 +358,7 @@ impl From<::DurationValue> for CDurationValue {
             hours: value.hours as libc::int64_t,
             minutes: value.minutes as libc::int64_t,
             seconds: value.seconds as libc::int64_t,
-            precision: CPrecision::from(value.precision),
+            precision: SNIPS_PRECISION::from(value.precision),
         }
     }
 }
@@ -370,12 +372,12 @@ pub struct CSlotValue {
      * a CTemperatureValue or a CDurationValue depending on value_type
      */
     value: *const libc::c_void,
-    value_type: CSlotValueType,
+    value_type: SNIPS_SLOT_VALUE_TYPE,
 }
 
 impl From<::SlotValue> for CSlotValue {
     fn from(slot_value: ::SlotValue) -> Self {
-        let value_type = CSlotValueType::from(&slot_value);
+        let value_type = SNIPS_SLOT_VALUE_TYPE::from(&slot_value);
         let value: *const libc::c_void = match slot_value {
             ::SlotValue::Custom(value) => CString::new(value.value).unwrap().into_raw() as _, // String can not contains 0
             ::SlotValue::Number(value) => Box::into_raw(Box::new(value.value as CNumberValue)) as _,
@@ -408,31 +410,31 @@ impl From<::SlotValue> for CSlotValue {
 impl Drop for CSlotValue {
     fn drop(&mut self) {
         match self.value_type {
-            CSlotValueType::CUSTOM => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => unsafe {
                 CString::from_raw(self.value as *mut libc::c_char);
             },
-            CSlotValueType::NUMBER => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => unsafe {
                 Box::from_raw(self.value as *mut CNumberValue);
             },
-            CSlotValueType::ORDINAL => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => unsafe {
                 Box::from_raw(self.value as *mut COrdinalValue);
             },
-            CSlotValueType::INSTANTTIME => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => unsafe {
                 Box::from_raw(self.value as *mut CInstantTimeValue);
             },
-            CSlotValueType::TIMEINTERVAL => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => unsafe {
                 Box::from_raw(self.value as *mut CTimeIntervalValue);
             },
-            CSlotValueType::AMOUNTOFMONEY => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => unsafe {
                 Box::from_raw(self.value as *mut CAmountOfMoneyValue);
             },
-            CSlotValueType::TEMPERATURE => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => unsafe {
                 Box::from_raw(self.value as *mut CTemperatureValue);
             },
-            CSlotValueType::DURATION => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => unsafe {
                 Box::from_raw(self.value as *mut CDurationValue);
             },
-            CSlotValueType::PERCENTAGE => unsafe {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE => unsafe {
                 Box::from_raw(self.value as *mut CPercentageValue);
             },
         };

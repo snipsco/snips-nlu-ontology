@@ -16,7 +16,7 @@ pub use builtin_entity_parser::*;
 macro_rules! export_nlu_ontology_parsers_c_symbols {
     () => {
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_create_builtin_entity_parser(
+        pub extern "C" fn snips_nlu_ontology_create_builtin_entity_parser(
             ptr: *mut *const $crate::CBuiltinEntityParser,
             lang: *const libc::c_char,
         ) -> snips_nlu_ontology_ffi_macros::CResult {
@@ -24,7 +24,7 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_extract_entities(
+        pub extern "C" fn snips_nlu_ontology_extract_entities(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const libc::c_char,
             filter_entity_kinds: *const snips_nlu_ontology_ffi_macros::CStringArray,
@@ -39,7 +39,7 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_extract_entities_json(
+        pub extern "C" fn snips_nlu_ontology_extract_entities_json(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const libc::c_char,
             filter_entity_kinds: *const snips_nlu_ontology_ffi_macros::CStringArray,
@@ -54,14 +54,14 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_builtin_entity_array(
+        pub extern "C" fn snips_nlu_ontology_destroy_builtin_entity_array(
             ptr: *mut snips_nlu_ontology_ffi_macros::CBuiltinEntityArray,
         ) -> snips_nlu_ontology_ffi_macros::CResult {
             wrap!(snips_nlu_ontology_ffi_macros::destroy(ptr))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_builtin_entity_parser(
+        pub extern "C" fn snips_nlu_ontology_destroy_builtin_entity_parser(
             ptr: *mut $crate::CBuiltinEntityParser,
         ) -> snips_nlu_ontology_ffi_macros::CResult {
             wrap!($crate::destroy_builtin_entity_parser(ptr))

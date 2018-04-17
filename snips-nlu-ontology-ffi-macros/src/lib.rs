@@ -28,37 +28,37 @@ pub use ffi_utils::*;
 macro_rules! export_nlu_ontology_c_symbols {
     () => {
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_version() -> *const libc::c_char {
+        pub extern "C" fn snips_nlu_ontology_version() -> *const libc::c_char {
             ::std::ffi::CString::new(snips_nlu_ontology::ONTOLOGY_VERSION).unwrap().into_raw()
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_get_last_error(error: *mut *const libc::c_char) -> $crate::ffi_utils::CResult {
+        pub extern "C" fn snips_nlu_ontology_get_last_error(error: *mut *const libc::c_char) -> $crate::ffi_utils::CResult {
             wrap!($crate::get_last_error(error))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_string_array(ptr: *mut $crate::CStringArray) -> $crate::ffi_utils::CResult {
+        pub extern "C" fn snips_nlu_ontology_destroy_string_array(ptr: *mut $crate::CStringArray) -> $crate::ffi_utils::CResult {
             wrap!($crate::destroy(ptr))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> $crate::ffi_utils::CResult {
+        pub extern "C" fn snips_nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> $crate::ffi_utils::CResult {
             wrap!($crate::destroy_string(ptr))
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_supported_languages() -> $crate::CStringArray {
+        pub extern "C" fn snips_nlu_ontology_supported_languages() -> $crate::CStringArray {
             $crate::supported_languages()
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_all_builtin_entities() -> $crate::CStringArray {
+        pub extern "C" fn snips_nlu_ontology_all_builtin_entities() -> $crate::CStringArray {
             $crate::all_builtin_entities()
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_supported_builtin_entities(
+        pub extern "C" fn snips_nlu_ontology_supported_builtin_entities(
             language: *const libc::c_char,
             results: *mut *const $crate::CStringArray,
         ) -> $crate::ffi_utils::CResult {
@@ -66,7 +66,7 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn nlu_ontology_builtin_entity_examples(
+        pub extern "C" fn snips_nlu_ontology_builtin_entity_examples(
             builtin_entity_kind: *const libc::c_char,
             language: *const libc::c_char,
             results: *mut *const $crate::CStringArray,
