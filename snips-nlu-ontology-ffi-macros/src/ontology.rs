@@ -19,7 +19,7 @@ pub struct CIntentParserResult {
 impl From<::IntentParserResult> for CIntentParserResult {
     fn from(input: ::IntentParserResult) -> Self {
         Self {
-            input: CString::new(input.input).unwrap().into_raw(), // String can not contains 0
+            input: CString::new(input.input).unwrap().into_raw(),
             intent: if let Some(intent) = input.intent {
                 CIntentClassifierResult::from(intent).into_raw_pointer()
             } else {
@@ -78,8 +78,8 @@ impl From<Vec<::Slot>> for CSlotList {
             slots: Box::into_raw(
                 input
                     .into_iter()
-                    .map(|s| CSlot::from(s))
-                    .collect::<Vec<CSlot>>()
+                    .map(CSlot::from)
+                    .collect::<Vec<_>>()
                     .into_boxed_slice(),
             ) as *const CSlot,
         }
@@ -117,12 +117,12 @@ impl From<::Slot> for CSlot {
         };
 
         Self {
-            raw_value: CString::new(input.raw_value).unwrap().into_raw(), // String can not contains 0
+            raw_value: CString::new(input.raw_value).unwrap().into_raw(),
             value: CSlotValue::from(input.value),
             range_start: range.start,
             range_end: range.end,
-            entity: CString::new(input.entity).unwrap().into_raw(), // String can not contains 0
-            slot_name: CString::new(input.slot_name).unwrap().into_raw(), // String can not contains 0
+            entity: CString::new(input.entity).unwrap().into_raw(),
+            slot_name: CString::new(input.slot_name).unwrap().into_raw(),
         }
     }
 }
@@ -149,8 +149,8 @@ pub enum SNIPS_SLOT_VALUE_TYPE {
     SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
 }
 
-impl SNIPS_SLOT_VALUE_TYPE {
-    pub fn from(slot_value: &::SlotValue) -> Self {
+impl<'a> From<&'a ::SlotValue> for SNIPS_SLOT_VALUE_TYPE {
+    fn from(slot_value: &::SlotValue) -> Self {
         match slot_value {
             &::SlotValue::Custom(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM,
             &::SlotValue::Number(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER,
@@ -172,8 +172,8 @@ pub enum SNIPS_PRECISION {
     SNIPS_PRECISION_EXACT = 1,
 }
 
-impl SNIPS_PRECISION {
-    pub fn from(value: ::Precision) -> Self {
+impl From<::Precision> for SNIPS_PRECISION {
+    fn from(value: ::Precision) -> Self {
         match value {
             ::Precision::Approximate => SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE,
             ::Precision::Exact => SNIPS_PRECISION::SNIPS_PRECISION_EXACT,
@@ -198,8 +198,8 @@ pub enum SNIPS_GRAIN {
     SNIPS_GRAIN_SECOND = 7,
 }
 
-impl SNIPS_GRAIN {
-    pub fn from(value: ::Grain) -> Self {
+impl From<::Grain> for SNIPS_GRAIN {
+    fn from(value: ::Grain) -> Self {
         match value {
             ::Grain::Year => SNIPS_GRAIN::SNIPS_GRAIN_YEAR,
             ::Grain::Quarter => SNIPS_GRAIN::SNIPS_GRAIN_QUARTER,
@@ -224,7 +224,7 @@ pub struct CInstantTimeValue {
 impl From<::InstantTimeValue> for CInstantTimeValue {
     fn from(value: ::InstantTimeValue) -> Self {
         Self {
-            value: CString::new(value.value).unwrap().into_raw(), // String can not contains 0
+            value: CString::new(value.value).unwrap().into_raw(),
             grain: SNIPS_GRAIN::from(value.grain),
             precision: SNIPS_PRECISION::from(value.precision),
         }
@@ -248,12 +248,12 @@ impl From<::TimeIntervalValue> for CTimeIntervalValue {
     fn from(value: ::TimeIntervalValue) -> Self {
         Self {
             from: if let Some(s) = value.from {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
             to: if let Some(s) = value.to {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
@@ -282,7 +282,7 @@ impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
             value: value.value as libc::c_float,
             precision: SNIPS_PRECISION::from(value.precision),
             unit: if let Some(s) = value.unit {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
@@ -308,7 +308,7 @@ impl From<::TemperatureValue> for CTemperatureValue {
         Self {
             value: value.value as libc::c_float,
             unit: if let Some(s) = value.unit {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },

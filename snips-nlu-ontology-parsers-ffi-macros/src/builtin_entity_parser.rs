@@ -91,9 +91,8 @@ pub fn extract_entity(
                     .to_str()
                     .map_err(::failure::Error::from)
                     .and_then(|s| {
-                        BuiltinEntityKind::from_identifier(s)
-                            .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))
-                            .map_err(::failure::Error::from)
+                        Ok(BuiltinEntityKind::from_identifier(s)
+                            .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))?)
                     })?)
             })
             .collect::<Result<Vec<_>>>()?;

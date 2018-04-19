@@ -22,11 +22,11 @@ pub struct CBuiltinEntity {
 }
 
 impl From<::BuiltinEntity> for CBuiltinEntity {
-    fn from(e: ::BuiltinEntity) -> CBuiltinEntity {
+    fn from(e: ::BuiltinEntity) -> Self {
         Self {
             entity: ::CSlotValue::from(e.entity),
             entity_kind: CString::new(e.entity_kind.identifier()).unwrap().into_raw(),
-            value: CString::new(e.value).unwrap().into_raw(), // String can not contains 0
+            value: CString::new(e.value).unwrap().into_raw(),
             range_start: e.range.start as libc::int32_t,
             range_end: e.range.end as libc::int32_t,
         }
@@ -81,7 +81,7 @@ pub fn all_builtin_entities() -> CStringArray {
                     .iter()
                     .map(|l| l.identifier().to_string())
                     .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
-                    .collect::<Vec<*const libc::c_char>>()
+                    .collect::<Vec<_>>()
                     .into_boxed_slice()
             )
         };
