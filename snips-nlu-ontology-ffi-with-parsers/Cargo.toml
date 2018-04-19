@@ -4,6 +4,9 @@ version = "0.55.0-SNAPSHOT"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]
+failure = "0.1"
+ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs" }
+lazy_static = "0.1"
 libc = "0.2"
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
 snips-nlu-ontology-ffi-macros = { path = "../snips-nlu-ontology-ffi-macros" }
