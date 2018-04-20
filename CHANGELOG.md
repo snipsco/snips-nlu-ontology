@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.54.3] - 2018-04-20
+
+### Changed
+- Updated Rustling ontology to `0.17.0`
+
 ## [0.54.2] - 2018-04-10
 
 ### Added
@@ -19,8 +24,9 @@ All notable changes to this project will be documented in this file.
 - Fixed the parsing of entities for languages where tokens are not space separated
 - Japanese language label
 
-### Modified
-- Updated Rustling ontoloty to `0.16.4`
+### Changed
+- Updated Rustling ontology to `0.16.4`
 
+[0.54.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.2...0.54.3
 [0.54.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.1...0.54.2
 [0.54.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.0...0.54.1
