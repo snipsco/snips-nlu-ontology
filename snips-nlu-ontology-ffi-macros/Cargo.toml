@@ -8,7 +8,7 @@ authors = [
 
 [dependencies]
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
-ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs" }
+ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs", rev = "b1f4af3" }
 lazy_static = "1.0"
 libc = "0.2"
 serde = "1.0"
