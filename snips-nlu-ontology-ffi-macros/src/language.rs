@@ -17,7 +17,7 @@ pub fn supported_languages() -> CStringArray {
                     .iter()
                     .map(|l| l.to_string().to_lowercase())
                     .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
-                    .collect::<Vec<*const libc::c_char>>()
+                    .collect::<Vec<_>>()
                     .into_boxed_slice()
             )
         };

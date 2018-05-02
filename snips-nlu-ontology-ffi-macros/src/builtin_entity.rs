@@ -8,7 +8,7 @@ use std::str::FromStr;
 use libc;
 
 use errors::*;
-use ffi_utils::CStringArray;
+use ffi_utils::{CStringArray, CReprOf, RawPointerConverter};
 use snips_nlu_ontology::{BuiltinEntityKind, Language};
 
 #[repr(C)]
@@ -22,11 +22,11 @@ pub struct CBuiltinEntity {
 }
 
 impl From<::BuiltinEntity> for CBuiltinEntity {
-    fn from(e: ::BuiltinEntity) -> CBuiltinEntity {
+    fn from(e: ::BuiltinEntity) -> Self {
         Self {
             entity: ::CSlotValue::from(e.entity),
             entity_kind: CString::new(e.entity_kind.identifier()).unwrap().into_raw(),
-            value: CString::new(e.value).unwrap().into_raw(), // String can not contains 0
+            value: CString::new(e.value).unwrap().into_raw(),
             range_start: e.range.start as libc::int32_t,
             range_end: e.range.end as libc::int32_t,
         }
@@ -35,8 +35,8 @@ impl From<::BuiltinEntity> for CBuiltinEntity {
 
 impl Drop for CBuiltinEntity {
     fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.value as *mut libc::c_char) };
-        let _ = unsafe { CString::from_raw(self.entity_kind as *mut libc::c_char) };
+        take_back_c_string!(self.value);
+        take_back_c_string!(self.entity_kind);
     }
 }
 
@@ -47,8 +47,8 @@ pub struct CBuiltinEntityArray {
     pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
-impl CBuiltinEntityArray {
-    pub fn from(input: Vec<CBuiltinEntity>) -> Self {
+impl From<Vec<CBuiltinEntity>> for CBuiltinEntityArray {
+    fn from(input: Vec<CBuiltinEntity>) -> Self {
         Self {
             size: input.len() as libc::int32_t,
             data: Box::into_raw(input.into_boxed_slice()) as *const CBuiltinEntity,
@@ -81,7 +81,7 @@ pub fn all_builtin_entities() -> CStringArray {
                     .iter()
                     .map(|l| l.identifier().to_string())
                     .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
-                    .collect::<Vec<*const libc::c_char>>()
+                    .collect::<Vec<_>>()
                     .into_boxed_slice()
             )
         };
@@ -103,10 +103,10 @@ pub fn get_supported_builtin_entities(
         .iter()
         .filter(|e| e.supported_languages().contains(&language))
         .map(|e| e.identifier().to_string())
-        .collect::<Vec<String>>();
-    let c_entities = CStringArray::from(entities);
+        .collect::<Vec<_>>();
+    let c_entities = CStringArray::c_repr_of(entities)?.into_raw_pointer();
     unsafe {
-        *results = Box::into_raw(Box::new(c_entities));
+        *results = c_entities;
     }
     Ok(())
 }
@@ -121,12 +121,12 @@ pub fn get_builtin_entity_examples(
     let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
     let language = Language::from_str(&*language_str.to_uppercase())?;
     let examples = entity_kind.examples(language)
-        .iter()
+        .into_iter()
         .map(|example| example.to_string())
-        .collect::<Vec<String>>();
-    let c_examples = CStringArray::from(examples);
+        .collect::<Vec<_>>();
+    let c_examples = CStringArray::c_repr_of(examples)?.into_raw_pointer();
     unsafe {
-        *results = Box::into_raw(Box::new(c_examples));
+        *results = c_examples;
     }
     Ok(())
 }

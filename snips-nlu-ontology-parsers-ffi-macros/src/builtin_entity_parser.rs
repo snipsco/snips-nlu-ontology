@@ -1,35 +1,25 @@
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 use std::slice;
 use std::sync::Arc;
 use std::str::FromStr;
 
 use failure::ResultExt;
 use libc;
-use serde_json;
 
 use Result;
+use ffi_utils::{CStringArray, CReprOf, RawPointerConverter};
 use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind, Language};
-use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray, CStringArray};
+use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray};
 use snips_nlu_ontology_parsers::BuiltinEntityParser;
 
 #[repr(C)]
-pub struct CBuiltinEntityParser {
-    pub parser: *const libc::c_void,
-}
+pub struct CBuiltinEntityParser(*const libc::c_void);
 
 macro_rules! get_parser {
     ($opaque:ident) => {{
         let container: &$crate::CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *const ::snips_nlu_ontology_parsers::BuiltinEntityParser;
+        let x = container.0 as *const ::snips_nlu_ontology_parsers::BuiltinEntityParser;
         unsafe { &*x }
-    }};
-}
-
-macro_rules! get_parser_mut {
-    ($opaque:ident) => {{
-        let container: &$crate::CBuiltinEntityParser = unsafe { &*$opaque };
-        let x = container.parser as *mut ::snips_nlu_ontology_parsers::BuiltinEntityParser;
-        unsafe { &mut *x }
     }};
 }
 
@@ -41,11 +31,10 @@ pub fn create_builtin_entity_parser(
     let lang = Language::from_str(&*lang.to_uppercase())?;
     let parser = BuiltinEntityParser::get(lang);
 
+    let c_parser = CBuiltinEntityParser(Arc::into_raw(parser) as _).into_raw_pointer();
+
     unsafe {
-        let container = CBuiltinEntityParser {
-            parser: Arc::into_raw(parser) as *const libc::c_void,
-        };
-        *ptr = Box::into_raw(Box::new(container))
+        *ptr = c_parser;
     }
     Ok(())
 }
@@ -59,11 +48,11 @@ pub fn extract_entity_c(
     let c_entities = extract_entity(ptr, sentence, filter_entity_kinds)?
         .into_iter()
         .map(CBuiltinEntity::from)
-        .collect::<Vec<CBuiltinEntity>>();
-    let c_entities = Box::new(CBuiltinEntityArray::from(c_entities));
+        .collect::<Vec<_>>();
+    let c_entities = CBuiltinEntityArray::from(c_entities).into_raw_pointer();
 
     unsafe {
-        *results = Box::into_raw(c_entities);
+        *results = c_entities;
     }
 
     Ok(())
@@ -76,10 +65,10 @@ pub fn extract_entity_json(
     results: *mut *const libc::c_char,
 ) -> Result<()> {
     let entities = extract_entity(ptr, sentence, filter_entity_kinds)?;
-    let json = serde_json::to_string(&entities)?;
+    let json = ::serde_json::to_string(&entities)?;
 
-    let cs = CString::new(json).unwrap(); // String can not contains 0
-    unsafe { *results = cs.into_raw() }
+    let cs = convert_to_c_string!(json);
+    unsafe { *results = cs }
 
     Ok(())
 }
@@ -102,9 +91,8 @@ pub fn extract_entity(
                     .to_str()
                     .map_err(::failure::Error::from)
                     .and_then(|s| {
-                        BuiltinEntityKind::from_identifier(s)
-                            .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))
-                            .map_err(::failure::Error::from)
+                        Ok(BuiltinEntityKind::from_identifier(s)
+                            .with_context(|_| format!("`{}` isn't a known builtin entity kind", s))?)
                     })?)
             })
             .collect::<Result<Vec<_>>>()?;
@@ -118,8 +106,8 @@ pub fn extract_entity(
 }
 
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
-    let parser = get_parser_mut!(ptr);
     unsafe {
+        let parser = CBuiltinEntityParser::from_raw_pointer(ptr)?.0;
         let _ = Arc::from_raw(parser);
     }
     Ok(())
