@@ -1,8 +1,12 @@
+#![allow(non_camel_case_types)]
+
 use std::ffi::CString;
 use std::ptr::null;
 use std::slice;
 
 use libc;
+
+use ffi_utils::RawPointerConverter;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -15,15 +19,14 @@ pub struct CIntentParserResult {
 impl From<::IntentParserResult> for CIntentParserResult {
     fn from(input: ::IntentParserResult) -> Self {
         Self {
-            input: CString::new(input.input).unwrap().into_raw(), // String can not contains 0
+            input: CString::new(input.input).unwrap().into_raw(),
             intent: if let Some(intent) = input.intent {
-                Box::into_raw(Box::new(CIntentClassifierResult::from(intent)))
-                    as *const CIntentClassifierResult
+                CIntentClassifierResult::from(intent).into_raw_pointer()
             } else {
                 null()
             },
             slots: if let Some(slots) = input.slots {
-                Box::into_raw(Box::new(CSlotList::from(slots))) as *const CSlotList
+                CSlotList::from(slots).into_raw_pointer()
             } else {
                 null()
             },
@@ -33,13 +36,9 @@ impl From<::IntentParserResult> for CIntentParserResult {
 
 impl Drop for CIntentParserResult {
     fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.input as *mut libc::c_char) };
-        if !self.intent.is_null() {
-            let _ = unsafe { Box::from_raw(self.intent as *mut CIntentClassifierResult) };
-        }
-        if !self.slots.is_null() {
-            let _ = unsafe { Box::from_raw(self.slots as *mut CSlotList) };
-        }
+        take_back_c_string!(self.input);
+        let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
+        let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
     }
 }
 
@@ -61,7 +60,7 @@ impl From<::IntentClassifierResult> for CIntentClassifierResult {
 
 impl Drop for CIntentClassifierResult {
     fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.intent_name as *mut libc::c_char) };
+        take_back_c_string!(self.intent_name);
     }
 }
 
@@ -79,8 +78,8 @@ impl From<Vec<::Slot>> for CSlotList {
             slots: Box::into_raw(
                 input
                     .into_iter()
-                    .map(|s| CSlot::from(s))
-                    .collect::<Vec<CSlot>>()
+                    .map(CSlot::from)
+                    .collect::<Vec<_>>()
                     .into_boxed_slice(),
             ) as *const CSlot,
         }
@@ -118,66 +117,66 @@ impl From<::Slot> for CSlot {
         };
 
         Self {
-            raw_value: CString::new(input.raw_value).unwrap().into_raw(), // String can not contains 0
+            raw_value: CString::new(input.raw_value).unwrap().into_raw(),
             value: CSlotValue::from(input.value),
             range_start: range.start,
             range_end: range.end,
-            entity: CString::new(input.entity).unwrap().into_raw(), // String can not contains 0
-            slot_name: CString::new(input.slot_name).unwrap().into_raw(), // String can not contains 0
+            entity: CString::new(input.entity).unwrap().into_raw(),
+            slot_name: CString::new(input.slot_name).unwrap().into_raw(),
         }
     }
 }
 
 impl Drop for CSlot {
     fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.raw_value as *mut libc::c_char) };
-        let _ = unsafe { CString::from_raw(self.entity as *mut libc::c_char) };
-        let _ = unsafe { CString::from_raw(self.slot_name as *mut libc::c_char) };
+        take_back_c_string!(self.raw_value);
+        take_back_c_string!(self.entity);
+        take_back_c_string!(self.slot_name);
     }
 }
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
-pub enum CSlotValueType {
-    CUSTOM = 1,
-    NUMBER = 2,
-    ORDINAL = 3,
-    INSTANTTIME = 4,
-    TIMEINTERVAL = 5,
-    AMOUNTOFMONEY = 6,
-    TEMPERATURE = 7,
-    DURATION = 8,
-    PERCENTAGE = 9,
+pub enum SNIPS_SLOT_VALUE_TYPE {
+    SNIPS_SLOT_VALUE_TYPE_CUSTOM = 1,
+    SNIPS_SLOT_VALUE_TYPE_NUMBER = 2,
+    SNIPS_SLOT_VALUE_TYPE_ORDINAL = 3,
+    SNIPS_SLOT_VALUE_TYPE_INSTANTTIME = 4,
+    SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL = 5,
+    SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY = 6,
+    SNIPS_SLOT_VALUE_TYPE_TEMPERATURE = 7,
+    SNIPS_SLOT_VALUE_TYPE_DURATION = 8,
+    SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
 }
 
-impl CSlotValueType {
-    pub fn from(slot_value: &::SlotValue) -> Self {
+impl<'a> From<&'a ::SlotValue> for SNIPS_SLOT_VALUE_TYPE {
+    fn from(slot_value: &::SlotValue) -> Self {
         match slot_value {
-            &::SlotValue::Custom(_) => CSlotValueType::CUSTOM,
-            &::SlotValue::Number(_) => CSlotValueType::NUMBER,
-            &::SlotValue::Ordinal(_) => CSlotValueType::ORDINAL,
-            &::SlotValue::InstantTime(_) => CSlotValueType::INSTANTTIME,
-            &::SlotValue::TimeInterval(_) => CSlotValueType::TIMEINTERVAL,
-            &::SlotValue::AmountOfMoney(_) => CSlotValueType::AMOUNTOFMONEY,
-            &::SlotValue::Temperature(_) => CSlotValueType::TEMPERATURE,
-            &::SlotValue::Duration(_) => CSlotValueType::DURATION,
-            &::SlotValue::Percentage(_) => CSlotValueType::PERCENTAGE,
+            &::SlotValue::Custom(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM,
+            &::SlotValue::Number(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER,
+            &::SlotValue::Ordinal(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL,
+            &::SlotValue::InstantTime(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME,
+            &::SlotValue::TimeInterval(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL,
+            &::SlotValue::AmountOfMoney(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY,
+            &::SlotValue::Temperature(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE,
+            &::SlotValue::Duration(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION,
+            &::SlotValue::Percentage(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE,
         }
     }
 }
 
 #[repr(C)]
 #[derive(Debug)]
-pub enum CPrecision {
-    APPROXIMATE = 0,
-    EXACT = 1,
+pub enum SNIPS_PRECISION {
+    SNIPS_PRECISION_APPROXIMATE = 0,
+    SNIPS_PRECISION_EXACT = 1,
 }
 
-impl CPrecision {
-    pub fn from(value: ::Precision) -> Self {
+impl From<::Precision> for SNIPS_PRECISION {
+    fn from(value: ::Precision) -> Self {
         match value {
-            ::Precision::Approximate => CPrecision::APPROXIMATE,
-            ::Precision::Exact => CPrecision::EXACT,
+            ::Precision::Approximate => SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE,
+            ::Precision::Exact => SNIPS_PRECISION::SNIPS_PRECISION_EXACT,
         }
     }
 }
@@ -188,28 +187,28 @@ pub type COrdinalValue = libc::int64_t;
 
 #[repr(C)]
 #[derive(Debug)]
-pub enum CGrain {
-    YEAR = 0,
-    QUARTER = 1,
-    MONTH = 2,
-    WEEK = 3,
-    DAY = 4,
-    HOUR = 5,
-    MINUTE = 6,
-    SECOND = 7,
+pub enum SNIPS_GRAIN {
+    SNIPS_GRAIN_YEAR = 0,
+    SNIPS_GRAIN_QUARTER = 1,
+    SNIPS_GRAIN_MONTH = 2,
+    SNIPS_GRAIN_WEEK = 3,
+    SNIPS_GRAIN_DAY = 4,
+    SNIPS_GRAIN_HOUR = 5,
+    SNIPS_GRAIN_MINUTE = 6,
+    SNIPS_GRAIN_SECOND = 7,
 }
 
-impl CGrain {
-    pub fn from(value: ::Grain) -> Self {
+impl From<::Grain> for SNIPS_GRAIN {
+    fn from(value: ::Grain) -> Self {
         match value {
-            ::Grain::Year => CGrain::YEAR,
-            ::Grain::Quarter => CGrain::QUARTER,
-            ::Grain::Month => CGrain::MONTH,
-            ::Grain::Week => CGrain::WEEK,
-            ::Grain::Day => CGrain::DAY,
-            ::Grain::Hour => CGrain::HOUR,
-            ::Grain::Minute => CGrain::MINUTE,
-            ::Grain::Second => CGrain::SECOND,
+            ::Grain::Year => SNIPS_GRAIN::SNIPS_GRAIN_YEAR,
+            ::Grain::Quarter => SNIPS_GRAIN::SNIPS_GRAIN_QUARTER,
+            ::Grain::Month => SNIPS_GRAIN::SNIPS_GRAIN_MONTH,
+            ::Grain::Week => SNIPS_GRAIN::SNIPS_GRAIN_WEEK,
+            ::Grain::Day => SNIPS_GRAIN::SNIPS_GRAIN_DAY,
+            ::Grain::Hour => SNIPS_GRAIN::SNIPS_GRAIN_HOUR,
+            ::Grain::Minute => SNIPS_GRAIN::SNIPS_GRAIN_MINUTE,
+            ::Grain::Second => SNIPS_GRAIN::SNIPS_GRAIN_SECOND,
         }
     }
 }
@@ -218,23 +217,23 @@ impl CGrain {
 #[derive(Debug)]
 pub struct CInstantTimeValue {
     pub value: *const libc::c_char,
-    pub grain: CGrain,
-    pub precision: CPrecision,
+    pub grain: SNIPS_GRAIN,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::InstantTimeValue> for CInstantTimeValue {
     fn from(value: ::InstantTimeValue) -> Self {
         Self {
-            value: CString::new(value.value).unwrap().into_raw(), // String can not contains 0
-            grain: CGrain::from(value.grain),
-            precision: CPrecision::from(value.precision),
+            value: CString::new(value.value).unwrap().into_raw(),
+            grain: SNIPS_GRAIN::from(value.grain),
+            precision: SNIPS_PRECISION::from(value.precision),
         }
     }
 }
 
 impl Drop for CInstantTimeValue {
     fn drop(&mut self) {
-        let _ = unsafe { CString::from_raw(self.value as *mut libc::c_char) };
+        take_back_c_string!(self.value);
     }
 }
 
@@ -249,12 +248,12 @@ impl From<::TimeIntervalValue> for CTimeIntervalValue {
     fn from(value: ::TimeIntervalValue) -> Self {
         Self {
             from: if let Some(s) = value.from {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
             to: if let Some(s) = value.to {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
@@ -264,12 +263,8 @@ impl From<::TimeIntervalValue> for CTimeIntervalValue {
 
 impl Drop for CTimeIntervalValue {
     fn drop(&mut self) {
-        if !self.from.is_null() {
-            let _ = unsafe { CString::from_raw(self.from as *mut libc::c_char) };
-        }
-        if !self.to.is_null() {
-            let _ = unsafe { CString::from_raw(self.to as *mut libc::c_char) };
-        }
+        take_back_nullable_c_string!(self.from);
+        take_back_nullable_c_string!(self.to);
     }
 }
 
@@ -278,16 +273,16 @@ impl Drop for CTimeIntervalValue {
 pub struct CAmountOfMoneyValue {
     pub unit: *const libc::c_char,
     pub value: libc::c_float,
-    pub precision: CPrecision,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
     fn from(value: ::AmountOfMoneyValue) -> Self {
         Self {
             value: value.value as libc::c_float,
-            precision: CPrecision::from(value.precision),
+            precision: SNIPS_PRECISION::from(value.precision),
             unit: if let Some(s) = value.unit {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
@@ -297,9 +292,7 @@ impl From<::AmountOfMoneyValue> for CAmountOfMoneyValue {
 
 impl Drop for CAmountOfMoneyValue {
     fn drop(&mut self) {
-        if !self.unit.is_null() {
-            let _ = unsafe { CString::from_raw(self.unit as *mut libc::c_char) };
-        }
+        take_back_nullable_c_string!(self.unit)
     }
 }
 
@@ -315,7 +308,7 @@ impl From<::TemperatureValue> for CTemperatureValue {
         Self {
             value: value.value as libc::c_float,
             unit: if let Some(s) = value.unit {
-                CString::new(s).unwrap().into_raw() // String can not contains 0
+                CString::new(s).unwrap().into_raw()
             } else {
                 null()
             },
@@ -325,9 +318,7 @@ impl From<::TemperatureValue> for CTemperatureValue {
 
 impl Drop for CTemperatureValue {
     fn drop(&mut self) {
-        if !self.unit.is_null() {
-            let _ = unsafe { CString::from_raw(self.unit as *mut libc::c_char) };
-        }
+        take_back_nullable_c_string!(self.unit);
     }
 }
 
@@ -342,7 +333,7 @@ pub struct CDurationValue {
     pub hours: libc::int64_t,
     pub minutes: libc::int64_t,
     pub seconds: libc::int64_t,
-    pub precision: CPrecision,
+    pub precision: SNIPS_PRECISION,
 }
 
 impl From<::DurationValue> for CDurationValue {
@@ -356,7 +347,7 @@ impl From<::DurationValue> for CDurationValue {
             hours: value.hours as libc::int64_t,
             minutes: value.minutes as libc::int64_t,
             seconds: value.seconds as libc::int64_t,
-            precision: CPrecision::from(value.precision),
+            precision: SNIPS_PRECISION::from(value.precision),
         }
     }
 }
@@ -370,36 +361,22 @@ pub struct CSlotValue {
      * a CTemperatureValue or a CDurationValue depending on value_type
      */
     value: *const libc::c_void,
-    value_type: CSlotValueType,
+    value_type: SNIPS_SLOT_VALUE_TYPE,
 }
 
 impl From<::SlotValue> for CSlotValue {
     fn from(slot_value: ::SlotValue) -> Self {
-        let value_type = CSlotValueType::from(&slot_value);
+        let value_type = SNIPS_SLOT_VALUE_TYPE::from(&slot_value);
         let value: *const libc::c_void = match slot_value {
-            ::SlotValue::Custom(value) => CString::new(value.value).unwrap().into_raw() as _, // String can not contains 0
-            ::SlotValue::Number(value) => Box::into_raw(Box::new(value.value as CNumberValue)) as _,
-            ::SlotValue::Ordinal(value) => {
-                Box::into_raw(Box::new(value.value as COrdinalValue)) as _
-            }
-            ::SlotValue::InstantTime(value) => {
-                Box::into_raw(Box::new(CInstantTimeValue::from(value))) as _
-            }
-            ::SlotValue::TimeInterval(value) => {
-                Box::into_raw(Box::new(CTimeIntervalValue::from(value))) as _
-            }
-            ::SlotValue::AmountOfMoney(value) => {
-                Box::into_raw(Box::new(CAmountOfMoneyValue::from(value))) as _
-            }
-            ::SlotValue::Temperature(value) => {
-                Box::into_raw(Box::new(CTemperatureValue::from(value))) as _
-            }
-            ::SlotValue::Duration(value) => {
-                Box::into_raw(Box::new(CDurationValue::from(value))) as _
-            }
-            ::SlotValue::Percentage(value) => {
-                Box::into_raw(Box::new(value.value as CPercentageValue)) as _
-            }
+            ::SlotValue::Custom(v) => CString::new(v.value).unwrap().into_raw() as _,
+            ::SlotValue::Number(v) => (v.value as CNumberValue).into_raw_pointer() as _,
+            ::SlotValue::Ordinal(v) => (v.value as COrdinalValue).into_raw_pointer() as _,
+            ::SlotValue::InstantTime(v) => CInstantTimeValue::from(v).into_raw_pointer() as _,
+            ::SlotValue::TimeInterval(v) => CTimeIntervalValue::from(v).into_raw_pointer() as _,
+            ::SlotValue::AmountOfMoney(v) => CAmountOfMoneyValue::from(v).into_raw_pointer() as _,
+            ::SlotValue::Temperature(v) => CTemperatureValue::from(v).into_raw_pointer() as _,
+            ::SlotValue::Duration(v) => CDurationValue::from(v).into_raw_pointer() as _,
+            ::SlotValue::Percentage(v) => (v.value as CPercentageValue).into_raw_pointer() as _,
         };
         Self { value_type, value }
     }
@@ -407,34 +384,18 @@ impl From<::SlotValue> for CSlotValue {
 
 impl Drop for CSlotValue {
     fn drop(&mut self) {
-        match self.value_type {
-            CSlotValueType::CUSTOM => unsafe {
-                CString::from_raw(self.value as *mut libc::c_char);
-            },
-            CSlotValueType::NUMBER => unsafe {
-                Box::from_raw(self.value as *mut CNumberValue);
-            },
-            CSlotValueType::ORDINAL => unsafe {
-                Box::from_raw(self.value as *mut COrdinalValue);
-            },
-            CSlotValueType::INSTANTTIME => unsafe {
-                Box::from_raw(self.value as *mut CInstantTimeValue);
-            },
-            CSlotValueType::TIMEINTERVAL => unsafe {
-                Box::from_raw(self.value as *mut CTimeIntervalValue);
-            },
-            CSlotValueType::AMOUNTOFMONEY => unsafe {
-                Box::from_raw(self.value as *mut CAmountOfMoneyValue);
-            },
-            CSlotValueType::TEMPERATURE => unsafe {
-                Box::from_raw(self.value as *mut CTemperatureValue);
-            },
-            CSlotValueType::DURATION => unsafe {
-                Box::from_raw(self.value as *mut CDurationValue);
-            },
-            CSlotValueType::PERCENTAGE => unsafe {
-                Box::from_raw(self.value as *mut CPercentageValue);
-            },
+        let _ = unsafe {
+            match self.value_type {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => CString::drop_raw_pointer(self.value),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => CNumberValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => COrdinalValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => CInstantTimeValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => CTimeIntervalValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => CAmountOfMoneyValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => CTemperatureValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => CDurationValue::drop_raw_pointer(self.value as _),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE => CPercentageValue::drop_raw_pointer(self.value as _),
+            }
         };
     }
 }

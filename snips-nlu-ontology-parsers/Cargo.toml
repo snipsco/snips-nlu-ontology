@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-parsers"
-version = "0.54.3"
+version = "0.55.0"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]

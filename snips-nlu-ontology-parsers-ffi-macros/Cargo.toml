@@ -1,10 +1,11 @@
 [package]
 name = "snips-nlu-ontology-parsers-ffi-macros"
-version = "0.54.3"
+version = "0.55.0"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]
 failure = "0.1"
+ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs", rev = "b1f4af3" }
 libc = "0.2"
 serde = "1.0"
 serde_json = "1.0"
