@@ -165,7 +165,7 @@ class CTimeIntervalValue(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var from: Pointer? = null
     @JvmField var to: Pointer? = null
     override fun getFieldOrder() = listOf("from", "to")
-    fun toTimeIntervalValue() = TimeIntervalValue(from = from.readString(), to = to.readString())
+    fun toTimeIntervalValue() = TimeIntervalValue(from = from?.readString(), to = to?.readString())
 }
 
 class CAmountOfMoneyValue(p: Pointer) : Structure(p), Structure.ByReference {
@@ -181,7 +181,7 @@ class CAmountOfMoneyValue(p: Pointer) : Structure(p), Structure.ByReference {
 
     fun toAmountOfMoneyValue() = AmountOfMoneyValue(value = value!!,
                                                     precision = precision.readPrecision(),
-                                                    unit = unit.readString())
+                                                    unit = unit?.readString())
 }
 
 class CTemperatureValue(p: Pointer) : Structure(p), Structure.ByReference {
@@ -195,7 +195,7 @@ class CTemperatureValue(p: Pointer) : Structure(p), Structure.ByReference {
     override fun getFieldOrder() = listOf("unit", "value")
 
     fun toTemperatureValue() = TemperatureValue(value = value!!,
-                                                unit = unit.readString())
+                                                unit = unit?.readString())
 
 }
 

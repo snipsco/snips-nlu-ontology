@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.56.0] - 2018-05-09
+
+### Fixed
+- Fixed the null values in the Kotlin binding
+
 ## [0.55.0] - 2018-05-02
 
 ### Changed
@@ -32,6 +37,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.56.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.55.0...0.56.0
 [0.55.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.3...0.55.0
 [0.54.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.2...0.54.3
 [0.54.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.1...0.54.2
