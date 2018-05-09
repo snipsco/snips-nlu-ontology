@@ -65,19 +65,19 @@ sealed class SlotValue(val type: Type) {
 
     @Parcel(BEAN)
     data class TimeIntervalValue @ParcelConstructor constructor(
-            @ParcelProperty("from") val from: String,
-            @ParcelProperty("to") val to: String) : SlotValue(TIME_INTERVAL)
+            @ParcelProperty("from") val from: String?,
+            @ParcelProperty("to") val to: String?) : SlotValue(TIME_INTERVAL)
 
     @Parcel(BEAN)
     data class AmountOfMoneyValue @ParcelConstructor constructor(
             @ParcelProperty("value") val value: Float,
             @ParcelProperty("precision") val precision: Precision,
-            @ParcelProperty("unit") val unit: String) : SlotValue(AMOUNT_OF_MONEY)
+            @ParcelProperty("unit") val unit: String?) : SlotValue(AMOUNT_OF_MONEY)
 
     @Parcel(BEAN)
     data class TemperatureValue @ParcelConstructor constructor(
             @ParcelProperty("value") val value: Float,
-            @ParcelProperty("unit") val unit: String) : SlotValue(TEMPERATURE)
+            @ParcelProperty("unit") val unit: String?) : SlotValue(TEMPERATURE)
 
     @Parcel(BEAN)
     data class DurationValue @ParcelConstructor constructor(

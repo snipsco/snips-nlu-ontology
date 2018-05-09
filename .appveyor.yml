@@ -1,0 +1,37 @@
+environment:
+  matrix:
+  - TARGET: x86_64-pc-windows-msvc
+  - TARGET: i686-pc-windows-msvc
+  - TARGET: i686-pc-windows-gnu
+
+branches:
+  only:
+  - develop
+
+install:
+  - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  - rustup-init.exe -y --default-host %TARGET%
+  - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
+  - if defined MSYS2_BITS set PATH=%PATH%;C:\msys64\mingw%MSYS2_BITS%\bin
+  - rustc -V
+  - cargo -V
+  - echo [workspace] > Cargo.toml
+  - echo members = [ >> Cargo.toml
+  - echo "snips-nlu-ontology", >> Cargo.toml
+  - echo "snips-nlu-ontology-ffi-macros", >> Cargo.toml
+  - echo "snips-nlu-ontology-parsers", >> Cargo.toml
+  - echo "snips-nlu-ontology-parsers-ffi-macros", >> Cargo.toml
+  - echo "snips-nlu-ontology-ffi", >> Cargo.toml
+  - echo "snips-nlu-ontology-ffi-with-parsers", >> Cargo.toml
+  - echo "snips-nlu-ontology-doc", >> Cargo.toml
+  - echo "platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs" >> Cargo.toml
+  - echo ] >> Cargo.toml
+  - perl -p -i -e "s/^snips-nlu-ontology = .*\$/snips-nlu-ontology = { path = \"..\/..\/..\/snips-nlu-ontology\" \}/g"platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - perl -p -i -e "s/^snips-nlu-ontology-ffi-macros = .*\$/snips-nlu-ontology-ffi-macros = { path = \"..\/..\/..\/snips-nlu-ontology-ffi-macros\" \}/g" platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - perl -p -i -e "s/^snips-nlu-ontology-parsers-ffi-macros = .*\$/snips-nlu-ontology-parsers-ffi-macros = { path = \"..\/..\/..\/snips-nlu-ontology-parsers-ffi-macros\" \}/g" platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+
+build: false
+
+test_script:
+  - cargo build --verbose
+  - cargo test --all --verbose
