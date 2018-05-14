@@ -26,9 +26,9 @@ install:
   - echo "snips-nlu-ontology-doc", >> Cargo.toml
   - echo "platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs" >> Cargo.toml
   - echo ] >> Cargo.toml
-  - perl -p -i.bak -e "s/^snips-nlu-ontology = .*\$/snips-nlu-ontology = { path = \"..\/..\/..\/snips-nlu-ontology\" \}/g" platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
-  - perl -p -i.bak -e "s/^snips-nlu-ontology-ffi-macros = .*\$/snips-nlu-ontology-ffi-macros = { path = \"..\/..\/..\/snips-nlu-ontology-ffi-macros\" \}/g" platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
-  - perl -p -i.bak -e "s/^snips-nlu-ontology-parsers-ffi-macros = .*\$/snips-nlu-ontology-parsers-ffi-macros = { path = \"..\/..\/..\/snips-nlu-ontology-parsers-ffi-macros\" \}/g" platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology = .*$", "snips-nlu-ontology = { path = `"../../../snips-nlu-ontology`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology-ffi-macros = .*$", "snips-nlu-ontology-ffi-macros = { path = `"../../../snips-nlu-ontology-ffi-macros`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology-parsers-ffi-macros = .*$", "snips-nlu-ontology-parsers-ffi-macros = { path = `"../../../snips-nlu-ontology-parsers-ffi-macros`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
 
 build: false
 
