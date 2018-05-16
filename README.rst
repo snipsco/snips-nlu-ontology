@@ -5,7 +5,7 @@ Snips NLU Ontology
    :target: https://travis-ci.org/snipsco/snips-nlu-ontology
 
 .. image:: https://ci.appveyor.com/api/projects/status/github/snipsco/snips-nlu-ontology?branch=develop&svg=true
-   :target: https://ci.appveyor.com/project/adrienball/snips-nlu-ontology
+   :target: https://ci.appveyor.com/project/snipsco/snips-nlu-ontology
 
 Ontology of the Snips NLU library API which describes supported languages and builtin entities.
 Please refer to `this page <platforms/snips-nlu-ontology-python>`_ for the python wrapper.
