@@ -28,6 +28,11 @@ fn add_header(readme: &mut String) {
     );
     readme.push_str("   :target: https://travis-ci.org/snipsco/snips-nlu-ontology\n");
     readme.push_str("\n");
+    readme.push_str(
+        ".. image:: https://ci.appveyor.com/api/projects/status/github/snipsco/snips-nlu-ontology?branch=develop&svg=true\n",
+    );
+    readme.push_str("   :target: https://ci.appveyor.com/project/snipsco/snips-nlu-ontology\n");
+    readme.push_str("\n");
 
     readme.push_str("Ontology of the Snips NLU library API which describes supported languages and builtin entities.\n");
     readme.push_str("Please refer to `this page <platforms/snips-nlu-ontology-python>`_ for the python wrapper.\n");

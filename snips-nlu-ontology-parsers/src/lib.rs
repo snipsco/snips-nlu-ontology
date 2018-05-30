@@ -1,6 +1,7 @@
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
+extern crate lru_cache;
 #[macro_use]
 extern crate maplit;
 extern crate regex;

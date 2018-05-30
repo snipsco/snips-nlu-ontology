@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use std::ops::Range;
-use std::time::Instant;
 use std::sync::{Arc, Mutex};
 
 use itertools::Itertools;
+use lru_cache::LruCache;
 use regex::Regex;
 
 use rustling_converters::{FromRustling, IntoBuiltin};
@@ -122,7 +122,7 @@ impl BuiltinEntityParser {
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
         lazy_static! {
-            static ref CACHED_ENTITY: Mutex<EntityCache> = Mutex::new(EntityCache::new(60));
+            static ref CACHED_ENTITIES: Mutex<EntityCache> = Mutex::new(EntityCache::new(100));
         }
         let key = CacheKey {
             lang: self.lang.to_string(),
@@ -135,7 +135,8 @@ impl BuiltinEntityParser {
                         .collect())
                 .unwrap_or_else(|| self.supported_entity_kinds.clone()),
         };
-        CACHED_ENTITY
+
+        CACHED_ENTITIES
             .lock()
             .unwrap()
             .cache(&key, |key| {
@@ -160,7 +161,6 @@ impl BuiltinEntityParser {
                     })
                     .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
             })
-            .entities
     }
 }
 
@@ -191,32 +191,24 @@ fn get_ranges_mapping(tokens_ranges: &Vec<Range<usize>>) -> HashMap<usize, usize
     ranges_mapping
 }
 
-struct EntityCache {
-    container: HashMap<CacheKey, CacheValue>,
-    valid_duration_sec: u64,
-}
+struct EntityCache(LruCache<CacheKey, Vec<BuiltinEntity>>);
 
 impl EntityCache {
-    fn new(valid_duration_sec: u64) -> EntityCache {
-        EntityCache {
-            container: HashMap::new(),
-            valid_duration_sec,
-        }
+    fn new(capacity: usize) -> EntityCache {
+        EntityCache(LruCache::new(capacity))
     }
 
     fn cache<F: Fn(&CacheKey) -> Vec<BuiltinEntity>>(
         &mut self,
         key: &CacheKey,
         producer: F,
-    ) -> CacheValue {
-        let cached_value = self.container.get(key).map(|a| a.clone());
+    ) -> Vec<BuiltinEntity> {
+        let cached_value = self.0.get_mut(key).map(|a| a.clone());
         if let Some(value) = cached_value {
-            if value.is_valid(self.valid_duration_sec) {
-                return value;
-            }
+            return value;
         }
-        let value = CacheValue::new(producer(key));
-        self.container.insert(key.clone(), value.clone());
+        let value = producer(key);
+        self.0.insert(key.clone(), value.clone());
         value
     }
 }
@@ -228,24 +220,6 @@ struct CacheKey {
     kinds: Vec<BuiltinEntityKind>,
 }
 
-#[derive(Debug, Clone)]
-struct CacheValue {
-    entities: Vec<BuiltinEntity>,
-    instant: Instant,
-}
-
-impl CacheValue {
-    fn new(entities: Vec<BuiltinEntity>) -> CacheValue {
-        CacheValue {
-            entities,
-            instant: Instant::now(),
-        }
-    }
-
-    fn is_valid(&self, valid_duration_sec: u64) -> bool {
-        self.instant.elapsed().as_secs() < valid_duration_sec
-    }
-}
 
 #[cfg(test)]
 mod test {
@@ -342,40 +316,52 @@ mod test {
 
     #[test]
     fn test_entity_cache() {
-        fn parse(_: &CacheKey) -> Vec<BuiltinEntity> {
-            vec![
-                BuiltinEntity {
-                    value: "two".into(),
-                    range: 23..26,
-                    entity_kind: BuiltinEntityKind::Number,
-                    entity: SlotValue::Number(NumberValue { value: 2.0 }),
-                },
-                BuiltinEntity {
-                    value: "4.5".into(),
-                    range: 34..42,
-                    entity_kind: BuiltinEntityKind::Number,
-                    entity: SlotValue::Number(NumberValue { value: 4.5 }),
-                },
-            ]
+        fn parse(key: &CacheKey) -> Vec<BuiltinEntity> {
+            if key.lang == "en".to_string() {
+                vec![
+                    BuiltinEntity {
+                        value: "two".into(),
+                        range: 23..26,
+                        entity_kind: BuiltinEntityKind::Number,
+                        entity: SlotValue::Number(NumberValue { value: 2.0 }),
+                    },
+                    BuiltinEntity {
+                        value: "4.5".into(),
+                        range: 34..42,
+                        entity_kind: BuiltinEntityKind::Number,
+                        entity: SlotValue::Number(NumberValue { value: 4.5 }),
+                    },
+                ]
+            } else {
+                vec![]
+            }
         }
 
-        let key = CacheKey {
+        let en_key = CacheKey {
             lang: "en".into(),
             input: "test".into(),
             kinds: vec![],
         };
 
-        let mut cache = EntityCache::new(10); // caching for 10s
-        assert_eq!(
-            cache.cache(&key, parse).instant,
-            cache.cache(&key, parse).instant
-        );
+        let en_key_2 = CacheKey {
+            lang: "en".into(),
+            input: "test2".into(),
+            kinds: vec![],
+        };
 
-        let mut cache = EntityCache::new(0); // no caching
-        assert_ne!(
-            cache.cache(&key, parse).instant,
-            cache.cache(&key, parse).instant
-        );
+        let fr_key = CacheKey {
+            lang: "fr".into(),
+            input: "test".into(),
+            kinds: vec![],
+        };
+
+        let mut cache = EntityCache::new(2); // caching for 10s
+        cache.cache(&en_key, parse);
+        cache.cache(&en_key_2, parse);
+        cache.cache(&fr_key, parse);
+
+        assert_eq!(2, cache.0.len());
+        assert_eq!(false, cache.0.contains_key(&en_key));
     }
 
     #[test]
