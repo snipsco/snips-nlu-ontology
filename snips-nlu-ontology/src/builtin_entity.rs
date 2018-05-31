@@ -508,7 +508,6 @@ pub struct BuiltinEntityKindDetails {
 
 /// Returns a json string containing the entities ontology per language in the following format:
 ///
-/// ```
 /// {
 ///   "en": {
 ///     "entities": [
@@ -526,7 +525,7 @@ pub struct BuiltinEntityKindDetails {
 ///     ]
 ///   }
 /// }
-/// ```
+///
 pub fn complete_entity_ontology() -> HashMap<String, HashMap<&'static str, Vec<BuiltinEntityKindDetails>>> {
     HashMap::from_iter(
         Language::all()
