@@ -146,12 +146,15 @@ impl BuiltinEntityKind {
     fn en_examples(&self) -> &[&str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                "10$",
+                "$10",
+                "six euros",
                 "around 5€",
                 "ten dollars and five cents",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
+                "during two minutes",
+                "for 20 seconds",
                 "3 months",
                 "half an hour",
                 "8 years and two days",
@@ -174,9 +177,10 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Time => &[
                 "Today",
+                "at 8 a.m.",
                 "4:30 pm",
                 "in 1 hour",
-                "3rd tuesday of June",
+                "the 3rd tuesday of June",
             ],
             BuiltinEntityKind::Percentage => &[
                 "25%",
@@ -189,13 +193,15 @@ impl BuiltinEntityKind {
     fn es_examples(&self) -> &[&str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                "10$",
+                "$10",
                 "cinco euros",
+                "15€",
                 "diez dólares y cinco centavos",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
                 "3 meses",
+                "diez minutos",
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "ciento dos minutos",
                 // "8 años y dos dias",
@@ -210,6 +216,7 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Ordinal => &[
                 "primer",
+                "decima",
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "vigésimo primero",
             ],
@@ -241,10 +248,13 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
                 "environ 5€",
+                "six euros",
                 "dix dollars et cinq centimes",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
+                "pendant vingt minutes",
+                "durant 3 secondes",
                 "3 mois",
                 "une demi heure",
                 "8 ans et deux jours",
@@ -257,18 +267,23 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Ordinal => &[
                 "1er",
+                "43ème",
                 "le deuxième",
+                "cinq centième",
                 "vingt et unieme",
             ],
             BuiltinEntityKind::Temperature => &[
                 "70K",
                 "3°C",
                 "vingt trois degrés",
+                "45 degrés celsius",
                 "deux cent degrés Fahrenheit",
             ],
             BuiltinEntityKind::Time => &[
                 "Aujourd'hui",
                 "à 14:30",
+                "demain matin",
+                "hier vers 10 heures",
                 "dans 1 heure",
                 "le premier jeudi de Juin",
             ],
