@@ -9,6 +9,12 @@ import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
 import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
 import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
 import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
+import ai.snips.nlu.ontology.EntityOntology.SnipsNluOntologyClientLibrary.Companion.INSTANCE as LIB
+import ai.snips.nlu.ontology.ffi.toPointer
+import com.sun.jna.Library
+import com.sun.jna.Native
+import com.sun.jna.Pointer
+import com.sun.jna.ptr.PointerByReference
 import org.parceler.Parcel
 import org.parceler.Parcel.Serialization.BEAN
 import org.parceler.ParcelConstructor
@@ -103,3 +109,39 @@ data class IntentParserResult @ParcelConstructor constructor(
         @ParcelProperty("input") val input: String,
         @ParcelProperty("intent") val intent: IntentClassifierResult?,
         @ParcelProperty("slots") val slots: List<Slot>)
+
+class EntityOntology {
+    companion object {
+        private fun parseError(returnCode: Int) {
+            if (returnCode != 0) {
+                PointerByReference().apply {
+                    LIB.snips_nlu_ontology_get_last_error(this)
+                    throw RuntimeException(value.getString(0).apply {
+                        LIB.snips_nlu_ontology_destroy_string(value)
+                    })
+                }
+            }
+        }
+
+        fun completeEntityOntologyJson(): String = PointerByReference().run {
+            parseError(LIB.snips_nlu_ontology_complete_entity_ontology_json(this))
+            value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
+        }
+
+        fun entityOntologyJson(language: String): String = PointerByReference().run {
+            parseError(LIB.snips_nlu_ontology_entity_ontology_json(language.toPointer(), this))
+            value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
+        }
+    }
+
+    internal interface SnipsNluOntologyClientLibrary : Library {
+        companion object {
+            val INSTANCE: SnipsNluOntologyClientLibrary = Native.loadLibrary("snips_nlu_ontology_ffi", SnipsNluOntologyClientLibrary::class.java)
+        }
+
+        fun snips_nlu_ontology_complete_entity_ontology_json(result: PointerByReference): Int
+        fun snips_nlu_ontology_entity_ontology_json(language: Pointer, result: PointerByReference): Int
+        fun snips_nlu_ontology_get_last_error(error: PointerByReference): Int
+        fun snips_nlu_ontology_destroy_string(string: Pointer): Int
+    }
+}

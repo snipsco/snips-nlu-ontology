@@ -10,3 +10,6 @@ lazy_static = "1.0"
 libc = "0.2"
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
 snips-nlu-ontology-ffi-macros = { path = "../snips-nlu-ontology-ffi-macros" }
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
