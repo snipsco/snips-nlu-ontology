@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::iter::FromIterator;
 use std::ops::Range;
 
 use serde::Deserialize;
@@ -354,8 +356,8 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn result_description(&self) -> Result<String> {
-        Ok(match *self {
+    pub fn result_description(&self) -> String {
+        match *self {
             BuiltinEntityKind::AmountOfMoney => serde_json::to_string_pretty(&vec![
                 ::SlotValue::AmountOfMoney(::AmountOfMoneyValue {
                     value: 10.05,
@@ -406,7 +408,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
             ]),
-        }?)
+        }.unwrap()
     }
 }
 
@@ -482,6 +484,64 @@ impl BuiltinEntityKind {
     }
 }
 
+impl BuiltinEntityKind {
+    fn ontology_details(&self, language: Language) -> BuiltinEntityKindDetails {
+        BuiltinEntityKindDetails {
+            name: self.to_string(),
+            label: self.identifier().to_string(),
+            description: self.description().to_string(),
+            examples: self.examples(language).into_iter().map(|ex| ex.to_string()).collect(),
+            result_description: self.result_description(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BuiltinEntityKindDetails {
+    name: String,
+    label: String,
+    description: String,
+    examples: Vec<String>,
+    result_description: String,
+}
+
+/// Returns a json string containing the entities ontology per language in the following format:
+///
+/// ```
+/// {
+///   "en": {
+///     "entities": [
+///       {
+///         "name": "Number",
+///         "label": "snips/number",
+///         "description": "Matches a cardinal number",
+///         "examples": [
+///           "2001",
+///           "twenty one",
+///           "three hundred and four"
+///         ],
+///         "resultDescription": "[\n  {\n    \"kind\": \"Number\",\n    \"value\": 42.0\n  }\n]"
+///       }
+///     ]
+///   }
+/// }
+/// ```
+pub fn complete_entity_ontology() -> HashMap<String, HashMap<&'static str, Vec<BuiltinEntityKindDetails>>> {
+    HashMap::from_iter(
+        Language::all()
+            .iter()
+            .map(|language| (language.to_string(), entity_ontology(*language))))
+}
+
+pub fn entity_ontology(language: Language) -> HashMap<&'static str, Vec<BuiltinEntityKindDetails>> {
+    let entities_details = BuiltinEntityKind::supported_entity_kinds(language)
+        .iter()
+        .map(|entity_kind| entity_kind.ontology_details(language))
+        .collect();
+    HashMap::from_iter([("entities", entities_details)].iter().cloned())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -490,7 +550,7 @@ mod tests {
     #[test]
     fn test_result_descriptions() {
         // Given
-        let description = BuiltinEntityKind::Percentage.result_description().unwrap();
+        let description = BuiltinEntityKind::Percentage.result_description();
 
         // When/Then
         let expected_description =
@@ -567,5 +627,17 @@ mod tests {
                 Token::StructEnd,
             ],
         );
+    }
+
+    #[test]
+    fn test_complete_entities_ontology() {
+        assert_eq!(true, serde_json::to_string_pretty(&complete_entity_ontology()).is_ok())
+    }
+
+    #[test]
+    fn test_entities_ontology() {
+        for language in Language::all() {
+            assert_eq!(true, serde_json::to_string_pretty(&entity_ontology(*language)).is_ok())
+        }
     }
 }

@@ -63,5 +63,20 @@ macro_rules! export_nlu_ontology_c_symbols {
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::get_builtin_entity_examples(builtin_entity_kind, language, results))
         }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_complete_entity_ontology_json(
+            results: *mut *const libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_complete_entity_ontology_json(results))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_entity_ontology_json(
+            language: *const libc::c_char,
+            results: *mut *const libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_entity_ontology_json(language, results))
+        }
     };
 }

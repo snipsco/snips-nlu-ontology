@@ -6,10 +6,11 @@ use std::slice;
 use std::str::FromStr;
 
 use libc;
+use serde_json;
 
 use errors::*;
-use ffi_utils::{CStringArray, CReprOf, RawPointerConverter};
-use snips_nlu_ontology::{BuiltinEntityKind, Language};
+use ffi_utils::{CStringArray, CReprOf, RawPointerConverter, point_to_string};
+use snips_nlu_ontology::{BuiltinEntityKind, Language, entity_ontology, complete_entity_ontology};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -129,4 +130,19 @@ pub fn get_builtin_entity_examples(
         *results = c_examples;
     }
     Ok(())
+}
+
+pub fn get_complete_entity_ontology_json(ontology_result: *mut *const libc::c_char) -> Result<()> {
+    let ontology = serde_json::to_string_pretty(&complete_entity_ontology())?;
+    point_to_string(ontology_result, ontology)
+}
+
+pub fn get_entity_ontology_json(
+    language: *const libc::c_char,
+    ontology_result: *mut *const libc::c_char,
+) -> Result<()> {
+    let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
+    let language = Language::from_str(&*language_str.to_uppercase())?;
+    let ontology = serde_json::to_string_pretty(&entity_ontology(language))?;
+    point_to_string(ontology_result, ontology)
 }
