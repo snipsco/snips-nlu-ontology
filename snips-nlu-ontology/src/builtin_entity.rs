@@ -76,12 +76,12 @@ impl BuiltinEntityKind {
 impl BuiltinEntityKind {
     pub fn description(&self) -> &str {
         match *self {
-            BuiltinEntityKind::AmountOfMoney => "Matches amount of money",
-            BuiltinEntityKind::Duration => "Matches time duration",
-            BuiltinEntityKind::Number => "Matches a cardinal numbers",
-            BuiltinEntityKind::Ordinal => "Matches a ordinal numbers",
+            BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
+            BuiltinEntityKind::Duration => "Matches a time duration",
+            BuiltinEntityKind::Number => "Matches a cardinal number",
+            BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
-            BuiltinEntityKind::Time => "Matches date, time, intervals or date and time together",
+            BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
             BuiltinEntityKind::Percentage => "Matches a percentage",
         }
     }
