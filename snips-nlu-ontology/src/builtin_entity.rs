@@ -507,6 +507,7 @@ impl BuiltinEntityKind {
             description: self.description().to_string(),
             examples: self.examples(language).into_iter().map(|ex| ex.to_string()).collect(),
             result_description: self.result_description(),
+            supported_languages: self.supported_languages().into_iter().map(|l| l.to_string()).collect(),
         }
     }
 }
@@ -519,6 +520,7 @@ pub struct BuiltinEntityKindDetails {
     description: String,
     examples: Vec<String>,
     result_description: String,
+    supported_languages: Vec<String>,
 }
 
 /// Returns a json string containing the entities ontology per language in the following format:
