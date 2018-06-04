@@ -123,11 +123,13 @@ class EntityOntology {
             }
         }
 
+        @JvmStatic
         fun completeEntityOntologyJson(): String = PointerByReference().run {
             parseError(LIB.snips_nlu_ontology_complete_entity_ontology_json(this))
             value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
         }
 
+        @JvmStatic
         fun entityOntologyJson(language: String): String = PointerByReference().run {
             parseError(LIB.snips_nlu_ontology_entity_ontology_json(language.toPointer(), this))
             value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
