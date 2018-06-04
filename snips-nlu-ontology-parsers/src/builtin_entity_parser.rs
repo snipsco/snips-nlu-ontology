@@ -4,7 +4,6 @@ use std::ops::Range;
 use std::sync::{Arc, Mutex};
 
 use itertools::Itertools;
-use lru_cache::LruCache;
 use regex::Regex;
 
 use rustling_converters::{FromRustling, IntoBuiltin};
@@ -121,46 +120,28 @@ impl BuiltinEntityParser {
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
-        lazy_static! {
-            static ref CACHED_ENTITIES: Mutex<EntityCache> = Mutex::new(EntityCache::new(100));
-        }
-        let key = CacheKey {
-            lang: self.lang.to_string(),
-            input: sentence.into(),
-            kinds: filter_entity_kinds
-                .map(|kinds|
-                    self.supported_entity_kinds.clone()
-                        .into_iter()
-                        .filter(|entity_kind| kinds.contains(&entity_kind))
-                        .collect())
-                .unwrap_or_else(|| self.supported_entity_kinds.clone()),
-        };
+        let context = ResolverContext::default();
+        let kind_order = self.supported_entity_kinds
+            .iter()
+            .filter(|entity_kind|
+                filter_entity_kinds
+                    .map(|kinds| kinds.contains(&entity_kind))
+                    .unwrap_or(true))
+            .map(|kind| kind.into_builtin())
+            .collect::<Vec<OutputKind>>();
 
-        CACHED_ENTITIES
-            .lock()
-            .unwrap()
-            .cache(&key, |key| {
-                let context = ResolverContext::default();
-                let kind_order = key.kinds.iter()
-                    .map(|kind| kind.into_builtin())
-                    .collect::<Vec<OutputKind>>();
-                self.parser
-                    .parse_with_kind_order(&sentence.to_lowercase(), &context, &kind_order)
-                    .unwrap_or_else(|_| vec![])
-                    .iter()
-                    .filter_map(|m| {
-                        let entity_kind = BuiltinEntityKind::from_rustling(&m.value);
-                        key.kinds.iter().find(|kind| **kind == entity_kind).map(|kind| {
-                            BuiltinEntity {
-                                value: sentence[m.byte_range.0..m.byte_range.1].into(),
-                                range: m.char_range.0..m.char_range.1,
-                                entity: m.value.clone().into_builtin(),
-                                entity_kind: kind.clone(),
-                            }
-                        })
-                    })
-                    .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
-            })
+        self.parser
+            .parse_with_kind_order(&sentence.to_lowercase(), &context, &kind_order)
+            .unwrap_or_else(|_| vec![])
+            .iter()
+            .map(|m|
+                BuiltinEntity {
+                    value: sentence[m.byte_range.0..m.byte_range.1].into(),
+                    range: m.char_range.0..m.char_range.1,
+                    entity: m.value.clone().into_builtin(),
+                    entity_kind: BuiltinEntityKind::from_rustling(&m.value),
+                })
+            .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
     }
 }
 
@@ -190,36 +171,6 @@ fn get_ranges_mapping(tokens_ranges: &Vec<Range<usize>>) -> HashMap<usize, usize
         ));
     ranges_mapping
 }
-
-struct EntityCache(LruCache<CacheKey, Vec<BuiltinEntity>>);
-
-impl EntityCache {
-    fn new(capacity: usize) -> EntityCache {
-        EntityCache(LruCache::new(capacity))
-    }
-
-    fn cache<F: Fn(&CacheKey) -> Vec<BuiltinEntity>>(
-        &mut self,
-        key: &CacheKey,
-        producer: F,
-    ) -> Vec<BuiltinEntity> {
-        let cached_value = self.0.get_mut(key).map(|a| a.clone());
-        if let Some(value) = cached_value {
-            return value;
-        }
-        let value = producer(key);
-        self.0.insert(key.clone(), value.clone());
-        value
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct CacheKey {
-    lang: String,
-    input: String,
-    kinds: Vec<BuiltinEntityKind>,
-}
-
 
 #[cfg(test)]
 mod test {
@@ -312,56 +263,6 @@ mod test {
                 None,
             )
         );
-    }
-
-    #[test]
-    fn test_entity_cache() {
-        fn parse(key: &CacheKey) -> Vec<BuiltinEntity> {
-            if key.lang == "en".to_string() {
-                vec![
-                    BuiltinEntity {
-                        value: "two".into(),
-                        range: 23..26,
-                        entity_kind: BuiltinEntityKind::Number,
-                        entity: SlotValue::Number(NumberValue { value: 2.0 }),
-                    },
-                    BuiltinEntity {
-                        value: "4.5".into(),
-                        range: 34..42,
-                        entity_kind: BuiltinEntityKind::Number,
-                        entity: SlotValue::Number(NumberValue { value: 4.5 }),
-                    },
-                ]
-            } else {
-                vec![]
-            }
-        }
-
-        let en_key = CacheKey {
-            lang: "en".into(),
-            input: "test".into(),
-            kinds: vec![],
-        };
-
-        let en_key_2 = CacheKey {
-            lang: "en".into(),
-            input: "test2".into(),
-            kinds: vec![],
-        };
-
-        let fr_key = CacheKey {
-            lang: "fr".into(),
-            input: "test".into(),
-            kinds: vec![],
-        };
-
-        let mut cache = EntityCache::new(2); // caching for 10s
-        cache.cache(&en_key, parse);
-        cache.cache(&en_key_2, parse);
-        cache.cache(&fr_key, parse);
-
-        assert_eq!(2, cache.0.len());
-        assert_eq!(false, cache.0.contains_key(&en_key));
     }
 
     #[test]
