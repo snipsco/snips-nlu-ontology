@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::iter::FromIterator;
 use std::ops::Range;
 
 use serde::Deserialize;
@@ -523,39 +521,30 @@ pub struct BuiltinEntityKindDetails {
     supported_languages: Vec<String>,
 }
 
-/// Returns a json string containing the entities ontology per language in the following format:
-///
-/// {
-///   "en": {
-///     "entities": [
-///       {
-///         "name": "Number",
-///         "label": "snips/number",
-///         "description": "Matches a cardinal number",
-///         "examples": [
-///           "2001",
-///           "twenty one",
-///           "three hundred and four"
-///         ],
-///         "resultDescription": "[\n  {\n    \"kind\": \"Number\",\n    \"value\": 42.0\n  }\n]"
-///       }
-///     ]
-///   }
-/// }
-///
-pub fn complete_entity_ontology() -> HashMap<String, HashMap<&'static str, Vec<BuiltinEntityKindDetails>>> {
-    HashMap::from_iter(
-        Language::all()
-            .iter()
-            .map(|language| (language.to_string(), entity_ontology(*language))))
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct LanguageBuiltinEntityOntology {
+    language: String,
+    entities: Vec<BuiltinEntityKindDetails>,
 }
 
-pub fn entity_ontology(language: Language) -> HashMap<&'static str, Vec<BuiltinEntityKindDetails>> {
-    let entities_details = BuiltinEntityKind::supported_entity_kinds(language)
+#[derive(Serialize, Deserialize, Clone)]
+pub struct CompleteBuiltinEntityOntology(Vec<LanguageBuiltinEntityOntology>);
+
+pub fn complete_entity_ontology() -> CompleteBuiltinEntityOntology {
+    let language_ontologies = Language::all()
+        .iter()
+        .map(|language| language_entity_ontology(*language))
+        .collect();
+    CompleteBuiltinEntityOntology(language_ontologies)
+}
+
+pub fn language_entity_ontology(language: Language) -> LanguageBuiltinEntityOntology {
+    let entities = BuiltinEntityKind::supported_entity_kinds(language)
         .iter()
         .map(|entity_kind| entity_kind.ontology_details(language))
         .collect();
-    HashMap::from_iter([("entities", entities_details)].iter().cloned())
+    LanguageBuiltinEntityOntology { language: language.to_string(), entities }
 }
 
 #[cfg(test)]
@@ -653,7 +642,7 @@ mod tests {
     #[test]
     fn test_entities_ontology() {
         for language in Language::all() {
-            assert_eq!(true, serde_json::to_string_pretty(&entity_ontology(*language)).is_ok())
+            assert_eq!(true, serde_json::to_string_pretty(&language_entity_ontology(*language)).is_ok())
         }
     }
 }

@@ -14,13 +14,13 @@ class EntityOntologyTest {
 
     @Test
     fun entityOntologyJsonWorks() {
-        assertThat(EntityOntology.entityOntologyJson("en")).isNotEmpty()
+        assertThat(EntityOntology.languageEntityOntologyJson("en")).isNotEmpty()
     }
 
     @Test
     fun entityOntologyJsonRaisesErrorOnUnknownLanguage() {
         try {
-            EntityOntology.entityOntologyJson("klingon")
+            EntityOntology.languageEntityOntologyJson("klingon")
             fail("Should raise exception for unknown language")
         } catch (e: RuntimeException) {
             assertThat(e.message).contains("Unknown language")

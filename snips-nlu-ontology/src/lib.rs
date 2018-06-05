@@ -15,7 +15,10 @@ pub mod language;
 pub mod builtin_entity;
 mod ontology;
 
-pub use builtin_entity::{BuiltinEntity, BuiltinEntityKind, entity_ontology, complete_entity_ontology};
+pub use builtin_entity::{BuiltinEntity,
+                         BuiltinEntityKind,
+                         language_entity_ontology,
+                         complete_entity_ontology};
 pub use ontology::*;
 pub use language::*;
 

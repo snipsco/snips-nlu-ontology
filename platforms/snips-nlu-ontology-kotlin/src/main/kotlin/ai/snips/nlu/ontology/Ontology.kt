@@ -130,8 +130,8 @@ class EntityOntology {
         }
 
         @JvmStatic
-        fun entityOntologyJson(language: String): String = PointerByReference().run {
-            parseError(LIB.snips_nlu_ontology_entity_ontology_json(language.toPointer(), this))
+        fun languageEntityOntologyJson(language: String): String = PointerByReference().run {
+            parseError(LIB.snips_nlu_ontology_language_entity_ontology_json(language.toPointer(), this))
             value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
         }
     }
@@ -142,7 +142,7 @@ class EntityOntology {
         }
 
         fun snips_nlu_ontology_complete_entity_ontology_json(result: PointerByReference): Int
-        fun snips_nlu_ontology_entity_ontology_json(language: Pointer, result: PointerByReference): Int
+        fun snips_nlu_ontology_language_entity_ontology_json(language: Pointer, result: PointerByReference): Int
         fun snips_nlu_ontology_get_last_error(error: PointerByReference): Int
         fun snips_nlu_ontology_destroy_string(string: Pointer): Int
     }
