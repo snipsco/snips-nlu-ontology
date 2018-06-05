@@ -23,7 +23,6 @@ import com.sun.jna.toJnaPointer
 
 const val RUST_ENCODING = "utf-8"
 
-fun String.toPointer(): Pointer = this.toJnaPointer(RUST_ENCODING)
 fun Pointer?.readString(): String = this!!.getString(0, RUST_ENCODING)
 fun Int?.readGrain(): Grain = CGrain.toGrain(this!!)
 fun Int?.readPrecision(): Precision = CPrecision.toPrecision(this!!)

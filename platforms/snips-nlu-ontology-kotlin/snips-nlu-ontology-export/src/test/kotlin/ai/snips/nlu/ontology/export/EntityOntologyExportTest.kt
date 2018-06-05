@@ -1,11 +1,11 @@
-package ai.snips.nlu.ontology
+package ai.snips.nlu.ontology.export
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.Assert.fail
 
 
-class EntityOntologyTest {
+class EntityOntologyExportTest {
 
     @Test
     fun completeEntityOntologyJsonWorks() {

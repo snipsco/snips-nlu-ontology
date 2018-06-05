@@ -25,54 +25,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile 'net.java.dev.jna:jna:4.5.0'
     compile 'org.parceler:parceler-api:1.1.9'
-    testCompile 'junit:junit:4.12'
-    testCompile 'com.google.truth:truth:0.36'
-}
-
-def buildType = project.hasProperty("debug") ? "debug" : "release"
-println "Using build type $buildType"
-
-def rustTargetPath = project.hasProperty("rustTargetPath") ? project.rustTargetPath : "../../target"
-println "Using rust target path $rustTargetPath"
-
-def soForJar = [
-        ["$rustTargetPath/$buildType/libsnips_nlu_ontology_ffi.so", "linux-x86-64", "linuxNative" ],
-        ["$rustTargetPath/$buildType/libsnips_nlu_ontology_ffi.dylib", "darwin", "macOsNative" ],
-        ["$rustTargetPath/arm-unknown-linux-gnueabihf/$buildType/libsnips_nlu_ontology_ffi.so", "linux-arm", "linuxArmCross"]
-]
-
-def jarClassifier = {
-    def existing = soForJar.findAll{ file(it[0]).exists() }
-    if(existing.size == 1) existing[0][1]
-    else if(existing.size == 0) "naked"
-    else "multiarch"
-}
-
-jar {
-    classifier "${ -> jarClassifier() }"
-}
-
-def jniLibsDir = new File(buildDir, "jniLibs")
-
-soForJar.forEach {
-    def taskName = "copySo${it[2].capitalize()}ForJar"
-    def soFile = file(it[0])
-    def destDir = new File(jniLibsDir, it[1])
-
-    task(taskName, type: Copy) {
-        from soFile
-        into destDir
-    }
-    processResources.dependsOn(taskName)
-
-}
-
-sourceSets {
-    main {
-        resources {
-            srcDir jniLibsDir
-        }
-    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
