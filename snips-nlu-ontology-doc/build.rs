@@ -108,6 +108,6 @@ fn add_builtin_entity_results_examples(readme: &mut String, entity: BuiltinEntit
     readme.push_str("\n");
     readme.push_str(".. code-block:: json\n");
     readme.push_str("\n   ");
-    readme.push_str(&*entity.result_description().unwrap().replace("\n", "\n   "));
+    readme.push_str(&*entity.result_description().replace("\n", "\n   "));
     readme.push_str("\n\n");
 }
