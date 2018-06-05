@@ -74,12 +74,12 @@ impl BuiltinEntityKind {
 impl BuiltinEntityKind {
     pub fn description(&self) -> &str {
         match *self {
-            BuiltinEntityKind::AmountOfMoney => "Matches amount of money",
-            BuiltinEntityKind::Duration => "Matches time duration",
-            BuiltinEntityKind::Number => "Matches a cardinal numbers",
-            BuiltinEntityKind::Ordinal => "Matches a ordinal numbers",
+            BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
+            BuiltinEntityKind::Duration => "Matches a time duration",
+            BuiltinEntityKind::Number => "Matches a cardinal number",
+            BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
-            BuiltinEntityKind::Time => "Matches date, time, intervals or date and time together",
+            BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
             BuiltinEntityKind::Percentage => "Matches a percentage",
         }
     }
@@ -144,12 +144,15 @@ impl BuiltinEntityKind {
     fn en_examples(&self) -> &[&str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                "10$",
+                "$10",
+                "six euros",
                 "around 5€",
                 "ten dollars and five cents",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
+                "during two minutes",
+                "for 20 seconds",
                 "3 months",
                 "half an hour",
                 "8 years and two days",
@@ -172,9 +175,10 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Time => &[
                 "Today",
+                "at 8 a.m.",
                 "4:30 pm",
                 "in 1 hour",
-                "3rd tuesday of June",
+                "the 3rd tuesday of June",
             ],
             BuiltinEntityKind::Percentage => &[
                 "25%",
@@ -187,13 +191,15 @@ impl BuiltinEntityKind {
     fn es_examples(&self) -> &[&str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                "10$",
+                "$10",
                 "cinco euros",
+                "15€",
                 "diez dólares y cinco centavos",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
                 "3 meses",
+                "diez minutos",
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "ciento dos minutos",
                 // "8 años y dos dias",
@@ -208,6 +214,7 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Ordinal => &[
                 "primer",
+                "decima",
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "vigésimo primero",
             ],
@@ -239,10 +246,13 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
                 "environ 5€",
+                "six euros",
                 "dix dollars et cinq centimes",
             ],
             BuiltinEntityKind::Duration => &[
                 "1h",
+                "pendant vingt minutes",
+                "durant 3 secondes",
                 "3 mois",
                 "une demi heure",
                 "8 ans et deux jours",
@@ -255,18 +265,23 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Ordinal => &[
                 "1er",
+                "43ème",
                 "le deuxième",
+                "cinq centième",
                 "vingt et unieme",
             ],
             BuiltinEntityKind::Temperature => &[
                 "70K",
                 "3°C",
                 "vingt trois degrés",
+                "45 degrés celsius",
                 "deux cent degrés Fahrenheit",
             ],
             BuiltinEntityKind::Time => &[
                 "Aujourd'hui",
                 "à 14:30",
+                "demain matin",
+                "hier vers 10 heures",
                 "dans 1 heure",
                 "le premier jeudi de Juin",
             ],
@@ -354,8 +369,8 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn result_description(&self) -> Result<String> {
-        Ok(match *self {
+    pub fn result_description(&self) -> String {
+        match *self {
             BuiltinEntityKind::AmountOfMoney => serde_json::to_string_pretty(&vec![
                 ::SlotValue::AmountOfMoney(::AmountOfMoneyValue {
                     value: 10.05,
@@ -406,7 +421,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
             ]),
-        }?)
+        }.unwrap()
     }
 }
 
@@ -482,6 +497,56 @@ impl BuiltinEntityKind {
     }
 }
 
+impl BuiltinEntityKind {
+    fn ontology_details(&self, language: Language) -> BuiltinEntityKindDetails {
+        BuiltinEntityKindDetails {
+            name: self.to_string(),
+            label: self.identifier().to_string(),
+            description: self.description().to_string(),
+            examples: self.examples(language).into_iter().map(|ex| ex.to_string()).collect(),
+            result_description: self.result_description(),
+            supported_languages: self.supported_languages().into_iter().map(|l| l.to_string()).collect(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BuiltinEntityKindDetails {
+    name: String,
+    label: String,
+    description: String,
+    examples: Vec<String>,
+    result_description: String,
+    supported_languages: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct LanguageBuiltinEntityOntology {
+    language: String,
+    entities: Vec<BuiltinEntityKindDetails>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct CompleteBuiltinEntityOntology(Vec<LanguageBuiltinEntityOntology>);
+
+pub fn complete_entity_ontology() -> CompleteBuiltinEntityOntology {
+    let language_ontologies = Language::all()
+        .iter()
+        .map(|language| language_entity_ontology(*language))
+        .collect();
+    CompleteBuiltinEntityOntology(language_ontologies)
+}
+
+pub fn language_entity_ontology(language: Language) -> LanguageBuiltinEntityOntology {
+    let entities = BuiltinEntityKind::supported_entity_kinds(language)
+        .iter()
+        .map(|entity_kind| entity_kind.ontology_details(language))
+        .collect();
+    LanguageBuiltinEntityOntology { language: language.to_string(), entities }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -490,7 +555,7 @@ mod tests {
     #[test]
     fn test_result_descriptions() {
         // Given
-        let description = BuiltinEntityKind::Percentage.result_description().unwrap();
+        let description = BuiltinEntityKind::Percentage.result_description();
 
         // When/Then
         let expected_description =
@@ -567,5 +632,17 @@ mod tests {
                 Token::StructEnd,
             ],
         );
+    }
+
+    #[test]
+    fn test_complete_entities_ontology() {
+        assert_eq!(true, serde_json::to_string_pretty(&complete_entity_ontology()).is_ok())
+    }
+
+    #[test]
+    fn test_entities_ontology() {
+        for language in Language::all() {
+            assert_eq!(true, serde_json::to_string_pretty(&language_entity_ontology(*language)).is_ok())
+        }
     }
 }

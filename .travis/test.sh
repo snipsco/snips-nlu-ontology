@@ -11,3 +11,9 @@ echo "Running python tests..."
 cd platforms/snips-nlu-ontology-python
 python -m pip install tox
 tox
+cd ../..
+
+echo "Kotlin build..."
+cd platforms/snips-nlu-ontology-kotlin
+./gradlew -Pdebug build --info
+cd ../..
