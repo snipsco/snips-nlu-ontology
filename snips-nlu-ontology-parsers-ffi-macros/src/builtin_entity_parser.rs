@@ -1,6 +1,5 @@
 use std::ffi::{CStr};
 use std::slice;
-use std::sync::Arc;
 use std::str::FromStr;
 
 use failure::ResultExt;
@@ -29,9 +28,9 @@ pub fn create_builtin_entity_parser(
 ) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
     let lang = Language::from_str(&*lang.to_uppercase())?;
-    let parser = BuiltinEntityParser::get(lang);
+    let parser = BuiltinEntityParser::new(lang);
 
-    let c_parser = CBuiltinEntityParser(Arc::into_raw(parser) as _).into_raw_pointer();
+    let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 
     unsafe {
         *ptr = c_parser;
@@ -108,7 +107,7 @@ pub fn extract_entity(
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
     unsafe {
         let parser = CBuiltinEntityParser::from_raw_pointer(ptr)?.0;
-        let _ = Arc::from_raw(parser);
+        let _ = BuiltinEntityParser::from_raw_pointer(parser as _);
     }
     Ok(())
 }
