@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.57.0] - 2018-06-07
+
+### Removed
+- Caching of `BuiltinEntityParser` objects
+
 ## [0.56.1] - 2018-06-05
 
 ### Added
@@ -48,6 +53,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.57.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.1...0.57.0
 [0.56.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.0...0.56.1
 [0.56.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.55.0...0.56.0
 [0.55.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.54.3...0.55.0
