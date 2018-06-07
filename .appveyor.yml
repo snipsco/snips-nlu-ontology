@@ -6,6 +6,7 @@ environment:
 branches:
   only:
   - develop
+  - master
 
 install:
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
