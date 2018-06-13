@@ -3,6 +3,10 @@ extern crate itertools;
 extern crate lazy_static;
 #[macro_use]
 extern crate maplit;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 extern crate regex;
 extern crate rustling_ontology;
 extern crate snips_nlu_ontology as nlu_ontology;

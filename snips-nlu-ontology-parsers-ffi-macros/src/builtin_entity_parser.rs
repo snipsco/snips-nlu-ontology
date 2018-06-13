@@ -1,13 +1,13 @@
 use std::ffi::{CStr};
 use std::slice;
-use std::str::FromStr;
 
 use failure::ResultExt;
 use libc;
+use serde_json;
 
 use Result;
 use ffi_utils::{CStringArray, CReprOf, RawPointerConverter};
-use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind, Language};
+use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind};
 use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray};
 use snips_nlu_ontology_parsers::BuiltinEntityParser;
 
@@ -24,11 +24,11 @@ macro_rules! get_parser {
 
 pub fn create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
-    lang: *const libc::c_char,
+    json_config: *const libc::c_char,
 ) -> Result<()> {
-    let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
-    let lang = Language::from_str(&*lang.to_uppercase())?;
-    let parser = BuiltinEntityParser::new(lang);
+    let json_config = unsafe { CStr::from_ptr(json_config) }.to_str()?;
+    let parser_configuration = serde_json::from_str(json_config)?;
+    let parser = BuiltinEntityParser::new(parser_configuration);
 
     let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 

@@ -10,12 +10,6 @@ use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 
-pub struct BuiltinEntityParser {
-    parser: Parser,
-    lang: Language,
-    supported_entity_kinds: Vec<BuiltinEntityKind>,
-}
-
 lazy_static! {
     static ref NON_SPACE_REGEX: Regex = Regex::new(r"[^\s]+").unwrap();
 }
@@ -24,18 +18,37 @@ lazy_static! {
     static ref NON_SPACE_SEPARATED_LANGUAGES: HashSet<Language> = hashset!(Language::JA);
 }
 
+pub struct BuiltinEntityParser {
+    parser: Parser,
+    lang: Language,
+    supported_entity_kinds: Vec<BuiltinEntityKind>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BuiltinEntityParserConfiguration {
+    pub language: Language,
+    pub builtin_entities_resources: Vec<BuiltinEntityResource>
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BuiltinEntityResource {
+    pub builtin_entity_name: String,
+    pub resource_path: String
+}
+
 impl BuiltinEntityParser {
-    pub fn new(lang: Language) -> Self {
-        let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(lang);
+    pub fn new(config: BuiltinEntityParserConfiguration) -> Self {
+        let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(config.language);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
             .map(|output_kind| output_kind.into_builtin())
             .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
             .collect();
+        let rustling_parser = build_parser(config.language.into_builtin()).unwrap();
 
         BuiltinEntityParser {
-            parser: build_parser(lang.into_builtin()).unwrap(),
-            lang,
+            parser: rustling_parser,
+            lang: config.language,
             supported_entity_kinds: ordered_entity_kinds,
         }
     }
@@ -169,7 +182,11 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let parser = BuiltinEntityParser::new(Language::EN);
+        let parser_config = BuiltinEntityParserConfiguration {
+            language: Language::EN,
+            builtin_entities_resources: vec![]
+        };
+        let parser = BuiltinEntityParser::new(parser_config);
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
@@ -212,7 +229,11 @@ mod test {
 
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
-        let parser = BuiltinEntityParser::new(Language::JA);
+        let parser_config = BuiltinEntityParserConfiguration {
+            language: Language::JA,
+            builtin_entities_resources: vec![]
+        };
+        let parser = BuiltinEntityParser::new(parser_config);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
             grain: Grain::Day,
@@ -255,7 +276,11 @@ mod test {
     #[test]
     fn test_entity_examples_should_be_parsed() {
         for language in Language::all() {
-            let parser = BuiltinEntityParser::new(*language);
+            let parser_config = BuiltinEntityParserConfiguration{
+                language: *language,
+                builtin_entities_resources: vec![]
+            };
+            let parser = BuiltinEntityParser::new(parser_config);
             for entity_kind in BuiltinEntityKind::all() {
                 for example in entity_kind.examples(*language) {
                     let results = parser.extract_entities(example, Some(&[*entity_kind]));

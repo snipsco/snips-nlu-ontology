@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import json
 from _ctypes import pointer, byref
-from builtins import object, range, str
+from builtins import object, range, str, bytes
 from ctypes import c_char_p, c_void_p, c_int, string_at
 
 from snips_nlu_ontology.utils import (
@@ -110,16 +110,29 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
+        builtin_entities_resources (list of str, opt): list of resource paths
+            for builtin entities
     """
 
-    def __init__(self, language):
+    def __init__(self, language, builtin_entities_resources=None):
+        if builtin_entities_resources is None:
+            builtin_entities_resources = []
         if not isinstance(language, str):
             raise TypeError("Expected language to be of type 'str' but found:"
                             " %s" % type(language))
-        self.language = language
+        if not isinstance(builtin_entities_resources, list):
+            raise TypeError("Expected builtin_entities_resources to be of "
+                            "type 'list' but found: %s"
+                            % type(builtin_entities_resources))
+        self.parser_config = dict(
+            language=language.upper(),
+            builtin_entities_resources=builtin_entities_resources
+        )
         self._parser = pointer(c_void_p())
+        json_parser_config = bytes(json.dumps(self.parser_config),
+                                   encoding="utf8")
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
-            byref(self._parser), language.encode("utf8"))
+            byref(self._parser), json_parser_config)
         if exit_code:
             raise ImportError("Something wrong happened while creating the "
                               "intent parser. See stderr.")

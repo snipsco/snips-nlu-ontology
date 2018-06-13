@@ -20,9 +20,9 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_create_builtin_entity_parser(
             ptr: *mut *const $crate::CBuiltinEntityParser,
-            lang: *const ::libc::c_char,
+            json_config: *const ::libc::c_char,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::create_builtin_entity_parser(ptr, lang))
+            wrap!($crate::create_builtin_entity_parser(ptr, json_config))
         }
 
         #[no_mangle]
