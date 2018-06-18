@@ -1,7 +1,13 @@
 environment:
   matrix:
-  - TARGET: x86_64-pc-windows-msvc
-  - TARGET: x86_64-pc-windows-gnu
+  - PYTHON: "C:\\Python27-x64"
+    TARGET: x86_64-pc-windows-msvc
+  - PYTHON: "C:\\Python27-x64"
+    TARGET: x86_64-pc-windows-gnu
+  - PYTHON: "C:\\Python36-x64"
+    TARGET: x86_64-pc-windows-msvc
+  - PYTHON: "C:\\Python36-x64"
+    TARGET: x86_64-pc-windows-gnu
 
 branches:
   only:
@@ -35,3 +41,7 @@ build: false
 test_script:
   - cargo build --verbose
   - cargo test --all --verbose
+  - cd platforms/snips-nlu-ontology-python
+  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+  - "%PYTHON%\\python.exe -m pip install -e . --verbose"
+  - "%PYTHON%\\python.exe -m unittest discover"
