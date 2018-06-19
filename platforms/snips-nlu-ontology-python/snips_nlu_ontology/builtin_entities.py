@@ -125,7 +125,7 @@ class BuiltinEntityParser(object):
                               "intent parser. See stderr.")
 
     def __del__(self):
-        if hasattr(self, '_parser'):
+        if lib is not None and hasattr(self, '_parser'):
             lib.snips_nlu_ontology_destroy_builtin_entity_parser(self._parser)
 
     def parse(self, text, scope=None):
