@@ -2,10 +2,10 @@ environment:
   matrix:
   - PYTHON: "C:\\Python27-x64"
     TARGET: x86_64-pc-windows-msvc
-  - PYTHON: "C:\\Python27-x64"
-    TARGET: x86_64-pc-windows-gnu
   - PYTHON: "C:\\Python36-x64"
     TARGET: x86_64-pc-windows-msvc
+  - PYTHON: "C:\\Python27-x64"
+    TARGET: x86_64-pc-windows-gnu
   - PYTHON: "C:\\Python36-x64"
     TARGET: x86_64-pc-windows-gnu
 
