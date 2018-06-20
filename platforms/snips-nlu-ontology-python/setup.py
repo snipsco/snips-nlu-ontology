@@ -32,6 +32,11 @@ required = [
     "wheel==0.30.0"
 ]
 
+rust_extension = RustExtension(
+    RUST_EXTENSION_NAME, CARGO_FILE_PATH, debug="develop" in sys.argv,
+    args=["--verbose"] if "--verbose" in sys.argv else None,
+    binding=Binding.NoBinding)
+
 setup(name=PACKAGE_NAME,
       description="Python wrapper of the Snips NLU ontology",
       long_description=readme,
@@ -47,9 +52,7 @@ setup(name=PACKAGE_NAME,
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6",
       ],
-      rust_extensions=[RustExtension(RUST_EXTENSION_NAME, CARGO_FILE_PATH,
-                                     debug="develop" in sys.argv,
-                                     binding=Binding.NoBinding)],
+      rust_extensions=[rust_extension],
       install_requires=required,
       packages=packages,
       include_package_data=True,
