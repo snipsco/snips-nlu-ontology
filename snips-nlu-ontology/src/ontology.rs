@@ -65,6 +65,7 @@ pub enum SlotValue {
     AmountOfMoney(AmountOfMoneyValue),
     Temperature(TemperatureValue),
     Duration(DurationValue),
+    MusicArtist(StringValue)
 }
 
 /// This struct is required in order to use serde Internally tagged enum representation

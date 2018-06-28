@@ -45,7 +45,8 @@ enum_kind!(
         Ordinal,
         Temperature,
         Time,
-        Percentage
+        Percentage,
+        MusicArtist
     ]
 );
 
@@ -59,6 +60,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "snips/temperature",
             BuiltinEntityKind::Time => "snips/datetime",
             BuiltinEntityKind::Percentage => "snips/percentage",
+            BuiltinEntityKind::MusicArtist => "snips/musicArtist",
         }
     }
 
@@ -81,6 +83,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "Matches a temperature",
             BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
             BuiltinEntityKind::Percentage => "Matches a percentage",
+            BuiltinEntityKind::MusicArtist => "Matches a music artist",
         }
     }
 }
@@ -139,6 +142,9 @@ impl BuiltinEntityKind {
                 "zwanzig Prozent",
                 "zwei tausend und fünfzig Prozent",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
+            ],
         }
     }
 
@@ -185,6 +191,9 @@ impl BuiltinEntityKind {
                 "25%",
                 "twenty percent",
                 "two hundred and fifty percents",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
             ],
         }
     }
@@ -239,6 +248,9 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tres mil por ciento",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
+            ],
         }
     }
 
@@ -290,6 +302,9 @@ impl BuiltinEntityKind {
                 "25%",
                 "20 pourcents",
                 "quatre vingt dix pourcents",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
             ],
         }
     }
@@ -385,6 +400,9 @@ impl BuiltinEntityKind {
                 "十五%",
                 "五パーセント",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
+            ],
         }
     }
 
@@ -421,6 +439,9 @@ impl BuiltinEntityKind {
                 "5 월 첫째 목요일",
             ],
             BuiltinEntityKind::Percentage => &[],
+            BuiltinEntityKind::MusicArtist => &[
+                "Metallica",
+            ],
         }
     }
 }
@@ -477,6 +498,9 @@ impl BuiltinEntityKind {
             ]),
             BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
+            ]),
+            BuiltinEntityKind::MusicArtist => serde_json::to_string_pretty(&vec![
+                ::SlotValue::MusicArtist(::StringValue { value: "Metallica".to_string() }),
             ]),
         }.unwrap()
     }
@@ -546,6 +570,9 @@ impl BuiltinEntityKind {
                 Language::FR,
                 Language::IT,
                 Language::JA,
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                Language::EN,
             ]
         }
     }
