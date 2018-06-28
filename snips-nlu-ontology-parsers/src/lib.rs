@@ -13,6 +13,7 @@ extern crate regex;
 extern crate rustling_ontology;
 extern crate snips_nlu_ontology as nlu_ontology;
 extern crate snips_nlu_utils as nlu_utils;
+extern crate gazetteer_entity_parser;
 
 pub mod errors;
 mod builtin_entity_parser;

@@ -6,10 +6,11 @@ use itertools::Itertools;
 use regex::Regex;
 
 use errors::*;
+use gazetteer_entity_parser::{Gazetteer, Parser as _GazetteerParser};
 use conversion::*;
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
-use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
+use rustling_ontology::{build_parser, OutputKind, Parser as RustlingParser, ResolverContext};
 
 lazy_static! {
     static ref NON_SPACE_REGEX: Regex = Regex::new(r"[^\s]+").unwrap();
@@ -20,21 +21,27 @@ lazy_static! {
 }
 
 pub struct BuiltinEntityParser {
-    parser: Parser,
-    lang: Language,
-    supported_entity_kinds: Vec<BuiltinEntityKind>,
+    gazetteer_parsers: Vec<GazetteerParser>,
+    rustling_parser: RustlingParser,
+    language: Language,
+    rustling_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct BuiltinEntityParserConfiguration {
     pub language: Language,
-    pub builtin_entities_resources: Vec<BuiltinEntityResource>
+    pub builtin_entities_resources: Vec<BuiltinEntityResource>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct BuiltinEntityResource {
     pub builtin_entity_name: String,
-    pub resource_path: String
+    pub resource_path: String,
+}
+
+struct GazetteerParser {
+    parser: _GazetteerParser,
+    entity_kind: GazetteerEntityKind,
 }
 
 impl BuiltinEntityParser {
@@ -47,6 +54,21 @@ impl BuiltinEntityParser {
             .collect();
         let rustling_parser = build_parser(config.language.ontology_into())
             .map_err(|_| format_err!("Cannot create Rustling Parser for language {:?}", config.language))?;
+        let gazetteer_parsers = config.builtin_entities_resources
+            .iter()
+            .map(|resources| {
+                let entity_kind = GazetteerEntityKind::from_identifier(&resources.builtin_entity_name)?;
+                if !supported_entity_kinds.contains(&(entity_kind.into())) {
+                    return Err(
+                        format_err!("Gazetteer entity kind {:?} is not yet supported in language {:?}",
+                                    entity_kind, config.language));
+                }
+                let gazetteer = Gazetteer::from_json(&resources.resource_path, None)?;
+                let parser = _GazetteerParser::from_gazetteer(&gazetteer, 1.0)?;
+                Ok(GazetteerParser { parser, entity_kind })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
         Ok(BuiltinEntityParser {
             gazetteer_parsers,
             rustling_parser,
@@ -96,6 +118,27 @@ impl BuiltinEntityParser {
             .map(|parser_match| rustling::convert_to_builtin(sentence, parser_match))
             .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start));
 
+        let mut gazetteer_entities: Vec<BuiltinEntity> = self.gazetteer_parsers.iter()
+            .filter(|parser|
+                filter_entity_kinds
+                    .map(|kinds| kinds.contains(&parser.entity_kind.into()))
+                    .unwrap_or(true))
+            .map(|parser| {
+                Ok(parser.parser
+                    .run(&sentence.to_lowercase())?
+                    .into_iter()
+                    .map(|parsed_value|
+                        gazetteer_entities::convert_to_builtin(parsed_value, parser.entity_kind))
+                    .collect())
+            })
+            .collect::<Result<Vec<Vec<BuiltinEntity>>>>()?
+            .into_iter()
+            .flat_map(|entities| entities)
+            .collect();
+
+        let mut entities = rustling_entities;
+        entities.append(&mut gazetteer_entities);
+        Ok(entities)
     }
 
     pub fn _extract_entities_for_non_space_separated(
