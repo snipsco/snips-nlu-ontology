@@ -10,6 +10,7 @@ import com.sun.jna.toJnaPointer
 const val RUST_ENCODING = "utf-8"
 
 fun String.toPointer(): Pointer = this.toJnaPointer(RUST_ENCODING)
+fun Pointer?.readString(): String = this!!.getString(0, RUST_ENCODING)
 
 class EntityOntology {
     companion object {
@@ -17,7 +18,7 @@ class EntityOntology {
             if (returnCode != 0) {
                 PointerByReference().apply {
                     LIB.snips_nlu_ontology_get_last_error(this)
-                    throw RuntimeException(value.getString(0).apply {
+                    throw RuntimeException(value.readString().apply {
                         LIB.snips_nlu_ontology_destroy_string(value)
                     })
                 }
@@ -27,13 +28,13 @@ class EntityOntology {
         @JvmStatic
         fun completeEntityOntologyJson(): String = PointerByReference().run {
             parseError(LIB.snips_nlu_ontology_complete_entity_ontology_json(this))
-            value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
+            value.readString().apply { LIB.snips_nlu_ontology_destroy_string(value) }
         }
 
         @JvmStatic
         fun languageEntityOntologyJson(language: String): String = PointerByReference().run {
             parseError(LIB.snips_nlu_ontology_language_entity_ontology_json(language.toPointer(), this))
-            value.getString(0).apply { LIB.snips_nlu_ontology_destroy_string(value) }
+            value.readString().apply { LIB.snips_nlu_ontology_destroy_string(value) }
         }
     }
 
