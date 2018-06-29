@@ -53,6 +53,35 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
         self.assertListEqual(expected_result, res)
 
+    def test_should_parse_with_gazetteer_entity(self):
+        # Given
+        builtin_entity_resources = [
+            {
+                "builtin_entity_name": "snips/musicArtist",
+                "resource_path": "/Users/adrien/Downloads/musicArtist.json"
+            }
+        ]
+        parser = BuiltinEntityParser("en", builtin_entity_resources)
+        scope = ["snips/musicArtist"]
+
+        # When
+        res = parser.parse("I want to list to calvin Harris please!", scope)
+
+        # Then
+        expected_result = [
+            {
+                "entity": {
+                    "kind": "MusicArtist",
+                    "value": "Calvin Harris"
+                },
+                "entity_kind": "snips/musicArtist",
+                "range": {"end": 31, "start": 18},
+                "value": "calvin Harris"
+            }
+        ]
+
+        self.assertListEqual(expected_result, res)
+
     def test_should_parse_in_all_languages(self):
         # Given
         all_languages = get_all_languages()

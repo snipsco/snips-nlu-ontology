@@ -113,7 +113,7 @@ impl BuiltinEntityParser {
 
         let rustling_entities = self.rustling_parser
             .parse_with_kind_order(&sentence.to_lowercase(), &context, &rustling_output_kinds)
-            .map_err(|_| format_err!("Error when parsing sentence {} with Rustling", sentence))?
+            .unwrap_or_else(|_| vec![])
             .into_iter()
             .map(|parser_match| rustling::convert_to_builtin(sentence, parser_match))
             .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start));
@@ -128,7 +128,10 @@ impl BuiltinEntityParser {
                     .run(&sentence.to_lowercase())?
                     .into_iter()
                     .map(|parsed_value|
-                        gazetteer_entities::convert_to_builtin(parsed_value, parser.entity_kind))
+                        gazetteer_entities::convert_to_builtin(
+                            sentence.to_string(),
+                            parsed_value,
+                            parser.entity_kind))
                     .collect())
             })
             .collect::<Result<Vec<Vec<BuiltinEntity>>>>()?
@@ -229,7 +232,7 @@ fn get_ranges_mapping(tokens_ranges: &Vec<Range<usize>>) -> HashMap<usize, usize
 #[cfg(test)]
 mod test {
     use super::*;
-    use itertools::Itertools;
+    use utils;
 
     use nlu_ontology::SlotValue::InstantTime;
     use nlu_ontology::language::Language;
@@ -286,6 +289,33 @@ mod test {
         let parser = BuiltinEntityParser::from_language(Language::EN).unwrap();
         let entities = parser.extract_entities("tomorrow morning", Some(&[])).unwrap();
         assert_eq!(Vec::<BuiltinEntity>::new(), entities);
+    }
+
+    #[test]
+    fn test_entities_extraction_with_gazetteer_entities() {
+        let gazetteer_entity_path = utils::gazetteer_entity_path("musicArtist.json");
+        let config = BuiltinEntityParserConfiguration {
+            language: Language::EN,
+            builtin_entities_resources: vec![
+                BuiltinEntityResource {
+                    builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
+                    resource_path: gazetteer_entity_path.to_str().unwrap().to_string(),
+                }
+            ],
+        };
+        let parser = BuiltinEntityParser::new(config).unwrap();
+        let expected_entity = BuiltinEntity {
+            value: "Calvin Harris".to_string(),
+            range: 20..33,
+            entity: SlotValue::MusicArtist(StringValue { value: "Calvin Harris".to_string() }),
+            entity_kind: BuiltinEntityKind::MusicArtist
+        };
+        assert_eq!(
+            vec![expected_entity],
+            parser
+                .extract_entities("I want to listen to Calvin Harris please", None)
+                .unwrap()
+        );
     }
 
     #[test]

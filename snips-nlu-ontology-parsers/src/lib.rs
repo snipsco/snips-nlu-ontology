@@ -18,6 +18,8 @@ extern crate gazetteer_entity_parser;
 pub mod errors;
 mod builtin_entity_parser;
 mod conversion;
+#[cfg(test)]
+mod utils;
 
 pub use self::builtin_entity_parser::*;
 pub use self::conversion::*;
