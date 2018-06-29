@@ -241,6 +241,7 @@ mod test {
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
                 .extract_entities("Book me restaurant for two people tomorrow", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -250,6 +251,7 @@ mod test {
             vec![BuiltinEntityKind::Duration],
             parser
                 .extract_entities("The weather during two weeks", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -259,6 +261,7 @@ mod test {
             vec![BuiltinEntityKind::Percentage],
             parser
                 .extract_entities("Set light to ten percents", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -271,6 +274,7 @@ mod test {
                     "I would like to do a bank transfer of ten euros for my friends",
                     None,
                 )
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -280,7 +284,7 @@ mod test {
     #[test]
     fn test_entities_extraction_with_empty_scope() {
         let parser = BuiltinEntityParser::from_language(Language::EN).unwrap();
-        let entities = parser.extract_entities("tomorrow morning", Some(&[]));
+        let entities = parser.extract_entities("tomorrow morning", Some(&[])).unwrap();
         assert_eq!(Vec::<BuiltinEntity>::new(), entities);
     }
 
@@ -303,7 +307,7 @@ mod test {
         let parsed_entities = parser.extract_entities(
             " の カリフォル  二 千 十三 年二 月十 日  ニア州の天気予報は？",
             None,
-        );
+        ).unwrap();
         assert_eq!(1, parsed_entities.len());
         let parsed_entity = &parsed_entities[0];
         assert_eq!(expected_entity.value, parsed_entity.value);
@@ -322,7 +326,7 @@ mod test {
             parser.extract_entities(
                 "二 千 十三 年二 月十 日の カリフォルニア州の天気予報は？",
                 None,
-            )
+            ).unwrap()
         );
     }
 
@@ -332,7 +336,7 @@ mod test {
             let parser = BuiltinEntityParser::from_language(*language).unwrap();
             for entity_kind in BuiltinEntityKind::all() {
                 for example in entity_kind.examples(*language) {
-                    let results = parser.extract_entities(example, Some(&[*entity_kind]));
+                    let results = parser.extract_entities(example, Some(&[*entity_kind])).unwrap();
                     assert_eq!(
                         1, results.len(),
                         "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \

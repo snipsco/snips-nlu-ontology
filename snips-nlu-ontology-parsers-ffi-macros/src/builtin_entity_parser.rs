@@ -28,7 +28,7 @@ pub fn create_builtin_entity_parser(
 ) -> Result<()> {
     let json_config = unsafe { CStr::from_ptr(json_config) }.to_str()?;
     let parser_configuration = serde_json::from_str(json_config)?;
-    let parser = BuiltinEntityParser::new(parser_configuration);
+    let parser = BuiltinEntityParser::new(parser_configuration)?;
 
     let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 
@@ -101,7 +101,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    Ok(parser.extract_entities(sentence, opt_filters))
+    parser.extract_entities(sentence, opt_filters)
 }
 
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
