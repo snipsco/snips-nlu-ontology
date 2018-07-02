@@ -30,13 +30,14 @@ pub struct BuiltinEntityParser {
 #[derive(Serialize, Deserialize)]
 pub struct BuiltinEntityParserConfiguration {
     pub language: Language,
-    pub builtin_entities_resources: Vec<BuiltinEntityResource>,
+    pub gazetteer_entity_configurations: Vec<GazetteerEntityConfiguration>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct BuiltinEntityResource {
+pub struct GazetteerEntityConfiguration {
     pub builtin_entity_name: String,
     pub resource_path: String,
+    pub parser_threshold: f32
 }
 
 struct GazetteerParser {
@@ -54,17 +55,17 @@ impl BuiltinEntityParser {
             .collect();
         let rustling_parser = build_parser(config.language.ontology_into())
             .map_err(|_| format_err!("Cannot create Rustling Parser for language {:?}", config.language))?;
-        let gazetteer_parsers = config.builtin_entities_resources
+        let gazetteer_parsers = config.gazetteer_entity_configurations
             .iter()
-            .map(|resources| {
-                let entity_kind = GazetteerEntityKind::from_identifier(&resources.builtin_entity_name)?;
+            .map(|entity_conf| {
+                let entity_kind = GazetteerEntityKind::from_identifier(&entity_conf.builtin_entity_name)?;
                 if !supported_entity_kinds.contains(&(entity_kind.into())) {
                     return Err(
                         format_err!("Gazetteer entity kind {:?} is not yet supported in language {:?}",
                                     entity_kind, config.language));
                 }
-                let gazetteer = Gazetteer::from_json(&resources.resource_path, None)?;
-                let parser = _GazetteerParser::from_gazetteer(&gazetteer, 1.0)?;
+                let gazetteer = Gazetteer::from_json(&entity_conf.resource_path, None)?;
+                let parser = _GazetteerParser::from_gazetteer(&gazetteer, entity_conf.parser_threshold)?;
                 Ok(GazetteerParser { parser, entity_kind })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -80,7 +81,7 @@ impl BuiltinEntityParser {
     pub fn from_language(language: Language) -> Result<Self> {
         Self::new(BuiltinEntityParserConfiguration {
             language,
-            builtin_entities_resources: vec![],
+            gazetteer_entity_configurations: vec![],
         })
     }
 
@@ -236,6 +237,7 @@ mod test {
 
     use nlu_ontology::SlotValue::InstantTime;
     use nlu_ontology::language::Language;
+    use gazetteer_entity_parser::EntityValue;
 
     #[test]
     fn test_entities_extraction() {
@@ -293,28 +295,41 @@ mod test {
 
     #[test]
     fn test_entities_extraction_with_gazetteer_entities() {
+        // Given
         let gazetteer_entity_path = utils::gazetteer_entity_path("musicArtist.json");
         let config = BuiltinEntityParserConfiguration {
             language: Language::EN,
-            builtin_entities_resources: vec![
-                BuiltinEntityResource {
+            gazetteer_entity_configurations: vec![
+                GazetteerEntityConfiguration {
                     builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
                     resource_path: gazetteer_entity_path.to_str().unwrap().to_string(),
+                    parser_threshold: 0.6
                 }
             ],
         };
+        // When
         let parser = BuiltinEntityParser::new(config).unwrap();
+        let above_threshold_entity = parser
+            .extract_entities("I want to listen to the Stones please", None)
+            .unwrap();
+        let below_threshold_entity = parser
+            .extract_entities("I want to listen to Harris please", None)
+            .unwrap();
+
+        // Then
         let expected_entity = BuiltinEntity {
-            value: "Calvin Harris".to_string(),
-            range: 20..33,
-            entity: SlotValue::MusicArtist(StringValue { value: "Calvin Harris".to_string() }),
+            value: "the Stones".to_string(),
+            range: 20..30,
+            entity: SlotValue::MusicArtist(StringValue { value: "The Rolling Stones".to_string() }),
             entity_kind: BuiltinEntityKind::MusicArtist
         };
         assert_eq!(
             vec![expected_entity],
-            parser
-                .extract_entities("I want to listen to Calvin Harris please", None)
-                .unwrap()
+            above_threshold_entity
+        );
+        assert_eq!(
+            Vec::<BuiltinEntity>::new(),
+            below_threshold_entity
         );
     }
 
