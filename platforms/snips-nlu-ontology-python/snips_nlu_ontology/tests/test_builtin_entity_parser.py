@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 import unittest
 
 from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
@@ -55,13 +56,16 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
     def test_should_parse_with_gazetteer_entity(self):
         # Given
-        builtin_entity_resources = [
+        resource_path = os.path.join(os.path.dirname(__file__), "resources",
+                                     "musicArtist.json")
+        gazetteer_entity_configurations = [
             {
                 "builtin_entity_name": "snips/musicArtist",
-                "resource_path": "/Users/adrien/Downloads/musicArtist.json"
+                "resource_path": resource_path,
+                "parser_threshold": 1.0
             }
         ]
-        parser = BuiltinEntityParser("en", builtin_entity_resources)
+        parser = BuiltinEntityParser("en", gazetteer_entity_configurations)
         scope = ["snips/musicArtist"]
 
         # When

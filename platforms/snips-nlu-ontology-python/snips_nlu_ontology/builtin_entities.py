@@ -110,23 +110,23 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
-        builtin_entities_resources (list of str, opt): list of resource paths
-            for builtin entities
+        gazetteer_entity_configurations (list of str, opt): list of
+            configurations for gazetteer entities
     """
 
-    def __init__(self, language, builtin_entities_resources=None):
-        if builtin_entities_resources is None:
-            builtin_entities_resources = []
+    def __init__(self, language, gazetteer_entity_configurations=None):
+        if gazetteer_entity_configurations is None:
+            gazetteer_entity_configurations = []
         if not isinstance(language, str):
             raise TypeError("Expected language to be of type 'str' but found:"
                             " %s" % type(language))
-        if not isinstance(builtin_entities_resources, list):
+        if not isinstance(gazetteer_entity_configurations, list):
             raise TypeError("Expected builtin_entities_resources to be of "
                             "type 'list' but found: %s"
-                            % type(builtin_entities_resources))
+                            % type(gazetteer_entity_configurations))
         self.parser_config = dict(
             language=language.upper(),
-            builtin_entities_resources=builtin_entities_resources
+            gazetteer_entity_configurations=gazetteer_entity_configurations
         )
         self._parser = pointer(c_void_p())
         json_parser_config = bytes(json.dumps(self.parser_config),
