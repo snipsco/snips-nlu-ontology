@@ -29,6 +29,7 @@ with io.open(README, "rt", encoding="utf8") as f:
 
 required = [
     "future==0.16.0",
+    "pathlib==1.0.1",
     "wheel==0.30.0"
 ]
 

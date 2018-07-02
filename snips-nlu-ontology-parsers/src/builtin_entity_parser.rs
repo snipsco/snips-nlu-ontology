@@ -6,7 +6,7 @@ use itertools::Itertools;
 use regex::Regex;
 
 use errors::*;
-use gazetteer_entity_parser::{Gazetteer, Parser as _GazetteerParser};
+use gazetteer_entity_parser::{Parser as _GazetteerParser};
 use conversion::*;
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
@@ -27,6 +27,12 @@ pub struct BuiltinEntityParser {
     rustling_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
+struct GazetteerParser {
+    parser: _GazetteerParser,
+    entity_kind: GazetteerEntityKind,
+    parser_threshold: f32,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct BuiltinEntityParserConfiguration {
     pub language: Language,
@@ -37,13 +43,9 @@ pub struct BuiltinEntityParserConfiguration {
 pub struct GazetteerEntityConfiguration {
     pub builtin_entity_name: String,
     pub resource_path: String,
-    pub parser_threshold: f32
+    pub parser_threshold: f32,
 }
 
-struct GazetteerParser {
-    parser: _GazetteerParser,
-    entity_kind: GazetteerEntityKind,
-}
 
 impl BuiltinEntityParser {
     pub fn new(config: BuiltinEntityParserConfiguration) -> Result<Self> {
@@ -64,9 +66,12 @@ impl BuiltinEntityParser {
                         format_err!("Gazetteer entity kind {:?} is not yet supported in language {:?}",
                                     entity_kind, config.language));
                 }
-                let gazetteer = Gazetteer::from_json(&entity_conf.resource_path, None)?;
-                let parser = _GazetteerParser::from_gazetteer(&gazetteer, entity_conf.parser_threshold)?;
-                Ok(GazetteerParser { parser, entity_kind })
+                let parser = _GazetteerParser::from_folder(&entity_conf.resource_path)?;
+                Ok(GazetteerParser {
+                    parser,
+                    entity_kind,
+                    parser_threshold: entity_conf.parser_threshold,
+                })
             })
             .collect::<Result<Vec<_>>>()?;
 
@@ -126,7 +131,7 @@ impl BuiltinEntityParser {
                     .unwrap_or(true))
             .map(|parser| {
                 Ok(parser.parser
-                    .run(&sentence.to_lowercase())?
+                    .run(&sentence.to_lowercase(), parser.parser_threshold)?
                     .into_iter()
                     .map(|parsed_value|
                         gazetteer_entities::convert_to_builtin(
@@ -237,7 +242,6 @@ mod test {
 
     use nlu_ontology::SlotValue::InstantTime;
     use nlu_ontology::language::Language;
-    use gazetteer_entity_parser::EntityValue;
 
     #[test]
     fn test_entities_extraction() {
@@ -296,14 +300,14 @@ mod test {
     #[test]
     fn test_entities_extraction_with_gazetteer_entities() {
         // Given
-        let gazetteer_entity_path = utils::gazetteer_entity_path("musicArtist.json");
+        let gazetteer_entity_path = utils::gazetteer_entity_path("music_artist");
         let config = BuiltinEntityParserConfiguration {
             language: Language::EN,
             gazetteer_entity_configurations: vec![
                 GazetteerEntityConfiguration {
                     builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
                     resource_path: gazetteer_entity_path.to_str().unwrap().to_string(),
-                    parser_threshold: 0.6
+                    parser_threshold: 0.6,
                 }
             ],
         };
@@ -321,7 +325,7 @@ mod test {
             value: "the Stones".to_string(),
             range: 20..30,
             entity: SlotValue::MusicArtist(StringValue { value: "The Rolling Stones".to_string() }),
-            entity_kind: BuiltinEntityKind::MusicArtist
+            entity_kind: BuiltinEntityKind::MusicArtist,
         };
         assert_eq!(
             vec![expected_entity],

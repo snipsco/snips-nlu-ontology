@@ -1,11 +1,10 @@
-import os
 from _ctypes import Structure, POINTER
 from contextlib import contextmanager
 from ctypes import c_char_p, c_int32, cdll
-from glob import glob
+from pathlib import Path
 
-dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
-dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology_rs*"))[0]
+dylib_dir = Path(__file__).parent / "dylib"
+dylib_path = list(dylib_dir.glob("libsnips_nlu_ontology_rs*"))[0]
 lib = cdll.LoadLibrary(dylib_path)
 
 

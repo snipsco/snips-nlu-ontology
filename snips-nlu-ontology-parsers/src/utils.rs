@@ -1,10 +1,10 @@
 use std::path::Path;
 
-pub fn gazetteer_entity_path(entity_file_name: &str) -> ::std::path::PathBuf {
+pub fn gazetteer_entity_path(name: &str) -> ::std::path::PathBuf {
     Path::new("..")
         .join("data")
         .join("tests")
         .join("gazetteer_entities")
-        .join(entity_file_name)
+        .join(name)
         .to_path_buf()
 }
