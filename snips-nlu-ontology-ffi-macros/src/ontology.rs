@@ -175,6 +175,8 @@ pub enum SNIPS_SLOT_VALUE_TYPE {
     /// Percentage type represented by a CPercentageValue
     SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
     SNIPS_SLOT_VALUE_TYPE_MUSICARTIST = 10,
+    SNIPS_SLOT_VALUE_TYPE_MUSICALBUM = 11,
+    SNIPS_SLOT_VALUE_TYPE_MUSICTRACK = 12,
 }
 
 impl<'a> From<&'a ::SlotValue> for SNIPS_SLOT_VALUE_TYPE {
@@ -190,6 +192,8 @@ impl<'a> From<&'a ::SlotValue> for SNIPS_SLOT_VALUE_TYPE {
             &::SlotValue::Duration(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION,
             &::SlotValue::Percentage(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE,
             &::SlotValue::MusicArtist(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST,
+            &::SlotValue::MusicAlbum(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM,
+            &::SlotValue::MusicTrack(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK,
         }
     }
 }
@@ -446,6 +450,8 @@ impl From<::SlotValue> for CSlotValue {
             ::SlotValue::Duration(v) => CDurationValue::from(v).into_raw_pointer() as _,
             ::SlotValue::Percentage(v) => (v.value as CPercentageValue).into_raw_pointer() as _,
             ::SlotValue::MusicArtist(v) => CString::new(v.value).unwrap().into_raw() as _,
+            ::SlotValue::MusicAlbum(v) => CString::new(v.value).unwrap().into_raw() as _,
+            ::SlotValue::MusicTrack(v) => CString::new(v.value).unwrap().into_raw() as _,
         };
         Self { value_type, value }
     }
@@ -465,6 +471,8 @@ impl Drop for CSlotValue {
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => CDurationValue::drop_raw_pointer(self.value as _),
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE => CPercentageValue::drop_raw_pointer(self.value as _),
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => CString::drop_raw_pointer(self.value),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => CString::drop_raw_pointer(self.value),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => CString::drop_raw_pointer(self.value),
             }
         };
     }

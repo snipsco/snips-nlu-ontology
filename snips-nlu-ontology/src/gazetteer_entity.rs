@@ -6,15 +6,15 @@ use errors::*;
 enum_kind!(
     GazetteerEntityKind,
     [
-        MusicArtist
+        MusicArtist,
+        MusicAlbum,
+        MusicTrack
     ]
 );
 
 impl GazetteerEntityKind {
-    pub fn identifier(&self) -> &str {
-        match *self {
-            GazetteerEntityKind::MusicArtist => "snips/musicArtist",
-        }
+    pub fn identifier(&self) -> &'static str {
+        BuiltinEntityKind::from(*self).identifier()
     }
 
     pub fn from_identifier(identifier: &str) -> Result<Self> {
@@ -28,8 +28,15 @@ impl GazetteerEntityKind {
 
 impl From<GazetteerEntityKind> for BuiltinEntityKind {
     fn from(kind: GazetteerEntityKind) -> Self {
-        match kind {
-            GazetteerEntityKind::MusicArtist => BuiltinEntityKind::MusicArtist
-        }
+        macro_rules! convert_gazetteer_entity {
+            ($($varname:ident),*) => {
+                match kind {
+                    $(
+                        GazetteerEntityKind::$varname => BuiltinEntityKind::$varname,
+                    )*
+                }
+            }
+        };
+        convert_gazetteer_entity!(MusicArtist, MusicAlbum, MusicTrack)
     }
 }

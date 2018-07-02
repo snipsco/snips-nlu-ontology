@@ -20,7 +20,7 @@ pub fn convert_to_builtin(
             }
         }
     };
-    let slot_value = match_entity_kind_to_slot_value!(MusicArtist);
+    let slot_value = match_entity_kind_to_slot_value!(MusicArtist, MusicAlbum, MusicTrack);
     BuiltinEntity {
         value: substring_with_char_range(input, &value.range),
         range: value.range,
