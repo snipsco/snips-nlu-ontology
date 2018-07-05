@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology"
-version = "0.57.0"
+version = "0.57.1"
 authors = [
     "Adrien Ball <adrien.ball@snips.ai>",
     "Thibaut Lorrain <thibaut.lorrain@snips.ai>",

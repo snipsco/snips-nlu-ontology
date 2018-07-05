@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.57.1] - 2018-07-05
+
+### Fixed
+- Destructor of BuiltinEntityParser python wrapper
+- jna string encodings
+- Crash when parsing dates with years overflowing 32 bits
+
+### Changed
+- Bump `rustling-ontology` to `0.17.1`
+
 ## [0.57.0] - 2018-06-07
 
 ### Removed
@@ -53,6 +63,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.57.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.0...0.57.1
 [0.57.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.1...0.57.0
 [0.56.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.0...0.56.1
 [0.56.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.55.0...0.56.0

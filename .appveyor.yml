@@ -1,7 +1,9 @@
 environment:
   matrix:
-  - TARGET: x86_64-pc-windows-msvc
-  - TARGET: x86_64-pc-windows-gnu
+  - PYTHON: "C:\\Python27-x64"
+    TARGET: x86_64-pc-windows-msvc
+  - PYTHON: "C:\\Python36-x64"
+    TARGET: x86_64-pc-windows-msvc
 
 branches:
   only:
@@ -29,9 +31,21 @@ install:
   - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology = .*$", "snips-nlu-ontology = { path = `"../../../snips-nlu-ontology`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
   - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology-ffi-macros = .*$", "snips-nlu-ontology-ffi-macros = { path = `"../../../snips-nlu-ontology-ffi-macros`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
   - ps: (Get-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml) | ForEach-Object { $_ -replace "^snips-nlu-ontology-parsers-ffi-macros = .*$", "snips-nlu-ontology-parsers-ffi-macros = { path = `"../../../snips-nlu-ontology-parsers-ffi-macros`" }" } | Set-Content platforms/snips-nlu-ontology-python/snips-nlu-ontology-rs/Cargo.toml
+  - "%PYTHON%\\python.exe -m pip install -r platforms/snips-nlu-ontology-python/requirements.txt"
 
 build: false
 
 test_script:
   - cargo build --verbose
   - cargo test --all --verbose
+  - cd platforms\snips-nlu-ontology-python
+  - "%PYTHON%\\python.exe -m pip install -e . --verbose --install-option=\"--verbose\""
+  - "%PYTHON%\\python.exe -m unittest discover"
+
+after_test:
+  - ECHO "BUILDING WHEELS..."
+  - "%PYTHON%\\python.exe setup.py bdist_wheel"
+
+artifacts:
+  - path: platforms\snips-nlu-ontology-python\dist\*
+    name: pypiartifacts
