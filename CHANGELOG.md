@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - Crash when parsing dates with years overflowing 32 bits
 
 ### Changed
-- Bump `rustling-ontology` to `0.17.1`
+- Bump `rustling-ontology` to `0.17.2`
 
 ## [0.57.0] - 2018-06-07
 
