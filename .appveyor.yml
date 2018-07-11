@@ -49,3 +49,16 @@ after_test:
 artifacts:
   - path: platforms\snips-nlu-ontology-python\dist\*
     name: pypiartifacts
+
+for:
+-
+  branches:
+    only:
+      - master
+
+  environment:
+    matrix:
+    - PYTHON: "C:\\Python27"
+      TARGET: i686-pc-windows-msvc
+    - PYTHON: "C:\\Python36"
+      TARGET: i686-pc-windows-msvc
