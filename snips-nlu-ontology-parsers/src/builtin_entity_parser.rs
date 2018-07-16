@@ -182,7 +182,8 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let parser = BuiltinEntityParser::new(Language::EN);
+        let base_datetime = "2013-02-12T04:30:00+00:00";
+        let parser = BuiltinEntityParser::new(Language::EN, base_datetime);
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
@@ -225,7 +226,8 @@ mod test {
 
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
-        let parser = BuiltinEntityParser::new(Language::JA);
+        let base_datetime = "2013-02-12T04:30:00+00:00";
+        let parser = BuiltinEntityParser::new(Language::JA, base_datetime);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
             grain: Grain::Day,
@@ -267,8 +269,9 @@ mod test {
 
     #[test]
     fn test_entity_examples_should_be_parsed() {
+        let base_datetime = "2013-02-12T04:30:00+00:00";
         for language in Language::all() {
-            let parser = BuiltinEntityParser::new(*language);
+            let parser = BuiltinEntityParser::new(*language, base_datetime);
             for entity_kind in BuiltinEntityKind::all() {
                 for example in entity_kind.examples(*language) {
                     let results = parser.extract_entities(example, Some(&[*entity_kind]));

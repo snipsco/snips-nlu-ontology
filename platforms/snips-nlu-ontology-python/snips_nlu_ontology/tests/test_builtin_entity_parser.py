@@ -1,11 +1,26 @@
 from __future__ import unicode_literals
 
 import unittest
-
+from datetime import datetime
+import pytz
 from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
 
 
 class TestBuiltinEntityParser(unittest.TestCase):
+    def test_should_parse_with_timezone(self):
+        # Given
+        ref_dt = datetime(2014, 7, 5, 18, 4, 40, 682006, tzinfo=pytz.utc)
+        parser = BuiltinEntityParser("en", reference_time = ref_dt)
+
+        res = parser.parse("at eight")
+
+        return_datetime = res['entity']['value']
+
+        self.assertEqual(
+            return_datetime.astimezone(pytz.utc),
+            ref_dt.replace(hour=6)
+        )
+
     def test_should_parse_without_scope(self):
         # Given
         parser = BuiltinEntityParser("en")
@@ -62,6 +77,10 @@ class TestBuiltinEntityParser(unittest.TestCase):
         for language in all_languages:
             parser = BuiltinEntityParser(language)
             parser.parse(text)
+
+    def test_should_not_accept_datetime_without_timezone(self):
+        with self.assertRaises(ValueError):
+            BuiltinEntityParser("en", datetime.now())
 
     def test_should_not_accept_bytes_as_language(self):
         with self.assertRaises(TypeError):
