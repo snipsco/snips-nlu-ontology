@@ -111,7 +111,11 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
-        reference_time (datetime): base reference time for rustling
+        reference_time (datetime with timezone): base reference time for rustling
+
+    Note:
+
+    Reference_time requires a timezone, if uncertain, use a U
     """
 
     def __init__(self, language, reference_time = None):
@@ -120,8 +124,10 @@ class BuiltinEntityParser(object):
                             " %s" % type(language))
         self.language = language
         if reference_time is None:
-            reference_time = datetime.now()
-        self.reference_time = reference_time.isoformat('T')
+            reference_time = datetime.utcnow().astimezone()
+        if not reference_time.tzinfo:
+            raise ValueError("Reference_time must be defined with a timezone")
+        self.reference_time = reference_time.isoformat()
         self._parser = pointer(c_void_p())
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
             byref(self._parser),
