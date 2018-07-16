@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
+from datetime import datetime
 from _ctypes import pointer, byref
 from builtins import object, range, str
 from ctypes import c_char_p, c_void_p, c_int, string_at
@@ -110,16 +111,23 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
+        reference_time (datetime): base reference time for rustling
     """
 
-    def __init__(self, language):
+    def __init__(self, language, reference_time = None):
         if not isinstance(language, str):
             raise TypeError("Expected language to be of type 'str' but found:"
                             " %s" % type(language))
         self.language = language
+        if reference_time is None:
+            reference_time = datetime.now()
+        self.reference_time = reference_time.isoformat('T')
         self._parser = pointer(c_void_p())
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
-            byref(self._parser), language.encode("utf8"))
+            byref(self._parser),
+            language.encode("utf8"),
+            self.reference_time.encode("utf8")
+        )
         if exit_code:
             raise ImportError("Something wrong happened while creating the "
                               "intent parser. See stderr.")

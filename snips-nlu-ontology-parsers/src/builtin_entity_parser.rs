@@ -9,10 +9,14 @@ use rustling_converters::{FromRustling, IntoBuiltin};
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
+use rustling_ontology::{Grain, Interval};
+use rustling_ontology_moment::Moment;
+use chrono::{DateTime, Local, TimeZone, FixedOffset};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
+    reference_datetime: DateTime<FixedOffset>,
     supported_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
@@ -25,7 +29,7 @@ lazy_static! {
 }
 
 impl BuiltinEntityParser {
-    pub fn new(lang: Language) -> Self {
+    pub fn new(lang: Language, reference_datestring: &str) -> Self {
         let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(lang);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
@@ -33,9 +37,12 @@ impl BuiltinEntityParser {
             .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
             .collect();
 
+        let reference_datetime = DateTime::parse_from_rfc3339(reference_datestring).unwrap();
+
         BuiltinEntityParser {
             parser: build_parser(lang.into_builtin()).unwrap(),
-            lang,
+            lang: lang,
+            reference_datetime: reference_datetime,
             supported_entity_kinds: ordered_entity_kinds,
         }
     }
@@ -107,7 +114,13 @@ impl BuiltinEntityParser {
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
-        let context = ResolverContext::default();
+
+        let local_timezone_reference = self.reference_datetime.with_timezone(&Local);
+        let local_reference_moment = Local.from_utc_datetime(&local_timezone_reference.naive_local());
+
+        let context = ResolverContext::new(
+            Interval::starting_at(Moment(local_reference_moment), Grain::Second)
+        );
         let kind_order = self.supported_entity_kinds
             .iter()
             .filter(|entity_kind|

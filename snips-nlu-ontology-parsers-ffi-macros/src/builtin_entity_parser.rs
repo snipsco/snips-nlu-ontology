@@ -25,10 +25,12 @@ macro_rules! get_parser {
 pub fn create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
     lang: *const libc::c_char,
+    reference_datestring: *const libc::c_char,
 ) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
+    let reference_datestring = unsafe { CStr::from_ptr(reference_datestring) }.to_str()?;
     let lang = Language::from_str(&*lang.to_uppercase())?;
-    let parser = BuiltinEntityParser::new(lang);
+    let parser = BuiltinEntityParser::new(lang, reference_datestring);
 
     let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 
