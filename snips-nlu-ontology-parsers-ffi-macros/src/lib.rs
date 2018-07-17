@@ -21,9 +21,9 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         pub extern "C" fn snips_nlu_ontology_create_builtin_entity_parser(
             ptr: *mut *const $crate::CBuiltinEntityParser,
             lang: *const ::libc::c_char,
-            reference_datestring: *const libc::c_char,
+            reference_timestamp: i64,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::create_builtin_entity_parser(ptr, lang, reference_datestring))
+            wrap!($crate::create_builtin_entity_parser(ptr, lang, reference_timestamp))
         }
 
         #[no_mangle]

@@ -9,14 +9,13 @@ use rustling_converters::{FromRustling, IntoBuiltin};
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
-use rustling_ontology::{Grain, Interval};
 use rustling_ontology_moment::Moment;
-use chrono::{DateTime, Local, TimeZone, FixedOffset};
+use chrono::{Local, DateTime, TimeZone};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
-    reference_datetime: DateTime<FixedOffset>,
+    reference_datetime: DateTime<Local>,
     supported_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
@@ -29,7 +28,7 @@ lazy_static! {
 }
 
 impl BuiltinEntityParser {
-    pub fn new(lang: Language, reference_datestring: &str) -> Self {
+    pub fn new(lang: Language, reference_timestamp: i64) -> Self {
         let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(lang);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
@@ -37,7 +36,7 @@ impl BuiltinEntityParser {
             .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
             .collect();
 
-        let reference_datetime = DateTime::parse_from_rfc3339(reference_datestring).unwrap();
+        let reference_datetime: DateTime<Local> = Local.timestamp(reference_timestamp, 0);
 
         BuiltinEntityParser {
             parser: build_parser(lang.into_builtin()).unwrap(),
@@ -114,12 +113,10 @@ impl BuiltinEntityParser {
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
-
-        let local_timezone_reference = self.reference_datetime.with_timezone(&Local);
-        let local_reference_moment = Local.from_utc_datetime(&local_timezone_reference.naive_local());
-
+        // don't cover global nlu_ontology::Grain
+        use rustling_ontology::{Grain, Interval};
         let context = ResolverContext::new(
-            Interval::starting_at(Moment(local_reference_moment), Grain::Second)
+            Interval::starting_at(Moment(self.reference_datetime), Grain::Second)
         );
         let kind_order = self.supported_entity_kinds
             .iter()
@@ -182,8 +179,9 @@ mod test {
 
     #[test]
     fn test_entities_extraction() {
-        let base_datetime = "2013-02-12T04:30:00+00:00";
-        let parser = BuiltinEntityParser::new(Language::EN, base_datetime);
+        // "2013-02-12T04:30:00+00:00"
+        let base_timestamp = 1360639800;
+        let parser = BuiltinEntityParser::new(Language::EN, base_timestamp);
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
@@ -226,8 +224,9 @@ mod test {
 
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
-        let base_datetime = "2013-02-12T04:30:00+00:00";
-        let parser = BuiltinEntityParser::new(Language::JA, base_datetime);
+        // "2013-02-12T04:30:00+00:00"
+        let base_timestamp = 1360639800;
+        let parser = BuiltinEntityParser::new(Language::JA, base_timestamp);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
             grain: Grain::Day,
@@ -269,9 +268,10 @@ mod test {
 
     #[test]
     fn test_entity_examples_should_be_parsed() {
-        let base_datetime = "2013-02-12T04:30:00+00:00";
+        // "2013-02-12T04:30:00+00:00"
+        let base_timestamp = 1360639800;
         for language in Language::all() {
-            let parser = BuiltinEntityParser::new(*language, base_datetime);
+            let parser = BuiltinEntityParser::new(*language, base_timestamp);
             for entity_kind in BuiltinEntityKind::all() {
                 for example in entity_kind.examples(*language) {
                     let results = parser.extract_entities(example, Some(&[*entity_kind]));

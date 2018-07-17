@@ -1,24 +1,21 @@
 from __future__ import unicode_literals
 
 import unittest
-from datetime import datetime
-import pytz
 from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
 
 
 class TestBuiltinEntityParser(unittest.TestCase):
-    def test_should_parse_with_timezone(self):
-        # Given
-        ref_dt = datetime(2014, 7, 5, 18, 4, 40, 682006, tzinfo=pytz.utc)
-        parser = BuiltinEntityParser("en", reference_time = ref_dt)
-
+    def test_should_parse_with_reference_time(self):
+        reference_time = 0
+        expected_value = '1970-01-01 08:00:00 +01:00'
+        parser = BuiltinEntityParser("en", reference_timestamp = reference_time)
         res = parser.parse("at eight")
 
-        return_datetime = res['entity']['value']
+        return_datetime = res[0]['entity']['value']
 
         self.assertEqual(
-            return_datetime.astimezone(pytz.utc),
-            ref_dt.replace(hour=6)
+            return_datetime,
+            expected_value
         )
 
     def test_should_parse_without_scope(self):
@@ -78,9 +75,9 @@ class TestBuiltinEntityParser(unittest.TestCase):
             parser = BuiltinEntityParser(language)
             parser.parse(text)
 
-    def test_should_not_accept_datetime_without_timezone(self):
+    def test_should_not_accept_a_non_integer_timestamp(self):
         with self.assertRaises(ValueError):
-            BuiltinEntityParser("en", datetime.now())
+            BuiltinEntityParser("en", "not an integer")
 
     def test_should_not_accept_bytes_as_language(self):
         with self.assertRaises(TypeError):
