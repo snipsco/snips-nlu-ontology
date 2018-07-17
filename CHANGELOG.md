@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.57.2] - 2018-07-13
+
+### Fixed
+- Kotlin ffi
+
 ## [0.57.1] - 2018-07-05
 
 ### Fixed
@@ -63,6 +68,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.57.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.1...0.57.2
 [0.57.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.0...0.57.1
 [0.57.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.1...0.57.0
 [0.56.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.56.0...0.56.1
