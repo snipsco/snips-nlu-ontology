@@ -7,14 +7,14 @@ from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
 class TestBuiltinEntityParser(unittest.TestCase):
     def test_should_parse_with_reference_time(self):
         reference_time = 0
-        expected_value = '1970-01-01 08:00:00 +01:00'
+        expected_value = '1970-01-01 08:00:00'
         parser = BuiltinEntityParser("en", reference_timestamp = reference_time)
         res = parser.parse("at eight")
 
         return_datetime = res[0]['entity']['value']
 
         self.assertEqual(
-            return_datetime,
+            return_datetime[:len(expected_value)],
             expected_value
         )
 
