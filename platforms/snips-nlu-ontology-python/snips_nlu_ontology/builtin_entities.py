@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-from datetime import datetime
+import time
 from _ctypes import pointer, byref
 from builtins import object, range, str
 from ctypes import c_char_p, c_void_p, c_int, string_at
@@ -120,7 +120,7 @@ class BuiltinEntityParser(object):
                             " %s" % type(language))
         self.language = language
         if reference_timestamp is None:
-            reference_timestamp = datetime.now().timestamp()
+            reference_timestamp = time.time()
 
         try:
             self.reference_timestamp = int(reference_timestamp)
