@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use std::ops::Range;
+use std::path::PathBuf;
 
 use itertools::Itertools;
 use regex::Regex;
@@ -42,7 +43,7 @@ pub struct BuiltinEntityParserConfiguration {
 #[derive(Serialize, Deserialize)]
 pub struct GazetteerEntityConfiguration {
     pub builtin_entity_name: String,
-    pub resource_path: String,
+    pub resource_path: PathBuf,
     pub parser_threshold: f32,
 }
 
@@ -300,7 +301,7 @@ mod test {
             gazetteer_entity_configurations: vec![
                 GazetteerEntityConfiguration {
                     builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
-                    resource_path: gazetteer_entity_path.to_str().unwrap().to_string(),
+                    resource_path: gazetteer_entity_path,
                     parser_threshold: 0.6,
                 }
             ],
