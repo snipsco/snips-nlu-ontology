@@ -65,7 +65,7 @@ pub fn extract_entity_json(
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
 ) -> Result<()> {
-    let entities = extract_entity(ptr, sentence, reference_timestamp, filter_entity_kinds)?;
+    let entities = extract_entity(ptr, sentence, Some(reference_timestamp), filter_entity_kinds)?;
     let json = ::serde_json::to_string(&entities)?;
 
     let cs = convert_to_c_string!(json);
@@ -104,7 +104,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    Ok(parser.extract_entities(sentence, reference_timestamp, opt_filters))
+    Ok(parser.extract_entities(sentence, Some(reference_timestamp), opt_filters))
 }
 
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
