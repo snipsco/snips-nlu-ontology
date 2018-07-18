@@ -65,7 +65,7 @@ pub fn extract_entity_json(
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
 ) -> Result<()> {
-    let entities = extract_entity(ptr, sentence, Some(reference_timestamp), filter_entity_kinds)?;
+    let entities = extract_entity(ptr, sentence, reference_timestamp, filter_entity_kinds)?;
     let json = ::serde_json::to_string(&entities)?;
 
     let cs = convert_to_c_string!(json);
