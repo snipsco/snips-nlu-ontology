@@ -111,7 +111,6 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
-        reference_timestamp (naive timestamp): base reference time for rustling
     """
 
     def __init__(self, language, reference_timestamp = None):
@@ -119,19 +118,10 @@ class BuiltinEntityParser(object):
             raise TypeError("Expected language to be of type 'str' but found:"
                             " %s" % type(language))
         self.language = language
-        if reference_timestamp is None:
-            reference_timestamp = time.time()
-
-        try:
-            self.reference_timestamp = int(reference_timestamp)
-        except ValueError:
-            raise ValueError("Reference_timestamp must be castable to int")
-
         self._parser = pointer(c_void_p())
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
             byref(self._parser),
-            language.encode("utf8"),
-            self.reference_timestamp
+            language.encode("utf8")
         )
         if exit_code:
             raise ImportError("Something wrong happened while creating the "
@@ -141,11 +131,13 @@ class BuiltinEntityParser(object):
         if lib is not None and hasattr(self, '_parser'):
             lib.snips_nlu_ontology_destroy_builtin_entity_parser(self._parser)
 
-    def parse(self, text, scope=None):
+    def parse(self, text, reference_timestamp=None, scope=None):
         """Extract builtin entities from *text*
 
         Args:
             text (str): Input
+            reference_timestamp (naive timestamp): base reference time for
+                rustling
             scope (list of str, optional): List of builtin entity labels. If
                 defined, the parser will extract entities using the provided
                 scope instead of the entire scope of all available entities.
@@ -157,6 +149,12 @@ class BuiltinEntityParser(object):
         if not isinstance(text, str):
             raise TypeError("Expected language to be of type 'str' but found: "
                             "%s" % type(text))
+        if reference_timestamp is None:
+            reference_timestamp = time.time()
+        try:
+            self.reference_timestamp = int(reference_timestamp)
+        except ValueError:
+            raise ValueError("Reference_timestamp must be castable to int")
         if scope is not None:
             if not all(isinstance(e, str) for e in scope):
                 raise TypeError(
@@ -169,7 +167,9 @@ class BuiltinEntityParser(object):
 
         with string_pointer(c_char_p()) as ptr:
             exit_code = lib.snips_nlu_ontology_extract_entities_json(
-                self._parser, text.encode("utf8"), scope, byref(ptr))
+                self._parser, text.encode("utf8"), reference_timestamp,
+                scope, byref(ptr)
+            )
             if exit_code:
                 raise ValueError("Something wrong happened while extracting "
                                  "builtin entities. See stderr.")

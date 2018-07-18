@@ -11,11 +11,11 @@ use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
 use rustling_ontology_moment::Moment;
 use chrono::{Local, DateTime, TimeZone};
+use rustling_ontology::{Grain, Interval};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
     lang: Language,
-    reference_datetime: DateTime<Local>,
     supported_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
@@ -28,7 +28,7 @@ lazy_static! {
 }
 
 impl BuiltinEntityParser {
-    pub fn new(lang: Language, reference_timestamp: i64) -> Self {
+    pub fn new(lang: Language) -> Self {
         let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(lang);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
@@ -36,12 +36,9 @@ impl BuiltinEntityParser {
             .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
             .collect();
 
-        let reference_datetime: DateTime<Local> = Local.timestamp(reference_timestamp, 0);
-
         BuiltinEntityParser {
             parser: build_parser(lang.into_builtin()).unwrap(),
             lang: lang,
-            reference_datetime: reference_datetime,
             supported_entity_kinds: ordered_entity_kinds,
         }
     }
@@ -49,6 +46,7 @@ impl BuiltinEntityParser {
     pub fn extract_entities(
         &self,
         sentence: &str,
+        reference_timestamp: Option<i64>,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
         if NON_SPACE_SEPARATED_LANGUAGES.contains(&self.lang) {
@@ -68,7 +66,7 @@ impl BuiltinEntityParser {
 
             let ranges_mapping = get_ranges_mapping(&original_tokens_bytes_ranges);
 
-            let entities = self._extract_entities(&*joined_sentence, filter_entity_kinds);
+            let entities = self._extract_entities(&*joined_sentence, reference_timestamp, filter_entity_kinds);
             entities
                 .into_iter()
                 .filter_map(|ent| {
@@ -111,12 +109,14 @@ impl BuiltinEntityParser {
     fn _extract_entities(
         &self,
         sentence: &str,
+        reference_timestamp: Option<i64>,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
-        // don't cover global nlu_ontology::Grain
-        use rustling_ontology::{Grain, Interval};
+        let reference_datetime: DateTime<Local> = Local.timestamp(
+            reference_timestamp.unwrap_or(DateTime.timestamp()), 0
+        );
         let context = ResolverContext::new(
-            Interval::starting_at(Moment(self.reference_datetime), Grain::Second)
+            Interval::starting_at(Moment(reference_datetime), rustling_ontology::Grain::Second)
         );
         let kind_order = self.supported_entity_kinds
             .iter()
@@ -181,11 +181,13 @@ mod test {
     fn test_entities_extraction() {
         // "2013-02-12T04:30:00+00:00"
         let base_timestamp = 1360639800;
-        let parser = BuiltinEntityParser::new(Language::EN, base_timestamp);
+        let parser = BuiltinEntityParser::new(Language::EN);
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
-                .extract_entities("Book me restaurant for two people tomorrow", None)
+                .extract_entities(
+                    "Book me restaurant for two people tomorrow", base_timestamp, None
+                )
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -194,7 +196,7 @@ mod test {
         assert_eq!(
             vec![BuiltinEntityKind::Duration],
             parser
-                .extract_entities("The weather during two weeks", None)
+                .extract_entities("The weather during two weeks", base_timestamp, None)
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -203,7 +205,7 @@ mod test {
         assert_eq!(
             vec![BuiltinEntityKind::Percentage],
             parser
-                .extract_entities("Set light to ten percents", None)
+                .extract_entities("Set light to ten percents", base_timestamp, None)
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -214,6 +216,7 @@ mod test {
             parser
                 .extract_entities(
                     "I would like to do a bank transfer of ten euros for my friends",
+                    base_timestamp,
                     None,
                 )
                 .iter()
@@ -226,10 +229,10 @@ mod test {
     fn test_entities_extraction_for_non_space_separated_languages() {
         // "2013-02-12T04:30:00+00:00"
         let base_timestamp = 1360639800;
-        let parser = BuiltinEntityParser::new(Language::JA, base_timestamp);
+        let parser = BuiltinEntityParser::new(Language::JA);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
-            grain: Grain::Day,
+            grain: nlu_ontology::Grain::Day,
             precision: Precision::Exact,
         };
 
@@ -242,6 +245,7 @@ mod test {
 
         let parsed_entities = parser.extract_entities(
             " の カリフォル  二 千 十三 年二 月十 日  ニア州の天気予報は？",
+            base_timestamp,
             None,
         );
         assert_eq!(1, parsed_entities.len());
@@ -261,6 +265,7 @@ mod test {
             Vec::<BuiltinEntity>::new(),
             parser.extract_entities(
                 "二 千 十三 年二 月十 日の カリフォルニア州の天気予報は？",
+                base_timestamp,
                 None,
             )
         );
@@ -271,10 +276,12 @@ mod test {
         // "2013-02-12T04:30:00+00:00"
         let base_timestamp = 1360639800;
         for language in Language::all() {
-            let parser = BuiltinEntityParser::new(*language, base_timestamp);
+            let parser = BuiltinEntityParser::new(*language);
             for entity_kind in BuiltinEntityKind::all() {
                 for example in entity_kind.examples(*language) {
-                    let results = parser.extract_entities(example, Some(&[*entity_kind]));
+                    let results = parser.extract_entities(
+                        example, base_timestamp, Some(&[*entity_kind])
+                    );
                     assert_eq!(
                         1, results.len(),
                         "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \

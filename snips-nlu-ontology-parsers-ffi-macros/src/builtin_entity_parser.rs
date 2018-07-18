@@ -25,11 +25,10 @@ macro_rules! get_parser {
 pub fn create_builtin_entity_parser(
     ptr: *mut *const CBuiltinEntityParser,
     lang: *const libc::c_char,
-    reference_timestamp: i64,
 ) -> Result<()> {
     let lang = unsafe { CStr::from_ptr(lang) }.to_str()?;
     let lang = Language::from_str(&*lang.to_uppercase())?;
-    let parser = BuiltinEntityParser::new(lang, reference_timestamp);
+    let parser = BuiltinEntityParser::new(lang);
 
     let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 
@@ -42,10 +41,11 @@ pub fn create_builtin_entity_parser(
 pub fn extract_entity_c(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
+    reference_timestamp: i64,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
 ) -> Result<()> {
-    let c_entities = extract_entity(ptr, sentence, filter_entity_kinds)?
+    let c_entities = extract_entity(ptr, sentence, reference_timestamp, filter_entity_kinds)?
         .into_iter()
         .map(CBuiltinEntity::from)
         .collect::<Vec<_>>();
@@ -61,10 +61,11 @@ pub fn extract_entity_c(
 pub fn extract_entity_json(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
+    reference_timestamp: i64,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
 ) -> Result<()> {
-    let entities = extract_entity(ptr, sentence, filter_entity_kinds)?;
+    let entities = extract_entity(ptr, sentence, reference_timestamp, filter_entity_kinds)?;
     let json = ::serde_json::to_string(&entities)?;
 
     let cs = convert_to_c_string!(json);
@@ -76,6 +77,7 @@ pub fn extract_entity_json(
 pub fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
+    reference_timestamp: i64,
     filter_entity_kinds: *const CStringArray,
 ) -> Result<Vec<BuiltinEntity>> {
     let parser = get_parser!(ptr);
@@ -102,7 +104,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    Ok(parser.extract_entities(sentence, opt_filters))
+    Ok(parser.extract_entities(sentence, reference_timestamp, opt_filters))
 }
 
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {

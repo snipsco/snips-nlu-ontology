@@ -20,22 +20,23 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_create_builtin_entity_parser(
             ptr: *mut *const $crate::CBuiltinEntityParser,
-            lang: *const ::libc::c_char,
-            reference_timestamp: i64,
+            lang: *const ::libc::c_char
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::create_builtin_entity_parser(ptr, lang, reference_timestamp))
+            wrap!($crate::create_builtin_entity_parser(ptr, lang))
         }
 
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_extract_entities(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const ::libc::c_char,
+            reference_time: i64,
             filter_entity_kinds: *const ::ffi_utils::CStringArray,
             results: *mut *const snips_nlu_ontology_ffi_macros::CBuiltinEntityArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::extract_entity_c(
                 ptr,
                 sentence,
+                reference_time,
                 filter_entity_kinds,
                 results
             ))
@@ -45,12 +46,14 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         pub extern "C" fn snips_nlu_ontology_extract_entities_json(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const ::libc::c_char,
+            reference_time: i64,
             filter_entity_kinds: *const ::ffi_utils::CStringArray,
             results: *mut *const ::libc::c_char,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::extract_entity_json(
                 ptr,
                 sentence,
+                reference_time,
                 filter_entity_kinds,
                 results
             ))

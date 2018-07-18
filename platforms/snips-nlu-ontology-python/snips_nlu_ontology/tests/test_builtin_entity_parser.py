@@ -8,8 +8,8 @@ class TestBuiltinEntityParser(unittest.TestCase):
     def test_should_parse_with_reference_time(self):
         reference_time = 0
         expected_value = '1970-01-01 08:00:00'
-        parser = BuiltinEntityParser("en", reference_timestamp = reference_time)
-        res = parser.parse("at eight")
+        parser = BuiltinEntityParser("en")
+        res = parser.parse("at eight", reference_timestamp = reference_time)
 
         return_datetime = res[0]['entity']['value']
 
@@ -76,8 +76,9 @@ class TestBuiltinEntityParser(unittest.TestCase):
             parser.parse(text)
 
     def test_should_not_accept_a_non_integer_timestamp(self):
+        parser=BuiltinEntityParser("en")
         with self.assertRaises(ValueError):
-            BuiltinEntityParser("en", "not an integer")
+            parser.parse('now', reference_timestamp = "not an integer")
 
     def test_should_not_accept_bytes_as_language(self):
         with self.assertRaises(TypeError):
