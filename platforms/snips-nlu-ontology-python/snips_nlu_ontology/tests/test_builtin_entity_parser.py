@@ -47,7 +47,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
         scope = ["snips/duration", "snips/temperature"]
 
         # When
-        res = parser.parse("Raise to sixty two", scope)
+        res = parser.parse("Raise to sixty two", scope=scope)
 
         # Then
         expected_result = [
@@ -100,4 +100,4 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
         # When/Then
         with self.assertRaises(TypeError):
-            parser.parse("Raise to sixty", scope)
+            parser.parse("Raise to sixty", scope=scope)

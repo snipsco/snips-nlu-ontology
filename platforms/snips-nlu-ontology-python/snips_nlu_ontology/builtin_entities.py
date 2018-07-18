@@ -152,7 +152,7 @@ class BuiltinEntityParser(object):
         if reference_timestamp is None:
             reference_timestamp = time.time()
         try:
-            self.reference_timestamp = int(reference_timestamp)
+            reference_timestamp = int(reference_timestamp)
         except ValueError:
             raise ValueError("Reference_timestamp must be castable to int")
         if scope is not None:
@@ -167,8 +167,11 @@ class BuiltinEntityParser(object):
 
         with string_pointer(c_char_p()) as ptr:
             exit_code = lib.snips_nlu_ontology_extract_entities_json(
-                self._parser, text.encode("utf8"), reference_timestamp,
-                scope, byref(ptr)
+                self._parser,
+                text.encode("utf8"),
+                reference_timestamp,
+                scope,
+                byref(ptr)
             )
             if exit_code:
                 raise ValueError("Something wrong happened while extracting "
