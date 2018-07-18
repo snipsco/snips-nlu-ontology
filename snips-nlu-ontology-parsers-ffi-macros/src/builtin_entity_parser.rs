@@ -101,7 +101,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    parser.extract_entities(sentence, opt_filters)
+    Ok(parser.extract_entities(sentence, opt_filters))
 }
 
 pub fn destroy_builtin_entity_parser(ptr: *mut CBuiltinEntityParser) -> Result<()> {
