@@ -232,7 +232,7 @@ mod test {
         let parser = BuiltinEntityParser::new(Language::JA);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
-            grain: nlu_ontology::Grain::Day,
+            grain: Grain::Day,
             precision: Precision::Exact,
         };
 
