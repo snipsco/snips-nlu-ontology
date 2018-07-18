@@ -8,10 +8,10 @@ use regex::Regex;
 use rustling_converters::{FromRustling, IntoBuiltin};
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
-use rustling_ontology::{build_parser, OutputKind, Parser, ResolverContext};
+use rustling_ontology;
+use rustling_ontology::{build_parser, Interval, OutputKind, Parser, ResolverContext};
 use rustling_ontology_moment::Moment;
 use chrono::{Local, DateTime, TimeZone};
-use rustling_ontology::{Grain, Interval};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
@@ -102,7 +102,7 @@ impl BuiltinEntityParser {
                 })
                 .collect()
         } else {
-            self._extract_entities(sentence, filter_entity_kinds)
+            self._extract_entities(sentence, reference_timestamp, filter_entity_kinds)
         }
     }
 
@@ -113,7 +113,7 @@ impl BuiltinEntityParser {
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
         let reference_datetime: DateTime<Local> = Local.timestamp(
-            reference_timestamp.unwrap_or(DateTime.timestamp()), 0
+            reference_timestamp.unwrap_or(Local::now().timestamp()), 0
         );
         let context = ResolverContext::new(
             Interval::starting_at(Moment(reference_datetime), rustling_ontology::Grain::Second)
@@ -180,7 +180,7 @@ mod test {
     #[test]
     fn test_entities_extraction() {
         // "2013-02-12T04:30:00+00:00"
-        let base_timestamp = 1360639800;
+        let base_timestamp = Some(1360639800);
         let parser = BuiltinEntityParser::new(Language::EN);
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
@@ -228,7 +228,7 @@ mod test {
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
         // "2013-02-12T04:30:00+00:00"
-        let base_timestamp = 1360639800;
+        let base_timestamp = Some(1360639800);
         let parser = BuiltinEntityParser::new(Language::JA);
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
@@ -274,7 +274,7 @@ mod test {
     #[test]
     fn test_entity_examples_should_be_parsed() {
         // "2013-02-12T04:30:00+00:00"
-        let base_timestamp = 1360639800;
+        let base_timestamp = Some(1360639800);
         for language in Language::all() {
             let parser = BuiltinEntityParser::new(*language);
             for entity_kind in BuiltinEntityKind::all() {
