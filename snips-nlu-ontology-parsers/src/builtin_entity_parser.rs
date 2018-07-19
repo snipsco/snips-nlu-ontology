@@ -115,9 +115,13 @@ impl BuiltinEntityParser {
         let reference_datetime: DateTime<Local> = Local.timestamp(
             reference_timestamp.unwrap_or(Local::now().timestamp()), 0
         );
-        let context = ResolverContext::new(
-            Interval::starting_at(Moment(reference_datetime), rustling_ontology::Grain::Second)
-        );
+        let context = reference_timestamp
+            .map(|ts|
+                ResolverContext::new(
+                    Interval::starting_at(Moment(Local.timestamp(ts, 0)),
+                    rustling_ontology::Grain::Second))
+            )
+            .unwrap_or_else(|| ResolverContext::default());
         let kind_order = self.supported_entity_kinds
             .iter()
             .filter(|entity_kind|
