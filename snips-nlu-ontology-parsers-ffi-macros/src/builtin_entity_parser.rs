@@ -1,7 +1,7 @@
 use std::ffi::{CStr};
 use std::slice;
 use std::str::FromStr;
-
+use std::i64;
 use failure::ResultExt;
 use libc;
 
@@ -104,7 +104,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    if reference_time == std::i64::MIN {
+    if reference_time == i64::MIN {
         Ok(parser.extract_entities(sentence, None, opt_filters))
     } else {
         Ok(parser.extract_entities(sentence, Some(reference_timestamp), opt_filters))

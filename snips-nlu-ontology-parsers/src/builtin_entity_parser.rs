@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use std::ops::Range;
-
 use itertools::Itertools;
 use regex::Regex;
 
@@ -11,7 +10,7 @@ use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology;
 use rustling_ontology::{build_parser, Interval, OutputKind, Parser, ResolverContext};
 use rustling_ontology_moment::Moment;
-use chrono::{Local, DateTime, TimeZone};
+use chrono::{Local, TimeZone};
 
 pub struct BuiltinEntityParser {
     parser: Parser,
