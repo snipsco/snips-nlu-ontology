@@ -112,9 +112,6 @@ impl BuiltinEntityParser {
         reference_timestamp: Option<i64>,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
     ) -> Vec<BuiltinEntity> {
-        let reference_datetime: DateTime<Local> = Local.timestamp(
-            reference_timestamp.unwrap_or(Local::now().timestamp()), 0
-        );
         let context = reference_timestamp
             .map(|ts|
                 ResolverContext::new(
