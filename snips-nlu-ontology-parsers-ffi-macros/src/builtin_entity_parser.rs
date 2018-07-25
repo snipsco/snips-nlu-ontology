@@ -77,7 +77,7 @@ pub fn extract_entity_json(
 pub fn extract_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
-    reference_timestamp: i64 = i64::MIN,
+    reference_timestamp: i64,
     filter_entity_kinds: *const CStringArray,
 ) -> Result<Vec<BuiltinEntity>> {
     let parser = get_parser!(ptr);
@@ -104,7 +104,7 @@ pub fn extract_entity(
     };
     let opt_filters = opt_filters.as_ref().map(|vec| vec.as_slice());
 
-    if reference_time == i64::MIN: {
+    if reference_time == i64::MIN {
         Ok(parser.extract_entities(sentence, None, opt_filters))
     } else {
         Ok(parser.extract_entities(sentence, Some(reference_timestamp), opt_filters))
