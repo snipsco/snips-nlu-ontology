@@ -52,6 +52,34 @@ enum_kind!(
     ]
 );
 
+pub trait IntoBuiltinEntityKind: Copy {
+    fn into_bek(self) -> BuiltinEntityKind;
+
+    fn identifier(&self) -> &'static str {
+        self.into_bek().identifier()
+    }
+
+    fn description(&self) -> &'static str {
+        self.into_bek().description()
+    }
+
+    fn examples(&self, language: Language) -> &'static[&'static str] {
+        self.into_bek().examples(language)
+    }
+
+    fn result_description(&self) -> String {
+        self.into_bek().result_description()
+    }
+
+    fn supported_languages(&self) -> &'static [Language] {
+        self.into_bek().supported_languages()
+    }
+
+    fn ontology_details(&self, language: Language) -> BuiltinEntityKindDetails {
+        self.into_bek().ontology_details(language)
+    }
+}
+
 impl BuiltinEntityKind {
     pub fn identifier(&self) -> &'static str {
         match *self {
@@ -78,7 +106,7 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn description(&self) -> &str {
+    pub fn description(&self) -> &'static str {
         match *self {
             BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
             BuiltinEntityKind::Duration => "Matches a time duration",
@@ -95,7 +123,7 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn examples(&self, language: Language) -> &[&str] {
+    pub fn examples(&self, language: Language) -> &'static[&'static str] {
         match language {
             Language::DE => self.de_examples(),
             Language::EN => self.en_examples(),
@@ -107,7 +135,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn de_examples(&self) -> &[&str] {
+    fn de_examples(&self) -> &'static[&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -160,7 +188,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn en_examples(&self) -> &[&str] {
+    fn en_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -216,7 +244,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn es_examples(&self) -> &[&str] {
+    fn es_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -278,7 +306,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn fr_examples(&self) -> &[&str] {
+    fn fr_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -395,7 +423,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn ja_examples(&self) -> &[&str] {
+    fn ja_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "八ドル",
@@ -442,7 +470,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn ko_examples(&self) -> &[&str] {
+    fn ko_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -555,7 +583,7 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn supported_languages(&self) -> &[Language] {
+    pub fn supported_languages(&self) -> &'static[Language] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 Language::DE,

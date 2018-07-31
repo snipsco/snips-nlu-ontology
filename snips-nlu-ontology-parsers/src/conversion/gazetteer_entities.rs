@@ -25,7 +25,7 @@ pub fn convert_to_builtin(
         value: substring_with_char_range(input, &value.range),
         range: value.range,
         entity: slot_value,
-        entity_kind: entity_kind.into(),
+        entity_kind: entity_kind.into_bek(),
     }
 }
 

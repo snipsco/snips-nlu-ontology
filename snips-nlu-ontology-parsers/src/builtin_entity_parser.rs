@@ -10,6 +10,7 @@ use errors::*;
 use gazetteer_entity_parser::{Parser as _GazetteerParser};
 use conversion::*;
 use nlu_ontology::*;
+use nlu_ontology::IntoBuiltinEntityKind;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser as RustlingParser, ResolverContext};
 
@@ -62,7 +63,7 @@ impl BuiltinEntityParser {
             .iter()
             .map(|entity_conf| {
                 let entity_kind = GazetteerEntityKind::from_identifier(&entity_conf.builtin_entity_name)?;
-                if !supported_entity_kinds.contains(&(entity_kind.into())) {
+                if !supported_entity_kinds.contains(&(entity_kind.into_bek())) {
                     return Err(
                         format_err!("Gazetteer entity kind {:?} is not yet supported in language {:?}",
                                     entity_kind, config.language));
@@ -128,7 +129,7 @@ impl BuiltinEntityParser {
         let mut gazetteer_entities: Vec<BuiltinEntity> = self.gazetteer_parsers.iter()
             .filter(|parser|
                 filter_entity_kinds
-                    .map(|kinds| kinds.contains(&parser.entity_kind.into()))
+                    .map(|kinds| kinds.contains(&parser.entity_kind.into_bek()))
                     .unwrap_or(true))
             .flat_map(|parser|
                 parser.parser
@@ -240,6 +241,7 @@ mod test {
     use utils;
 
     use nlu_ontology::SlotValue::InstantTime;
+    use nlu_ontology::IntoBuiltinEntityKind;
     use nlu_ontology::language::Language;
 
     #[test]
@@ -376,9 +378,9 @@ mod test {
     fn test_entity_examples_should_be_parsed() {
         for language in Language::all() {
             let parser = BuiltinEntityParser::from_language(*language).unwrap();
-            for entity_kind in BuiltinEntityKind::all() {
-                for example in entity_kind.examples(*language) {
-                    let results = parser.extract_entities(example, Some(&[*entity_kind]));
+            for entity_kind in GrammarEntityKind::all() {
+                for example in (*entity_kind).examples(*language) {
+                    let results = parser.extract_entities(example, Some(&[entity_kind.into_bek()]));
                     assert_eq!(
                         1, results.len(),
                         "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \

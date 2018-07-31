@@ -48,11 +48,37 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_all_grammar_entities() -> ::ffi_utils::CStringArray {
+            $crate::all_grammar_entities()
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_all_gazetteer_entities() -> ::ffi_utils::CStringArray {
+            $crate::all_gazetteer_entities()
+        }
+
+        #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_supported_builtin_entities(
             language: *const libc::c_char,
             results: *mut *const ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::get_supported_builtin_entities(language, results))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_supported_grammar_entities(
+            language: *const libc::c_char,
+            results: *mut *const ::ffi_utils::CStringArray,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_supported_grammar_entities(language, results))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_supported_gazetteer_entities(
+            language: *const libc::c_char,
+            results: *mut *const ::ffi_utils::CStringArray,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_supported_gazetteer_entities(language, results))
         }
 
         #[no_mangle]

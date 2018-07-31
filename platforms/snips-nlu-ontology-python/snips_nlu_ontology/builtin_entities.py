@@ -1,21 +1,23 @@
 # coding=utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import json
-from _ctypes import pointer, byref
-from builtins import object, range, str, bytes
-from ctypes import c_char_p, c_void_p, c_int, string_at
+from _ctypes import byref, pointer
+from builtins import bytes, object, range, str
+from ctypes import c_char_p, c_int, c_void_p, string_at
 
-from snips_nlu_ontology.utils import (
-    string_array_pointer, string_pointer, CStringArray, lib)
+from snips_nlu_ontology.utils import (CStringArray, lib, string_array_pointer,
+                                      string_pointer)
 
 _ALL_LANGUAGES = None
 _SUPPORTED_ENTITIES = dict()
+_SUPPORTED_GAZETTEER_ENTITIES = dict()
+_SUPPORTED_GRAMMAR_ENTITIES = dict()
 _ENTITIES_EXAMPLES = dict()
 _ALL_BUILTIN_ENTITIES = None
+_ALL_GAZETTEER_ENTITIES = None
+_ALL_GRAMMAR_ENTITIES = None
 _ONTOLOGY_VERSION = None
 
 
@@ -51,6 +53,30 @@ def get_all_builtin_entities():
     return _ALL_BUILTIN_ENTITIES
 
 
+def get_all_gazetteer_entities():
+    """Lists the gazetteer entities that are supported in at least one
+    language"""
+    global _ALL_GAZETTEER_ENTITIES
+    if _ALL_GAZETTEER_ENTITIES is None:
+        lib.snips_nlu_ontology_all_gazetteer_entities.restype = CStringArray
+        array = lib.snips_nlu_ontology_all_gazetteer_entities()
+        _ALL_GAZETTEER_ENTITIES = set(
+            array.data[i].decode("utf8") for i in range(array.size))
+    return _ALL_GAZETTEER_ENTITIES
+
+
+def get_all_grammar_entities():
+    """Lists the grammar entities that are supported in at least one
+    language"""
+    global _ALL_GRAMMAR_ENTITIES
+    if _ALL_GRAMMAR_ENTITIES is None:
+        lib.snips_nlu_ontology_all_grammar_entities.restype = CStringArray
+        array = lib.snips_nlu_ontology_all_grammar_entities()
+        _ALL_GRAMMAR_ENTITIES = set(
+            array.data[i].decode("utf8") for i in range(array.size))
+    return _ALL_GRAMMAR_ENTITIES
+
+
 def get_supported_entities(language):
     """Lists the builtin entities supported in the specified *language*
 
@@ -74,6 +100,56 @@ def get_supported_entities(language):
             _SUPPORTED_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
     return _SUPPORTED_ENTITIES[language]
+
+
+def get_supported_gazetteer_entities(language):
+    """Lists the gazetteer entities supported in the specified *language*
+
+    Returns:
+          list of str: the list of entity labels
+    """
+    global _SUPPORTED_GAZETTEER_ENTITIES
+
+    if not isinstance(language, str):
+        raise TypeError("Expected language to be of type 'str' but found: %s"
+                        % type(language))
+
+    if language not in _SUPPORTED_GAZETTEER_ENTITIES:
+        with string_array_pointer(pointer(CStringArray())) as ptr:
+            exit_code = lib.snips_nlu_ontology_supported_gazetteer_entities(
+                language.encode("utf8"), byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while retrieving "
+                                 "supported entities. See stderr.")
+            array = ptr.contents
+            _SUPPORTED_GAZETTEER_ENTITIES[language] = set(
+                array.data[i].decode("utf8") for i in range(array.size))
+    return _SUPPORTED_GAZETTEER_ENTITIES[language]
+
+
+def get_supported_grammar_entities(language):
+    """Lists the grammar entities supported in the specified *language*
+
+    Returns:
+          list of str: the list of entity labels
+    """
+    global _SUPPORTED_GRAMMAR_ENTITIES
+
+    if not isinstance(language, str):
+        raise TypeError("Expected language to be of type 'str' but found: %s"
+                        % type(language))
+
+    if language not in _SUPPORTED_GRAMMAR_ENTITIES:
+        with string_array_pointer(pointer(CStringArray())) as ptr:
+            exit_code = lib.snips_nlu_ontology_supported_grammar_entities(
+                language.encode("utf8"), byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while retrieving "
+                                 "supported entities. See stderr.")
+            array = ptr.contents
+            _SUPPORTED_GRAMMAR_ENTITIES[language] = set(
+                array.data[i].decode("utf8") for i in range(array.size))
+    return _SUPPORTED_GRAMMAR_ENTITIES[language]
 
 
 def get_builtin_entity_examples(builtin_entity_kind, language):
