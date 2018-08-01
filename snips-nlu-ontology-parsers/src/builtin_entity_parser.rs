@@ -7,7 +7,7 @@ use itertools::Itertools;
 use regex::Regex;
 
 use errors::*;
-use gazetteer_entity_parser::{Parser as _GazetteerParser};
+use gazetteer_entity_parser::Parser as _GazetteerParser;
 use conversion::*;
 use nlu_ontology::*;
 use nlu_ontology::IntoBuiltinEntityKind;
@@ -119,12 +119,16 @@ impl BuiltinEntityParser {
             .flat_map(|kind| kind.try_ontology_into().ok())
             .collect::<Vec<OutputKind>>();
 
-        let rustling_entities = self.rustling_parser
-            .parse_with_kind_order(&sentence.to_lowercase(), &context, &rustling_output_kinds)
-            .unwrap_or_else(|_| vec![])
-            .into_iter()
-            .map(|parser_match| rustling::convert_to_builtin(sentence, parser_match))
-            .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start));
+        let rustling_entities: Vec<BuiltinEntity> = if rustling_output_kinds.is_empty() {
+            vec![]
+        } else {
+            self.rustling_parser
+                .parse_with_kind_order(&sentence.to_lowercase(), &context, &rustling_output_kinds)
+                .unwrap_or_else(|_| vec![])
+                .into_iter()
+                .map(|parser_match| rustling::convert_to_builtin(sentence, parser_match))
+                .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
+        };
 
         let mut gazetteer_entities: Vec<BuiltinEntity> = self.gazetteer_parsers.iter()
             .filter(|parser|
