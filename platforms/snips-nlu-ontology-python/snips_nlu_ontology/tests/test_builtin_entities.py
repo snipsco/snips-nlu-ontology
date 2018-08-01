@@ -2,9 +2,9 @@ import unittest
 from builtins import str
 
 from snips_nlu_ontology.builtin_entities import (
-    get_all_languages, get_all_builtin_entities, get_all_gazetteer_entities,
-    get_all_grammar_entities, get_builtin_entity_examples,
-    get_supported_entities, get_ontology_version,
+    get_all_builtin_entities, get_all_gazetteer_entities,
+    get_all_grammar_entities, get_all_languages, get_builtin_entity_examples,
+    get_builtin_entity_shortname, get_ontology_version, get_supported_entities,
     get_supported_gazetteer_entities, get_supported_grammar_entities)
 
 
@@ -18,6 +18,16 @@ class TestBuiltinEntities(unittest.TestCase):
         self.assertIn(u"fr", all_languages)
         for language in all_languages:
             self.assertIsInstance(language, str)
+
+    def test_should_get_builtin_entity_shortname(self):
+        # Given
+        entity_name = u"snips/amountOfMoney"
+
+        # When
+        short_name = get_builtin_entity_shortname(entity_name)
+
+        # Then
+        self.assertEqual(u"AmountOfMoney", short_name)
 
     def test_should_get_all_builtin_entities(self):
         # When

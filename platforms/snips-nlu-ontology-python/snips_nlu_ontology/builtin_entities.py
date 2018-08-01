@@ -18,6 +18,7 @@ _ENTITIES_EXAMPLES = dict()
 _ALL_BUILTIN_ENTITIES = None
 _ALL_GAZETTEER_ENTITIES = None
 _ALL_GRAMMAR_ENTITIES = None
+_BUILTIN_ENTITIES_SHORTNAMES = dict()
 _ONTOLOGY_VERSION = None
 
 
@@ -75,6 +76,27 @@ def get_all_grammar_entities():
         _ALL_GRAMMAR_ENTITIES = set(
             array.data[i].decode("utf8") for i in range(array.size))
     return _ALL_GRAMMAR_ENTITIES
+
+
+def get_builtin_entity_shortname(entity):
+    """Get the short name of the entity
+
+    Examples:
+
+    >>> get_builtin_entity_shortname(u"snips/amountOfMoney")
+    'AmountOfMoney'
+    """
+    global _BUILTIN_ENTITIES_SHORTNAMES
+    if entity not in _BUILTIN_ENTITIES_SHORTNAMES:
+        with string_pointer(c_char_p()) as ptr:
+            exit_code = lib.snips_nlu_ontology_entity_shortname(
+                entity.encode("utf8"), byref(ptr))
+            if exit_code:
+                raise ValueError("Something wrong happened while extracting "
+                                 "builtin entity shortname. See stderr.")
+            result = string_at(ptr)
+            _BUILTIN_ENTITIES_SHORTNAMES[entity] = result.decode("utf8")
+    return _BUILTIN_ENTITIES_SHORTNAMES[entity]
 
 
 def get_supported_entities(language):

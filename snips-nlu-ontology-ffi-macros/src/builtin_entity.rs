@@ -136,6 +136,15 @@ pub fn all_gazetteer_entities() -> CStringArray {
     }
 }
 
+pub fn get_builtin_entity_shortname(
+    entity_name: *const libc::c_char,
+    result: *mut *const libc::c_char
+) -> Result<()> {
+    let entity_str = unsafe { CStr::from_ptr(entity_name) }.to_str()?;
+    let entity_kind = BuiltinEntityKind::from_identifier(entity_str)?;
+    point_to_string(result, entity_kind.to_string())
+}
+
 pub fn get_supported_builtin_entities(
     language: *const libc::c_char,
     results: *mut *const CStringArray,

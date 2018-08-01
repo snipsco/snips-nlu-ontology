@@ -43,6 +43,14 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_entity_shortname(
+            entity_name: *const libc::c_char,
+            result: *mut *const libc::c_char
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_builtin_entity_shortname(entity_name, result))
+        }
+
+        #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_all_builtin_entities() -> ::ffi_utils::CStringArray {
             $crate::all_builtin_entities()
         }
