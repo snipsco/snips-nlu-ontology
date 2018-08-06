@@ -62,7 +62,7 @@ fn add_supported_builtin_entities(readme: &mut String) {
     readme.push_str("\n");
     let mut table = Table::new();
     table.set_format(*prettytable::format::consts::FORMAT_DEFAULT);
-    table.set_titles(row!["Entity", "Identifier", "Supported languages"]);
+    table.set_titles(row!["Entity", "Identifier", "Category", "Supported languages"]);
 
     let mut all_entities = ::BuiltinEntityKind::all().iter().collect::<Vec<_>>();
     all_entities.sort_by(|a, b| a.identifier().cmp(b.identifier()));
@@ -73,9 +73,14 @@ fn add_supported_builtin_entities(readme: &mut String) {
             .iter()
             .map(|l| format!("| {}\n", l.full_name()))
             .collect();
+        let category = GazetteerEntityKind::from_identifier(entity.identifier())
+            .ok()
+            .map(|_| "Gazetteer Entity".to_string())
+            .unwrap_or_else(|| "Grammar Entity".to_string());
         table.add_row(row![
             entity.to_string(),
             entity.identifier(),
+            category,
             supported_languages
         ]);
     }

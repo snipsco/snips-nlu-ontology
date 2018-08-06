@@ -303,7 +303,7 @@ mod test {
         // Given
         let gazetteer_entity_path = utils::gazetteer_entity_path("music_artist");
         let config = BuiltinEntityParserConfiguration {
-            language: Language::EN,
+            language: Language::FR,
             gazetteer_entity_configurations: vec![
                 GazetteerEntityConfiguration {
                     builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
@@ -315,9 +315,9 @@ mod test {
         // When
         let parser = BuiltinEntityParser::new(config).unwrap();
         let above_threshold_entity = parser
-            .extract_entities("I want to listen to the Stones please", None);
+            .extract_entities("Je voudrais écouter the Stones s'il vous plaît", None);
         let below_threshold_entity = parser
-            .extract_entities("I want to listen to Harris please", None);
+            .extract_entities("Je voudrais écouter Harris", None);
 
         // Then
         let expected_entity = BuiltinEntity {
