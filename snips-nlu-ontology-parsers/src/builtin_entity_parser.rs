@@ -32,7 +32,6 @@ pub struct BuiltinEntityParser {
 struct GazetteerParser {
     parser: _GazetteerParser,
     entity_kind: GazetteerEntityKind,
-    parser_threshold: f32,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,7 +44,6 @@ pub struct BuiltinEntityParserConfiguration {
 pub struct GazetteerEntityConfiguration {
     pub builtin_entity_name: String,
     pub resource_path: PathBuf,
-    pub parser_threshold: f32,
 }
 
 
@@ -72,7 +70,6 @@ impl BuiltinEntityParser {
                 Ok(GazetteerParser {
                     parser,
                     entity_kind,
-                    parser_threshold: entity_conf.parser_threshold,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -137,7 +134,7 @@ impl BuiltinEntityParser {
                     .unwrap_or(true))
             .flat_map(|parser|
                 parser.parser
-                    .run(&sentence.to_lowercase(), parser.parser_threshold)
+                    .run(&sentence.to_lowercase())
                     .unwrap_or_else(|_| vec![])
                     .into_iter()
                     .map(|parsed_value|
@@ -308,7 +305,6 @@ mod test {
                 GazetteerEntityConfiguration {
                     builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
                     resource_path: gazetteer_entity_path,
-                    parser_threshold: 0.6,
                 }
             ],
         };
