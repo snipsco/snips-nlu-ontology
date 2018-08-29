@@ -75,7 +75,7 @@ macro_rules! sub_entity_kind {
         }
 
         impl IntoBuiltinEntityKind for $kindname {
-            fn into_bek(self) -> BuiltinEntityKind {
+            fn into_builtin_kind(self) -> BuiltinEntityKind {
                 match self {
                     $(
                         $kindname::$varname => BuiltinEntityKind::$varname,

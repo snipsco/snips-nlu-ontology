@@ -2,7 +2,7 @@ use entity::builtin_entity::{BuiltinEntityKind, IntoBuiltinEntityKind};
 use errors::*;
 
 sub_entity_kind!(
-    GazetteerEntityKind,
+    BuiltinGazetteerEntityKind,
     [
         MusicArtist,
         MusicAlbum,

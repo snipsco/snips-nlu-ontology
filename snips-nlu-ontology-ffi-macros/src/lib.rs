@@ -82,11 +82,11 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_supported_gazetteer_entities(
+        pub extern "C" fn snips_nlu_ontology_supported_builtin_gazetteer_entities(
             language: *const libc::c_char,
             results: *mut *const ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::get_supported_gazetteer_entities(language, results))
+            wrap!($crate::get_supported_builtin_gazetteer_entities(language, results))
         }
 
         #[no_mangle]

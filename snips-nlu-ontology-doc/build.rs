@@ -73,7 +73,7 @@ fn add_supported_builtin_entities(readme: &mut String) {
             .iter()
             .map(|l| format!("| {}\n", l.full_name()))
             .collect();
-        let category = GazetteerEntityKind::from_identifier(entity.identifier())
+        let category = BuiltinGazetteerEntityKind::from_identifier(entity.identifier())
             .ok()
             .map(|_| "Gazetteer Entity".to_string())
             .unwrap_or_else(|| "Grammar Entity".to_string());

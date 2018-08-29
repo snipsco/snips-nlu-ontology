@@ -10,7 +10,7 @@ use serde_json;
 
 use errors::*;
 use ffi_utils::{CStringArray, CReprOf, RawPointerConverter, point_to_string};
-use snips_nlu_ontology::{BuiltinEntityKind, GazetteerEntityKind, GrammarEntityKind,
+use snips_nlu_ontology::{BuiltinEntityKind, BuiltinGazetteerEntityKind, GrammarEntityKind,
                          IntoBuiltinEntityKind, Language, language_entity_ontology,
                          complete_entity_ontology};
 
@@ -120,7 +120,7 @@ pub fn all_gazetteer_entities() -> CStringArray {
     lazy_static! {
         static ref ALL: DummyWrapper = {
             DummyWrapper(
-                GazetteerEntityKind::all()
+                BuiltinGazetteerEntityKind::all()
                     .iter()
                     .map(|l| l.identifier().to_string())
                     .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
@@ -181,13 +181,13 @@ pub fn get_supported_grammar_entities(
     Ok(())
 }
 
-pub fn get_supported_gazetteer_entities(
+pub fn get_supported_builtin_gazetteer_entities(
     language: *const libc::c_char,
     results: *mut *const CStringArray,
 ) -> Result<()> {
     let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
     let language = Language::from_str(&*language_str.to_uppercase())?;
-    let entities = GazetteerEntityKind::all()
+    let entities = BuiltinGazetteerEntityKind::all()
         .iter()
         .filter(|e| e.supported_languages().contains(&language))
         .map(|e| e.identifier().to_string())

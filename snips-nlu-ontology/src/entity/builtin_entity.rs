@@ -53,30 +53,30 @@ enum_kind!(
 );
 
 pub trait IntoBuiltinEntityKind: Copy {
-    fn into_bek(self) -> BuiltinEntityKind;
+    fn into_builtin_kind(self) -> BuiltinEntityKind;
 
     fn identifier(&self) -> &'static str {
-        self.into_bek().identifier()
+        self.into_builtin_kind().identifier()
     }
 
     fn description(&self) -> &'static str {
-        self.into_bek().description()
+        self.into_builtin_kind().description()
     }
 
     fn examples(&self, language: Language) -> &'static[&'static str] {
-        self.into_bek().examples(language)
+        self.into_builtin_kind().examples(language)
     }
 
     fn result_description(&self) -> String {
-        self.into_bek().result_description()
+        self.into_builtin_kind().result_description()
     }
 
     fn supported_languages(&self) -> &'static [Language] {
-        self.into_bek().supported_languages()
+        self.into_builtin_kind().supported_languages()
     }
 
     fn ontology_details(&self, language: Language) -> BuiltinEntityKindDetails {
-        self.into_bek().ontology_details(language)
+        self.into_builtin_kind().ontology_details(language)
     }
 }
 
