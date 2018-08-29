@@ -1,94 +1,65 @@
-use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
 use std::ops::Range;
-use std::path::PathBuf;
 
 use itertools::Itertools;
-use regex::Regex;
 
 use errors::*;
-use gazetteer_entity_parser::Parser as _GazetteerParser;
-use conversion::*;
 use nlu_ontology::*;
-use nlu_ontology::IntoBuiltinEntityKind;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser as RustlingParser, ResolverContext};
 
-lazy_static! {
-    static ref NON_SPACE_REGEX: Regex = Regex::new(r"[^\s]+").unwrap();
-}
-
-lazy_static! {
-    static ref NON_SPACE_SEPARATED_LANGUAGES: HashSet<Language> = hashset!(Language::JA);
-}
+use gazetteer_parser::GazetteerParser;
+use utils::{get_ranges_mapping, NON_SPACE_REGEX, NON_SPACE_SEPARATED_LANGUAGES};
+use conversion::*;
+use std::path::PathBuf;
+use std::path::Path;
 
 pub struct BuiltinEntityParser {
-    gazetteer_parsers: Vec<GazetteerParser>,
+    gazetteer_parser: Option<GazetteerParser<BuiltinGazetteerEntityKind>>,
     rustling_parser: RustlingParser,
     language: Language,
     rustling_entity_kinds: Vec<BuiltinEntityKind>,
 }
 
-struct GazetteerParser {
-    parser: _GazetteerParser,
-    entity_kind: GazetteerEntityKind,
-}
-
 #[derive(Serialize, Deserialize)]
-pub struct BuiltinEntityParserConfiguration {
-    pub language: Language,
-    pub gazetteer_entity_configurations: Vec<GazetteerEntityConfiguration>,
+pub struct BuiltinEntityParserLoader {
+    language: Language,
+    gazetteer_parser_path: Option<PathBuf>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct GazetteerEntityConfiguration {
-    pub builtin_entity_name: String,
-    pub resource_path: PathBuf,
-}
+impl BuiltinEntityParserLoader {
+    pub fn new(language: Language) -> Self {
+        BuiltinEntityParserLoader { language, gazetteer_parser_path: None }
+    }
 
+    pub fn use_gazetter_parser<'a, P: AsRef<Path>>(mut self, parser_path: P) -> Self {
+        self.gazetteer_parser_path = Some(parser_path.as_ref().to_path_buf());
+        self
+    }
 
-impl BuiltinEntityParser {
-    pub fn new(config: BuiltinEntityParserConfiguration) -> Result<Self> {
-        let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(config.language);
+    pub fn load(self) -> Result<BuiltinEntityParser> {
+        let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(self.language);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
             .map(|output_kind| output_kind.ontology_into())
             .filter(|builtin_entity_kind| supported_entity_kinds.contains(&builtin_entity_kind))
             .collect();
-        let rustling_parser = build_parser(config.language.ontology_into())
-            .map_err(|_| format_err!("Cannot create Rustling Parser for language {:?}", config.language))?;
-        let gazetteer_parsers = config.gazetteer_entity_configurations
-            .iter()
-            .map(|entity_conf| {
-                let entity_kind = GazetteerEntityKind::from_identifier(&entity_conf.builtin_entity_name)?;
-                if !supported_entity_kinds.contains(&(entity_kind.into_bek())) {
-                    return Err(
-                        format_err!("Gazetteer entity kind {:?} is not yet supported in language {:?}",
-                                    entity_kind, config.language));
-                }
-                let parser = _GazetteerParser::from_folder(&entity_conf.resource_path)?;
-                Ok(GazetteerParser {
-                    parser,
-                    entity_kind,
-                })
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let rustling_parser = build_parser(self.language.ontology_into())
+            .map_err(|_| format_err!("Cannot create Rustling Parser for language {:?}", self.language))?;
+        let gazetteer_parser = match self.gazetteer_parser_path {
+            Some(parser_path) => Some(GazetteerParser::from_path(parser_path)?),
+            None => None
+        };
 
         Ok(BuiltinEntityParser {
-            gazetteer_parsers,
+            gazetteer_parser,
             rustling_parser,
-            language: config.language,
+            language: self.language,
             rustling_entity_kinds: ordered_entity_kinds,
         })
     }
+}
 
-    pub fn from_language(language: Language) -> Result<Self> {
-        Self::new(BuiltinEntityParserConfiguration {
-            language,
-            gazetteer_entity_configurations: vec![],
-        })
-    }
-
+impl BuiltinEntityParser {
     pub fn extract_entities(
         &self,
         sentence: &str,
@@ -116,7 +87,7 @@ impl BuiltinEntityParser {
             .flat_map(|kind| kind.try_ontology_into().ok())
             .collect::<Vec<OutputKind>>();
 
-        let rustling_entities: Vec<BuiltinEntity> = if rustling_output_kinds.is_empty() {
+        let rustling_entities = if rustling_output_kinds.is_empty() {
             vec![]
         } else {
             self.rustling_parser
@@ -127,24 +98,19 @@ impl BuiltinEntityParser {
                 .sorted_by(|a, b| Ord::cmp(&a.range.start, &b.range.start))
         };
 
-        let mut gazetteer_entities: Vec<BuiltinEntity> = self.gazetteer_parsers.iter()
-            .filter(|parser|
-                filter_entity_kinds
-                    .map(|kinds| kinds.contains(&parser.entity_kind.into_bek()))
-                    .unwrap_or(true))
-            .flat_map(|parser|
-                parser.parser
-                    .run(&sentence.to_lowercase())
+        let mut gazetteer_entities = match &self.gazetteer_parser {
+            Some(gazetteer_parser) => {
+                let gazetteer_entity_kinds = filter_entity_kinds
+                    .map(|kinds|
+                        kinds.into_iter()
+                            .flat_map(|kind| kind.try_into_gazetteer_kind().ok())
+                            .collect());
+                gazetteer_parser
+                    .extract_builtin_entities(sentence, gazetteer_entity_kinds.as_ref())
                     .unwrap_or_else(|_| vec![])
-                    .into_iter()
-                    .map(|parsed_value|
-                        gazetteer_entities::convert_to_builtin(
-                            sentence.to_string(),
-                            parsed_value,
-                            parser.entity_kind))
-                    .collect_vec()
-            )
-            .collect();
+            }
+            None => vec![]
+        };
 
         let mut entities = rustling_entities;
         entities.append(&mut gazetteer_entities);
@@ -209,45 +175,18 @@ impl BuiltinEntityParser {
     }
 }
 
-fn get_ranges_mapping(tokens_ranges: &Vec<Range<usize>>) -> HashMap<usize, usize> {
-    /* Given tokens ranges returns a mapping of byte index to a token index
-    The byte indexes corresponds to indexes of the end of tokens in string given by joining all
-    the tokens. The tokens index gives the index of the tokens preceding the byte index.
-
-    For instance, if range_mapping[65] -> 5, this means that the token of index 6 starts at the
-    65th byte in the joined string
-    */
-    let ranges_mapping =
-        HashMap::<usize, usize>::from_iter(tokens_ranges.iter().enumerate().fold(
-            vec![],
-            |mut acc: Vec<(usize, usize)>, (token_index, ref original_range)| {
-                let previous_end = if token_index == 0 {
-                    0 as usize
-                } else {
-                    acc[acc.len() - 1].0
-                };
-                acc.push((
-                    previous_end + original_range.end - original_range.start,
-                    token_index,
-                ));
-                acc
-            },
-        ));
-    ranges_mapping
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
-    use utils;
 
     use nlu_ontology::SlotValue::InstantTime;
     use nlu_ontology::IntoBuiltinEntityKind;
     use nlu_ontology::language::Language;
+    use test_utils::test_path;
 
     #[test]
     fn test_entities_extraction() {
-        let parser = BuiltinEntityParser::from_language(Language::EN).unwrap();
+        let parser = BuiltinEntityParserLoader::new(Language::EN).load().unwrap();
         assert_eq!(
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
@@ -290,7 +229,7 @@ mod test {
 
     #[test]
     fn test_entities_extraction_with_empty_scope() {
-        let parser = BuiltinEntityParser::from_language(Language::EN).unwrap();
+        let parser = BuiltinEntityParserLoader::new(Language::EN).load().unwrap();
         let entities = parser.extract_entities("tomorrow morning", Some(&[]));
         assert_eq!(Vec::<BuiltinEntity>::new(), entities);
     }
@@ -298,26 +237,19 @@ mod test {
     #[test]
     fn test_entities_extraction_with_gazetteer_entities() {
         // Given
-        let gazetteer_entity_path = utils::gazetteer_entity_path("music_artist");
-        let config = BuiltinEntityParserConfiguration {
-            language: Language::FR,
-            gazetteer_entity_configurations: vec![
-                GazetteerEntityConfiguration {
-                    builtin_entity_name: BuiltinEntityKind::MusicArtist.identifier().to_string(),
-                    resource_path: gazetteer_entity_path,
-                }
-            ],
-        };
+        let language = Language::FR;
+        let parser_loader = BuiltinEntityParserLoader::new(language)
+            .use_gazetter_parser(test_path().join("builtin_gazetteer_parser"));
         // When
-        let parser = BuiltinEntityParser::new(config).unwrap();
+        let parser = parser_loader.load().unwrap();
         let above_threshold_entity = parser
-            .extract_entities("Je voudrais écouter the Stones s'il vous plaît", None);
+            .extract_entities("Je voudrais écouter the stones s'il vous plaît", None);
         let below_threshold_entity = parser
-            .extract_entities("Je voudrais écouter Harris", None);
+            .extract_entities("Je voudrais écouter les stones", None);
 
         // Then
         let expected_entity = BuiltinEntity {
-            value: "the Stones".to_string(),
+            value: "the stones".to_string(),
             range: 20..30,
             entity: SlotValue::MusicArtist(StringValue { value: "The Rolling Stones".to_string() }),
             entity_kind: BuiltinEntityKind::MusicArtist,
@@ -334,7 +266,7 @@ mod test {
 
     #[test]
     fn test_entities_extraction_for_non_space_separated_languages() {
-        let parser = BuiltinEntityParser::from_language(Language::JA).unwrap();
+        let parser = BuiltinEntityParserLoader::new(Language::JA).load().unwrap();
         let expected_time_value = InstantTimeValue {
             value: "2013-02-10 00:00:00 +01:00".to_string(),
             grain: Grain::Day,
@@ -377,10 +309,10 @@ mod test {
     #[test]
     fn test_entity_examples_should_be_parsed() {
         for language in Language::all() {
-            let parser = BuiltinEntityParser::from_language(*language).unwrap();
+            let parser = BuiltinEntityParserLoader::new(*language).load().unwrap();
             for entity_kind in GrammarEntityKind::all() {
                 for example in (*entity_kind).examples(*language) {
-                    let results = parser.extract_entities(example, Some(&[entity_kind.into_bek()]));
+                    let results = parser.extract_entities(example, Some(&[entity_kind.into_builtin_kind()]));
                     assert_eq!(
                         1, results.len(),
                         "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \

@@ -14,12 +14,20 @@ extern crate rustling_ontology;
 extern crate snips_nlu_ontology as nlu_ontology;
 extern crate snips_nlu_utils as nlu_utils;
 extern crate gazetteer_entity_parser;
+extern crate snips_nlu_ontology;
+#[cfg(test)]
+extern crate tempfile;
 
 pub mod errors;
+
 mod builtin_entity_parser;
 mod conversion;
-#[cfg(test)]
+mod gazetteer_parser;
 mod utils;
+#[cfg(test)]
+mod test_utils;
 
-pub use self::builtin_entity_parser::*;
-pub use self::conversion::*;
+pub use gazetteer_entity_parser::EntityValue as CustomEntityValue;
+pub use builtin_entity_parser::*;
+pub use gazetteer_parser::*;
+pub use conversion::*;

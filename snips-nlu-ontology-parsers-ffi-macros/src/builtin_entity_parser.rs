@@ -9,7 +9,7 @@ use Result;
 use ffi_utils::{CStringArray, CReprOf, RawPointerConverter};
 use snips_nlu_ontology::{BuiltinEntity, BuiltinEntityKind};
 use snips_nlu_ontology_ffi_macros::{CBuiltinEntity, CBuiltinEntityArray};
-use snips_nlu_ontology_parsers::BuiltinEntityParser;
+use snips_nlu_ontology_parsers::{BuiltinEntityParser, BuiltinEntityParserLoader};
 
 #[repr(C)]
 pub struct CBuiltinEntityParser(*const libc::c_void);
@@ -27,8 +27,8 @@ pub fn create_builtin_entity_parser(
     json_config: *const libc::c_char,
 ) -> Result<()> {
     let json_config = unsafe { CStr::from_ptr(json_config) }.to_str()?;
-    let parser_configuration = serde_json::from_str(json_config)?;
-    let parser = BuiltinEntityParser::new(parser_configuration)?;
+    let parser_loader: BuiltinEntityParserLoader = serde_json::from_str(json_config)?;
+    let parser = parser_loader.load()?;
 
     let c_parser = CBuiltinEntityParser(parser.into_raw_pointer() as _).into_raw_pointer();
 
@@ -38,13 +38,13 @@ pub fn create_builtin_entity_parser(
     Ok(())
 }
 
-pub fn extract_entity_c(
+pub fn extract_builtin_entity_c(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const CBuiltinEntityArray,
 ) -> Result<()> {
-    let c_entities = extract_entity(ptr, sentence, filter_entity_kinds)?
+    let c_entities = extract_builtin_entity(ptr, sentence, filter_entity_kinds)?
         .into_iter()
         .map(CBuiltinEntity::from)
         .collect::<Vec<_>>();
@@ -57,13 +57,13 @@ pub fn extract_entity_c(
     Ok(())
 }
 
-pub fn extract_entity_json(
+pub fn extract_builtin_entity_json(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,
     results: *mut *const libc::c_char,
 ) -> Result<()> {
-    let entities = extract_entity(ptr, sentence, filter_entity_kinds)?;
+    let entities = extract_builtin_entity(ptr, sentence, filter_entity_kinds)?;
     let json = ::serde_json::to_string(&entities)?;
 
     let cs = convert_to_c_string!(json);
@@ -72,7 +72,7 @@ pub fn extract_entity_json(
     Ok(())
 }
 
-pub fn extract_entity(
+pub fn extract_builtin_entity(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,
     filter_entity_kinds: *const CStringArray,

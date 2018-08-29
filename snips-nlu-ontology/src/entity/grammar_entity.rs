@@ -13,3 +13,14 @@ sub_entity_kind!(
         Percentage
     ]
 );
+
+pub trait TryIntoGrammarEntityKind {
+    fn try_into_grammar_kind(self) -> Result<GrammarEntityKind>;
+}
+
+
+impl TryIntoGrammarEntityKind for BuiltinEntityKind {
+    fn try_into_grammar_kind(self) -> Result<GrammarEntityKind> {
+        GrammarEntityKind::from_identifier(self.identifier())
+    }
+}

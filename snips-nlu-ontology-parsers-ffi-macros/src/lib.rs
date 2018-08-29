@@ -11,8 +11,10 @@ extern crate ffi_utils;
 type Result<T> = ::std::result::Result<T, ::failure::Error>;
 
 mod builtin_entity_parser;
+mod gazetteer_entity_parser;
 
 pub use builtin_entity_parser::*;
+pub use gazetteer_entity_parser::*;
 
 #[macro_export]
 macro_rules! export_nlu_ontology_parsers_c_symbols {
@@ -26,13 +28,13 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_extract_entities(
+        pub extern "C" fn snips_nlu_ontology_extract_builtin_entities(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const ::libc::c_char,
             filter_entity_kinds: *const ::ffi_utils::CStringArray,
             results: *mut *const snips_nlu_ontology_ffi_macros::CBuiltinEntityArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::extract_entity_c(
+            wrap!($crate::extract_builtin_entity_c(
                 ptr,
                 sentence,
                 filter_entity_kinds,
@@ -41,13 +43,13 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_extract_entities_json(
+        pub extern "C" fn snips_nlu_ontology_extract_builtin_entities_json(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const ::libc::c_char,
             filter_entity_kinds: *const ::ffi_utils::CStringArray,
             results: *mut *const ::libc::c_char,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::extract_entity_json(
+            wrap!($crate::extract_builtin_entity_json(
                 ptr,
                 sentence,
                 filter_entity_kinds,
@@ -69,6 +71,44 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
             ptr: *mut $crate::CBuiltinEntityParser,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::destroy_builtin_entity_parser(ptr))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_build_gazetteer_entity_parser(
+            ptr: *mut *const $crate::CGazetteerEntityParser,
+            json_config: *const ::libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::build_gazetteer_entity_parser(ptr, json_config))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_load_gazetteer_entity_parser(
+            ptr: *mut *const $crate::CGazetteerEntityParser,
+            json_config: *const ::libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::load_gazetteer_entity_parser(ptr, json_config))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_extract_gazetteer_entities_json(
+            ptr: *const $crate::CGazetteerEntityParser,
+            sentence: *const ::libc::c_char,
+            filter_entity_kinds: *const ::ffi_utils::CStringArray,
+            results: *mut *const ::libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::extract_gazetteer_entity_json(
+                ptr,
+                sentence,
+                filter_entity_kinds,
+                results
+            ))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_destroy_gazetteer_entity_parser(
+            ptr: *mut $crate::CGazetteerEntityParser,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::destroy_gazetteer_entity_parser(ptr))
         }
     }
 }
