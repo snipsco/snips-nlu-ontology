@@ -111,7 +111,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
     def test_should_parse_from_loaded_parser(self):
         # Given
-        parser = GazetteerEntityParser.load(str(CUSTOM_PARSER_PATH))
+        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
 
         # When
         res = parser.parse("I want to listen to the stones", None)
@@ -130,7 +130,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
     def test_should_persist_parser(self):
         # Given
-        parser = GazetteerEntityParser.load(str(CUSTOM_PARSER_PATH))
+        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
 
         # When
         with temp_dir() as tmpdir:
@@ -153,7 +153,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
     def test_should_not_accept_bytes_in_text(self):
         # Given
-        parser = GazetteerEntityParser.load(str(CUSTOM_PARSER_PATH))
+        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
         bytes_text = b"Raise to sixty"
 
         # When/Then
@@ -163,7 +163,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
     def test_should_not_accept_bytes_in_scope(self):
         # Given
         scope = [b"snips/number", b"snips/datetime"]
-        parser = GazetteerEntityParser.load(str(CUSTOM_PARSER_PATH))
+        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
 
         # When/Then
         with self.assertRaises(TypeError):

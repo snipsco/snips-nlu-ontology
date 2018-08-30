@@ -2,6 +2,7 @@ import json
 from _ctypes import byref, pointer
 from builtins import bytes
 from ctypes import c_char_p, c_int, c_void_p, string_at
+from pathlib import Path
 
 from snips_nlu_ontology.utils import (CStringArray, lib, string_pointer)
 
@@ -15,6 +16,8 @@ class GazetteerEntityParser(object):
         """Create a :class:`GazetteerEntityParser` from a gazetteer parser
         persisted on disk
         """
+        if isinstance(parser_path, Path):
+            parser_path = str(parser_path)
         parser = pointer(c_void_p())
         parser_path = bytes(parser_path, encoding="utf8")
         exit_code = lib.snips_nlu_ontology_load_gazetteer_entity_parser(
@@ -132,9 +135,8 @@ class GazetteerEntityParser(object):
 
     def persist(self, path):
         """Persist the gazetteer parser on disk at the provided path"""
-        if not isinstance(path, str):
-            raise TypeError("Expected path to be of type 'str' but found: "
-                            "%s" % type(path))
+        if isinstance(path, Path):
+            path = str(path)
         exit_code = lib.snips_nlu_ontology_persist_gazetteer_entity_parser(
             self._parser, path.encode("utf8"))
         if exit_code:

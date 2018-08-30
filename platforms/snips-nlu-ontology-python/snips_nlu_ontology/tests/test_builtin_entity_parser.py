@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 import unittest
-from pathlib import Path
 
 from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
+from snips_nlu_ontology.tests.test_utils import ROOT_DIR
 
 
 class TestBuiltinEntityParser(unittest.TestCase):
@@ -56,31 +56,24 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
     def test_should_parse_with_gazetteer_entity(self):
         # Given
-        root_path = Path(__file__).parent.parent.parent.parent.parent
-        resource_path = root_path / "data" / "tests" / "gazetteer_entities" \
-                        / "music_artist"
-        gazetteer_entity_configurations = [
-            {
-                "entity_identifier": "snips/musicArtist",
-                "resource_path": str(resource_path),
-            }
-        ]
-        parser = BuiltinEntityParser("en", gazetteer_entity_configurations)
+        gazetteer_parser_path = ROOT_DIR / "data" / "tests" / \
+                                "builtin_gazetteer_parser"
+        parser = BuiltinEntityParser("en", gazetteer_parser_path)
         scope = ["snips/musicArtist"]
 
         # When
-        res = parser.parse("I want to list to calvin Harris please!", scope)
+        res = parser.parse("I want to listen to the stones please!", scope)
 
         # Then
         expected_result = [
             {
                 "entity": {
                     "kind": "MusicArtist",
-                    "value": "Calvin Harris"
+                    "value": "The Rolling Stones"
                 },
                 "entity_kind": "snips/musicArtist",
-                "range": {"end": 31, "start": 18},
-                "value": "calvin Harris"
+                "range": {"end": 30, "start": 20},
+                "value": "the stones"
             }
         ]
 

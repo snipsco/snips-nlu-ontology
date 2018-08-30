@@ -1,6 +1,7 @@
 import json
 from _ctypes import byref, pointer
 from ctypes import c_char_p, c_int, c_void_p, string_at
+from pathlib import Path
 
 from snips_nlu_ontology.utils import CStringArray, lib, string_pointer
 
@@ -10,20 +11,19 @@ class BuiltinEntityParser(object):
 
     Args:
         language (str): Language (ISO code) of the builtin entity parser
-        gazetteer_entity_configurations (list of str, opt): list of
-            configurations for gazetteer entities
+        gazetteer_entity_parser_path (str, opt): Path to the gazetteer entity
+            parser.
     """
 
-    def __init__(self, language, gazetteer_entity_configurations=None):
+    def __init__(self, language, gazetteer_entity_parser_path=None):
+        if isinstance(gazetteer_entity_parser_path, Path):
+            gazetteer_entity_parser_path = str(gazetteer_entity_parser_path)
         if not isinstance(language, str):
             raise TypeError("Expected language to be of type 'str' but found:"
                             " %s" % type(language))
-        gazetteer_parser = None
-        if gazetteer_entity_configurations is not None:
-            gazetteer_parser = dict(
-                entity_parsers=gazetteer_entity_configurations)
-        parser_config = dict(language=language.upper(),
-                             gazetteer_parser=gazetteer_parser)
+        parser_config = dict(
+            language=language.upper(),
+            gazetteer_parser_path=gazetteer_entity_parser_path)
         parser = pointer(c_void_p())
         json_parser_config = bytes(json.dumps(parser_config), encoding="utf8")
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
