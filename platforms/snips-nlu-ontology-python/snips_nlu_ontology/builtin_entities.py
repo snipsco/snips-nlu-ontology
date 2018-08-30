@@ -1,11 +1,10 @@
 # coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import json
 from _ctypes import byref, pointer
-from builtins import bytes, object, range, str
-from ctypes import c_char_p, c_int, c_void_p, string_at
+from builtins import range, str
+from ctypes import c_char_p, string_at
 
 from snips_nlu_ontology.utils import (CStringArray, lib, string_array_pointer,
                                       string_pointer)
@@ -92,7 +91,7 @@ def get_builtin_entity_shortname(entity):
             exit_code = lib.snips_nlu_ontology_entity_shortname(
                 entity.encode("utf8"), byref(ptr))
             if exit_code:
-                raise ValueError("Something wrong happened while extracting "
+                raise ValueError("Something went wrong while retrieving "
                                  "builtin entity shortname. See stderr.")
             result = string_at(ptr)
             _BUILTIN_ENTITIES_SHORTNAMES[entity] = result.decode("utf8")
@@ -116,7 +115,7 @@ def get_supported_entities(language):
             exit_code = lib.snips_nlu_ontology_supported_builtin_entities(
                 language.encode("utf8"), byref(ptr))
             if exit_code:
-                raise ValueError("Something wrong happened while retrieving "
+                raise ValueError("Something went wrong while retrieving "
                                  "supported entities. See stderr.")
             array = ptr.contents
             _SUPPORTED_ENTITIES[language] = set(
@@ -138,11 +137,12 @@ def get_supported_gazetteer_entities(language):
 
     if language not in _SUPPORTED_GAZETTEER_ENTITIES:
         with string_array_pointer(pointer(CStringArray())) as ptr:
-            exit_code = lib.snips_nlu_ontology_supported_gazetteer_entities(
-                language.encode("utf8"), byref(ptr))
+            exit_code = \
+                lib.snips_nlu_ontology_supported_builtin_gazetteer_entities(
+                    language.encode("utf8"), byref(ptr))
             if exit_code:
-                raise ValueError("Something wrong happened while retrieving "
-                                 "supported entities. See stderr.")
+                raise ValueError("Something went wrong while retrieving "
+                                 "supported gazetteer entities. See stderr.")
             array = ptr.contents
             _SUPPORTED_GAZETTEER_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
@@ -166,8 +166,8 @@ def get_supported_grammar_entities(language):
             exit_code = lib.snips_nlu_ontology_supported_grammar_entities(
                 language.encode("utf8"), byref(ptr))
             if exit_code:
-                raise ValueError("Something wrong happened while retrieving "
-                                 "supported entities. See stderr.")
+                raise ValueError("Something went wrong while retrieving "
+                                 "supported grammar entities. See stderr.")
             array = ptr.contents
             _SUPPORTED_GRAMMAR_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
@@ -195,81 +195,9 @@ def get_builtin_entity_examples(builtin_entity_kind, language):
                 builtin_entity_kind.encode("utf8"),
                 language.encode("utf8"), byref(ptr))
             if exit_code:
-                raise ValueError("Something wrong happened while retrieving "
+                raise ValueError("Something went wrong while retrieving "
                                  "builtin entity examples. See stderr.")
             array = ptr.contents
             _ENTITIES_EXAMPLES[builtin_entity_kind][language] = list(
                 array.data[i].decode("utf8") for i in range(array.size))
     return _ENTITIES_EXAMPLES[builtin_entity_kind][language]
-
-
-class BuiltinEntityParser(object):
-    """Extract builtin entities
-
-    Args:
-        language (str): Language (ISO code) of the builtin entity parser
-        gazetteer_entity_configurations (list of str, opt): list of
-            configurations for gazetteer entities
-    """
-
-    def __init__(self, language, gazetteer_entity_configurations=None):
-        if gazetteer_entity_configurations is None:
-            gazetteer_entity_configurations = []
-        if not isinstance(language, str):
-            raise TypeError("Expected language to be of type 'str' but found:"
-                            " %s" % type(language))
-        if not isinstance(gazetteer_entity_configurations, list):
-            raise TypeError("Expected builtin_entities_resources to be of "
-                            "type 'list' but found: %s"
-                            % type(gazetteer_entity_configurations))
-        self.parser_config = dict(
-            language=language.upper(),
-            gazetteer_entity_configurations=gazetteer_entity_configurations
-        )
-        self._parser = pointer(c_void_p())
-        json_parser_config = bytes(json.dumps(self.parser_config),
-                                   encoding="utf8")
-        exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
-            byref(self._parser), json_parser_config)
-        if exit_code:
-            raise ImportError("Something wrong happened while creating the "
-                              "intent parser. See stderr.")
-
-    def __del__(self):
-        if lib is not None and hasattr(self, '_parser'):
-            lib.snips_nlu_ontology_destroy_builtin_entity_parser(self._parser)
-
-    def parse(self, text, scope=None):
-        """Extract builtin entities from *text*
-
-        Args:
-            text (str): Input
-            scope (list of str, optional): List of builtin entity labels. If
-                defined, the parser will extract entities using the provided
-                scope instead of the entire scope of all available entities.
-                This allows to look for specifics builtin entity kinds.
-
-        Returns:
-            list of dict: The list of extracted entities
-        """
-        if not isinstance(text, str):
-            raise TypeError("Expected language to be of type 'str' but found: "
-                            "%s" % type(text))
-        if scope is not None:
-            if not all(isinstance(e, str) for e in scope):
-                raise TypeError(
-                    "Expected scope to contain objects of type 'str'")
-            scope = [e.encode("utf8") for e in scope]
-            arr = CStringArray()
-            arr.size = c_int(len(scope))
-            arr.data = (c_char_p * len(scope))(*scope)
-            scope = byref(arr)
-
-        with string_pointer(c_char_p()) as ptr:
-            exit_code = lib.snips_nlu_ontology_extract_entities_json(
-                self._parser, text.encode("utf8"), scope, byref(ptr))
-            if exit_code:
-                raise ValueError("Something wrong happened while extracting "
-                                 "builtin entities. See stderr.")
-            result = string_at(ptr)
-            return json.loads(result.decode("utf8"))

@@ -61,9 +61,8 @@ class TestBuiltinEntityParser(unittest.TestCase):
                         / "music_artist"
         gazetteer_entity_configurations = [
             {
-                "builtin_entity_name": "snips/musicArtist",
+                "entity_identifier": "snips/musicArtist",
                 "resource_path": str(resource_path),
-                "parser_threshold": 1.0
             }
         ]
         parser = BuiltinEntityParser("en", gazetteer_entity_configurations)
