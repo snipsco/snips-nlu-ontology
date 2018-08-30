@@ -1,17 +1,17 @@
+use std::fs;
 use std::ops::Range;
+use std::path::{Path, PathBuf};
 
-use itertools::Itertools;
-
+use conversion::*;
 use errors::*;
+use failure::ResultExt;
+use gazetteer_parser::GazetteerParser;
+use itertools::Itertools;
 use nlu_ontology::*;
 use nlu_utils::string::{convert_to_byte_range, convert_to_char_index};
 use rustling_ontology::{build_parser, OutputKind, Parser as RustlingParser, ResolverContext};
-
-use gazetteer_parser::GazetteerParser;
+use serde_json;
 use utils::{get_ranges_mapping, NON_SPACE_REGEX, NON_SPACE_SEPARATED_LANGUAGES};
-use conversion::*;
-use std::path::PathBuf;
-use std::path::Path;
 
 pub struct BuiltinEntityParser {
     gazetteer_parser: Option<GazetteerParser<BuiltinGazetteerEntityKind>>,
@@ -31,12 +31,12 @@ impl BuiltinEntityParserLoader {
         BuiltinEntityParserLoader { language, gazetteer_parser_path: None }
     }
 
-    pub fn use_gazetter_parser<'a, P: AsRef<Path>>(mut self, parser_path: P) -> Self {
+    pub fn use_gazetter_parser<P: AsRef<Path>>(&mut self, parser_path: P) -> &mut Self {
         self.gazetteer_parser_path = Some(parser_path.as_ref().to_path_buf());
         self
     }
 
-    pub fn load(self) -> Result<BuiltinEntityParser> {
+    pub fn load(&self) -> Result<BuiltinEntityParser> {
         let supported_entity_kinds = BuiltinEntityKind::supported_entity_kinds(self.language);
         let ordered_entity_kinds = OutputKind::all()
             .iter()
@@ -45,7 +45,7 @@ impl BuiltinEntityParserLoader {
             .collect();
         let rustling_parser = build_parser(self.language.ontology_into())
             .map_err(|_| format_err!("Cannot create Rustling Parser for language {:?}", self.language))?;
-        let gazetteer_parser = match self.gazetteer_parser_path {
+        let gazetteer_parser = match &self.gazetteer_parser_path {
             Some(parser_path) => Some(GazetteerParser::from_path(parser_path)?),
             None => None
         };
@@ -175,6 +175,52 @@ impl BuiltinEntityParser {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct BuiltinParserMetadata {
+    language: Language,
+    gazetteer_parser: Option<String>,
+}
+
+impl BuiltinEntityParser {
+    pub fn persist<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        fs::create_dir(path.as_ref())
+            .with_context(|_| format!("Cannot create builtin entity parser directory at path: {:?}",
+                                      path.as_ref()))?;
+        let gazetteer_parser_directory = if let Some(ref gazetteer_parser) = self.gazetteer_parser {
+            let gazetteer_parser_path = path.as_ref().join("gazetteer_entity_parser");
+            gazetteer_parser.persist(gazetteer_parser_path)?;
+            Some("gazetteer_entity_parser".to_string())
+        } else {
+            None
+        };
+        let gazetteer_parser_metadata = BuiltinParserMetadata {
+            language: self.language,
+            gazetteer_parser: gazetteer_parser_directory,
+        };
+        let metadata_path = path.as_ref().join("metadata.json");
+        let metadata_file = fs::File::create(&metadata_path)
+            .with_context(|_| format!("Cannot create metadata file at path: {:?}", metadata_path))?;
+        serde_json::to_writer_pretty(metadata_file, &gazetteer_parser_metadata)
+            .with_context(|_| "Cannot serialize builtin parser metadata")?;
+        Ok(())
+    }
+
+    pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let metadata_path = path.as_ref().join("metadata.json");
+        let metadata_file = fs::File::open(&metadata_path)
+            .with_context(|_| format!("Cannot open builtin parser metadata file at path: {:?}",
+                                      metadata_path))?;
+        let metadata: BuiltinParserMetadata = serde_json::from_reader(metadata_file)
+            .with_context(|_| "Cannot deserialize builtin parser metadata")?;
+        let mut parser_loader = BuiltinEntityParserLoader::new(metadata.language);
+        if let Some(gazetteer_parser_dir) = metadata.gazetteer_parser {
+            let gazetteer_parser_path = path.as_ref().join(&gazetteer_parser_dir);
+            parser_loader.use_gazetter_parser(gazetteer_parser_path);
+        }
+        parser_loader.load()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -183,6 +229,7 @@ mod test {
     use nlu_ontology::IntoBuiltinEntityKind;
     use nlu_ontology::language::Language;
     use test_utils::test_path;
+    use tempfile::tempdir;
 
     #[test]
     fn test_entities_extraction() {
@@ -238,10 +285,12 @@ mod test {
     fn test_entities_extraction_with_gazetteer_entities() {
         // Given
         let language = Language::FR;
-        let parser_loader = BuiltinEntityParserLoader::new(language)
-            .use_gazetter_parser(test_path().join("builtin_gazetteer_parser"));
+        let parser = BuiltinEntityParserLoader::new(language)
+            .use_gazetter_parser(test_path().join("builtin_gazetteer_parser"))
+            .load()
+            .unwrap();
+
         // When
-        let parser = parser_loader.load().unwrap();
         let above_threshold_entity = parser
             .extract_entities("Je voudrais écouter the stones s'il vous plaît", None);
         let below_threshold_entity = parser
@@ -321,5 +370,83 @@ mod test {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_should_persist_parser() {
+        // Given
+        let language = Language::FR;
+        let parser = BuiltinEntityParserLoader::new(language)
+            .load()
+            .unwrap();
+
+        let temp_dir = tempdir().unwrap();
+        let parser_dir = temp_dir.path().join("builtin_entity_parser");
+
+        // When
+        parser.persist(&parser_dir).unwrap();
+        let loaded_parser = BuiltinEntityParser::from_path(&parser_dir).unwrap();
+
+        // Then
+        assert_eq!(parser.language, loaded_parser.language);
+        assert_eq!(None, loaded_parser.gazetteer_parser);
+        assert_eq!(parser.rustling_entity_kinds, loaded_parser.rustling_entity_kinds);
+    }
+
+    #[test]
+    fn test_should_load_parser_from_path() {
+        // Given
+        let parser_path = test_path().join("builtin_entity_parser_no_gazetteer");
+
+        // When
+        let parser = BuiltinEntityParser::from_path(parser_path).unwrap();
+
+        // Then
+        let expected_parser = BuiltinEntityParserLoader::new(Language::EN)
+            .load()
+            .unwrap();
+        assert_eq!(expected_parser.language, parser.language);
+        assert_eq!(expected_parser.gazetteer_parser, parser.gazetteer_parser);
+        assert_eq!(expected_parser.rustling_entity_kinds, parser.rustling_entity_kinds);
+    }
+
+    #[test]
+    fn test_should_persist_parser_with_gazetteer_entities() {
+        // Given
+        let language = Language::FR;
+        let parser = BuiltinEntityParserLoader::new(language)
+            .use_gazetter_parser(test_path().join("builtin_gazetteer_parser"))
+            .load()
+            .unwrap();
+
+        let temp_dir = tempdir().unwrap();
+        let parser_dir = temp_dir.path().join("builtin_entity_parser");
+
+        // When
+        parser.persist(&parser_dir).unwrap();
+        let loaded_parser = BuiltinEntityParser::from_path(&parser_dir).unwrap();
+
+        // Then
+        assert_eq!(parser.language, loaded_parser.language);
+        assert_eq!(parser.gazetteer_parser, loaded_parser.gazetteer_parser);
+        assert_eq!(parser.rustling_entity_kinds, loaded_parser.rustling_entity_kinds);
+    }
+
+    #[test]
+    fn test_should_load_parser_with_gazetteer_entities_from_path() {
+        // Given
+        let parser_path = test_path().join("builtin_entity_parser");
+
+        // When
+        let parser = BuiltinEntityParser::from_path(parser_path).unwrap();
+
+        // Then
+        let expected_parser = BuiltinEntityParserLoader::new(Language::FR)
+            .use_gazetter_parser(test_path().join("builtin_gazetteer_parser"))
+            .load()
+            .unwrap();
+        assert_eq!(expected_parser.language, parser.language);
+        assert_eq!(expected_parser.gazetteer_parser, parser.gazetteer_parser);
+        assert_eq!(expected_parser.rustling_entity_kinds, parser.rustling_entity_kinds);
     }
 }

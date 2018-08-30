@@ -38,6 +38,30 @@ pub fn create_builtin_entity_parser(
     Ok(())
 }
 
+pub fn persist_builtin_entity_parser(
+    ptr: *const CBuiltinEntityParser,
+    path: *const libc::c_char
+) -> Result<()> {
+    let parser = get_parser!(ptr);
+    let parser_path = unsafe { CStr::from_ptr(path) }.to_str()?;
+    parser.persist(parser_path)?;
+    Ok(())
+}
+
+pub fn load_builtin_entity_parser(
+    ptr: *mut *const CBuiltinEntityParser,
+    path: *const libc::c_char
+) -> Result<()> {
+    let parser_path = unsafe { CStr::from_ptr(path) }.to_str()?;
+    let builtin_entity_parser = BuiltinEntityParser::from_path(parser_path)?;
+    let c_parser = CBuiltinEntityParser(builtin_entity_parser.into_raw_pointer() as _).into_raw_pointer();
+
+    unsafe {
+        *ptr = c_parser;
+    }
+    Ok(())
+}
+
 pub fn extract_builtin_entity_c(
     ptr: *const CBuiltinEntityParser,
     sentence: *const libc::c_char,

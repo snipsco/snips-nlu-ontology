@@ -7,15 +7,19 @@ from snips_nlu_ontology.utils import CStringArray, lib, string_pointer
 
 
 class BuiltinEntityParser(object):
-    """Extract builtin entities
+    def __init__(self, parser):
+        self._parser = parser
 
-    Args:
-        language (str): Language (ISO code) of the builtin entity parser
-        gazetteer_entity_parser_path (str, opt): Path to the gazetteer entity
-            parser.
-    """
+    @classmethod
+    def build(cls, language, gazetteer_entity_parser_path=None):
+        """Build a `BuiltinEntityParser`
 
-    def __init__(self, language, gazetteer_entity_parser_path=None):
+        Args:
+            language (str): Language identifier
+            gazetteer_entity_parser_path (str, optional): Path to a gazetteer
+                entity parser. If None, the builtin entity parser will only
+                use grammar entities.
+        """
         if isinstance(gazetteer_entity_parser_path, Path):
             gazetteer_entity_parser_path = str(gazetteer_entity_parser_path)
         if not isinstance(language, str):
@@ -31,11 +35,7 @@ class BuiltinEntityParser(object):
         if exit_code:
             raise ImportError("Something went wrong while creating the "
                               "builtin entity parser. See stderr.")
-        self._parser = parser
-
-    def __del__(self):
-        if lib is not None and hasattr(self, '_parser'):
-            lib.snips_nlu_ontology_destroy_builtin_entity_parser(self._parser)
+        return cls(parser)
 
     def parse(self, text, scope=None):
         """Extract builtin entities from *text*
@@ -71,3 +71,44 @@ class BuiltinEntityParser(object):
                                  "builtin entities. See stderr.")
             result = string_at(ptr)
             return json.loads(result.decode("utf8"))
+
+    def persist(self, path):
+        """Persist the gazetteer parser on disk at the provided path"""
+        if isinstance(path, Path):
+            path = str(path)
+        exit_code = lib.snips_nlu_ontology_persist_builtin_entity_parser(
+            self._parser, path.encode("utf8"))
+        if exit_code:
+            with string_pointer(c_char_p()) as ptr:
+                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
+                    ffi_error_message = string_at(ptr).decode("utf8")
+                else:
+                    ffi_error_message = "see stderr"
+            raise ValueError("Something wrong happened while persisting the "
+                             "builtin entity parser: %s" % ffi_error_message)
+
+    @classmethod
+    def from_path(cls, parser_path):
+        """Create a :class:`GazetteerEntityParser` from a gazetteer parser
+        persisted on disk
+        """
+        if isinstance(parser_path, Path):
+            parser_path = str(parser_path)
+        parser = pointer(c_void_p())
+        parser_path = bytes(parser_path, encoding="utf8")
+        exit_code = lib.snips_nlu_ontology_load_builtin_entity_parser(
+            byref(parser), parser_path)
+        if exit_code:
+            with string_pointer(c_char_p()) as ptr:
+                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
+                    ffi_error_message = string_at(ptr).decode("utf8")
+                else:
+                    ffi_error_message = "see stderr"
+            raise ImportError(
+                "Something went wrong while loading the builtin entity "
+                "parser: %s" % ffi_error_message)
+        return cls(parser)
+
+    def __del__(self):
+        if lib is not None and hasattr(self, '_parser'):
+            lib.snips_nlu_ontology_destroy_builtin_entity_parser(self._parser)

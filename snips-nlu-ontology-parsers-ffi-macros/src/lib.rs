@@ -28,6 +28,22 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         }
 
         #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_persist_builtin_entity_parser(
+            ptr: *const $crate::CBuiltinEntityParser,
+            path: *const ::libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::persist_builtin_entity_parser(ptr, path))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_load_builtin_entity_parser(
+            ptr: *mut *const $crate::CBuiltinEntityParser,
+            parser_path: *const ::libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::load_builtin_entity_parser(ptr, parser_path))
+        }
+
+        #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_extract_builtin_entities(
             ptr: *const $crate::CBuiltinEntityParser,
             sentence: *const ::libc::c_char,
