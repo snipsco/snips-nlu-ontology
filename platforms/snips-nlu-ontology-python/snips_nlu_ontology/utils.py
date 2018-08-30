@@ -1,9 +1,11 @@
-from _ctypes import Structure, POINTER
+from _ctypes import POINTER, Structure
 from contextlib import contextmanager
 from ctypes import c_char_p, c_int32, cdll
 from pathlib import Path
 
-dylib_dir = Path(__file__).parent / "dylib"
+PACKAGE_PATH = Path(__file__).parent
+
+dylib_dir = PACKAGE_PATH / "dylib"
 dylib_path = list(dylib_dir.glob("libsnips_nlu_ontology_rs*"))[0]
 lib = cdll.LoadLibrary(str(dylib_path))
 

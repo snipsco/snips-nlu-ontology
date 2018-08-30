@@ -84,9 +84,9 @@ macro_rules! export_nlu_ontology_parsers_c_symbols {
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_load_gazetteer_entity_parser(
             ptr: *mut *const $crate::CGazetteerEntityParser,
-            json_config: *const ::libc::c_char,
+            parser_path: *const ::libc::c_char,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::load_gazetteer_entity_parser(ptr, json_config))
+            wrap!($crate::load_gazetteer_entity_parser(ptr, parser_path))
         }
 
         #[no_mangle]

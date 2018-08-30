@@ -5,3 +5,4 @@ from snips_nlu_ontology.builtin_entities import (
     get_all_grammar_entities, get_all_languages, get_builtin_entity_examples,
     get_builtin_entity_shortname, get_ontology_version, get_supported_entities,
     get_supported_gazetteer_entities, get_supported_grammar_entities)
+from snips_nlu_ontology.gazetteer_entities import GazetteerEntityParser
