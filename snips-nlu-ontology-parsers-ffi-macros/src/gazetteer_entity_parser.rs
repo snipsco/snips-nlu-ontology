@@ -48,6 +48,16 @@ pub fn build_gazetteer_entity_parser(
     Ok(())
 }
 
+pub fn persist_gazetteer_entity_parser(
+    ptr: *const CGazetteerEntityParser,
+    path: *const libc::c_char
+) -> Result<()> {
+    let parser = get_parser!(ptr);
+    let parser_path = unsafe { CStr::from_ptr(path) }.to_str()?;
+    parser.persist(parser_path)?;
+    Ok(())
+}
+
 pub fn extract_gazetteer_entity_json(
     ptr: *const CGazetteerEntityParser,
     sentence: *const libc::c_char,

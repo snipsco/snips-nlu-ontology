@@ -1,7 +1,9 @@
+import shutil
 from _ctypes import POINTER, Structure
 from contextlib import contextmanager
 from ctypes import c_char_p, c_int32, cdll
 from pathlib import Path
+from tempfile import mkdtemp
 
 PACKAGE_PATH = Path(__file__).parent
 
@@ -31,3 +33,12 @@ class CStringArray(Structure):
         ("data", POINTER(c_char_p)),
         ("size", c_int32)
     ]
+
+
+@contextmanager
+def temp_dir():
+    tmp_dir = mkdtemp()
+    try:
+        yield Path(tmp_dir)
+    finally:
+        shutil.rmtree(tmp_dir)

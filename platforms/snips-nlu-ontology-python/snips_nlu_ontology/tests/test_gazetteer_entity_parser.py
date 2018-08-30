@@ -5,6 +5,7 @@ from builtins import str
 
 from snips_nlu_ontology import GazetteerEntityParser
 from snips_nlu_ontology.tests.test_utils import ROOT_DIR
+from snips_nlu_ontology.utils import temp_dir
 
 CUSTOM_PARSER_PATH = ROOT_DIR / "data" / "tests" / "custom_gazetteer_parser"
 
@@ -114,6 +115,29 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
         # When
         res = parser.parse("I want to listen to the stones", None)
+
+        # Then
+        expected_result = [
+            {
+                "value": "the stones",
+                "resolved_value": "The Rolling Stones",
+                "range": {"start": 20, "end": 30},
+                "entity_identifier": "music_artist"
+            }
+        ]
+
+        self.assertListEqual(expected_result, res)
+
+    def test_should_persist_parser(self):
+        # Given
+        parser = GazetteerEntityParser.load(str(CUSTOM_PARSER_PATH))
+
+        # When
+        with temp_dir() as tmpdir:
+            persisted_path = str(tmpdir / "persisted_parser")
+            parser.persist(persisted_path)
+            loaded_parser = GazetteerEntityParser.load(persisted_path)
+        res = loaded_parser.parse("I want to listen to the stones", None)
 
         # Then
         expected_result = [

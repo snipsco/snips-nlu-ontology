@@ -89,6 +89,18 @@ class GazetteerEntityParser(object):
         return cls(parser)
 
     def parse(self, text, scope=None):
+        """Extract gazetteer entities from *text*
+
+        Args:
+            text (str): Input
+            scope (list of str, optional): List of entity labels. If defined,
+                the parser will extract entities using the provided scope
+                instead of the entire scope of all available entities. This
+                allows to look for specifics entities.
+
+        Returns:
+            list of dict: The list of extracted entities
+        """
         if not isinstance(text, str):
             raise TypeError("Expected text to be of type 'str' but found: "
                             "%s" % type(text))
@@ -117,6 +129,22 @@ class GazetteerEntityParser(object):
                                  "gazetteer entities: %s" % ffi_error_message)
             result = string_at(ptr)
             return json.loads(result.decode("utf8"))
+
+    def persist(self, path):
+        """Persist the gazetteer parser on disk at the provided path"""
+        if not isinstance(path, str):
+            raise TypeError("Expected path to be of type 'str' but found: "
+                            "%s" % type(path))
+        exit_code = lib.snips_nlu_ontology_persist_gazetteer_entity_parser(
+            self._parser, path.encode("utf8"))
+        if exit_code:
+            with string_pointer(c_char_p()) as ptr:
+                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
+                    ffi_error_message = string_at(ptr).decode("utf8")
+                else:
+                    ffi_error_message = "see stderr"
+            raise ValueError("Something wrong happened while persisting the "
+                             "gazetteer entity parser: %s" % ffi_error_message)
 
     def __del__(self):
         if lib is not None:
