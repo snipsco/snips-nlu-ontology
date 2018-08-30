@@ -12,28 +12,6 @@ class GazetteerEntityParser(object):
         self._parser = parser
 
     @classmethod
-    def load(cls, parser_path):
-        """Create a :class:`GazetteerEntityParser` from a gazetteer parser
-        persisted on disk
-        """
-        if isinstance(parser_path, Path):
-            parser_path = str(parser_path)
-        parser = pointer(c_void_p())
-        parser_path = bytes(parser_path, encoding="utf8")
-        exit_code = lib.snips_nlu_ontology_load_gazetteer_entity_parser(
-            byref(parser), parser_path)
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ImportError(
-                "Something went wrong while loading the gazetteer entity "
-                "parser: %s" % ffi_error_message)
-        return cls(parser)
-
-    @classmethod
     def build(cls, build_config):
         """Create a new :class:`GazetteerEntityParser` from a build config
 
@@ -147,6 +125,28 @@ class GazetteerEntityParser(object):
                     ffi_error_message = "see stderr"
             raise ValueError("Something wrong happened while persisting the "
                              "gazetteer entity parser: %s" % ffi_error_message)
+
+    @classmethod
+    def from_path(cls, parser_path):
+        """Create a :class:`GazetteerEntityParser` from a gazetteer parser
+        persisted on disk
+        """
+        if isinstance(parser_path, Path):
+            parser_path = str(parser_path)
+        parser = pointer(c_void_p())
+        parser_path = bytes(parser_path, encoding="utf8")
+        exit_code = lib.snips_nlu_ontology_load_gazetteer_entity_parser(
+            byref(parser), parser_path)
+        if exit_code:
+            with string_pointer(c_char_p()) as ptr:
+                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
+                    ffi_error_message = string_at(ptr).decode("utf8")
+                else:
+                    ffi_error_message = "see stderr"
+            raise ImportError(
+                "Something went wrong while loading the gazetteer entity "
+                "parser: %s" % ffi_error_message)
+        return cls(parser)
 
     def __del__(self):
         if lib is not None:

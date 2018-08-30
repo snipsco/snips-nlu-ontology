@@ -109,9 +109,31 @@ class TestBuiltinEntityParser(unittest.TestCase):
         self.assertListEqual(expected_artist_result, res_artist)
         self.assertListEqual(expected_track_result, res_track)
 
-    def test_should_parse_from_loaded_parser(self):
+    def test_should_persist_parser(self):
         # Given
-        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
+        parser = GazetteerEntityParser.from_path(CUSTOM_PARSER_PATH)
+
+        # When
+        with temp_dir() as tmpdir:
+            persisted_path = str(tmpdir / "persisted_gazetteer_parser")
+            parser.persist(persisted_path)
+            loaded_parser = GazetteerEntityParser.from_path(persisted_path)
+        res = loaded_parser.parse("I want to listen to the stones", None)
+
+        # Then
+        expected_result = [
+            {
+                "value": "the stones",
+                "resolved_value": "The Rolling Stones",
+                "range": {"start": 20, "end": 30},
+                "entity_identifier": "music_artist"
+            }
+        ]
+        self.assertListEqual(expected_result, res)
+
+    def test_should_load_parser_from_path(self):
+        # Given
+        parser = GazetteerEntityParser.from_path(CUSTOM_PARSER_PATH)
 
         # When
         res = parser.parse("I want to listen to the stones", None)
@@ -128,32 +150,9 @@ class TestBuiltinEntityParser(unittest.TestCase):
 
         self.assertListEqual(expected_result, res)
 
-    def test_should_persist_parser(self):
-        # Given
-        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
-
-        # When
-        with temp_dir() as tmpdir:
-            persisted_path = str(tmpdir / "persisted_parser")
-            parser.persist(persisted_path)
-            loaded_parser = GazetteerEntityParser.load(persisted_path)
-        res = loaded_parser.parse("I want to listen to the stones", None)
-
-        # Then
-        expected_result = [
-            {
-                "value": "the stones",
-                "resolved_value": "The Rolling Stones",
-                "range": {"start": 20, "end": 30},
-                "entity_identifier": "music_artist"
-            }
-        ]
-
-        self.assertListEqual(expected_result, res)
-
     def test_should_not_accept_bytes_in_text(self):
         # Given
-        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
+        parser = GazetteerEntityParser.from_path(CUSTOM_PARSER_PATH)
         bytes_text = b"Raise to sixty"
 
         # When/Then
@@ -163,7 +162,7 @@ class TestBuiltinEntityParser(unittest.TestCase):
     def test_should_not_accept_bytes_in_scope(self):
         # Given
         scope = [b"snips/number", b"snips/datetime"]
-        parser = GazetteerEntityParser.load(CUSTOM_PARSER_PATH)
+        parser = GazetteerEntityParser.from_path(CUSTOM_PARSER_PATH)
 
         # When/Then
         with self.assertRaises(TypeError):

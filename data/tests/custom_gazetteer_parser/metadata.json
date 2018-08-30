@@ -2,11 +2,11 @@
   "parsers_metadata": [
     {
       "entity_identifier": "music_artist",
-      "parser_directory": "parser_1"
+      "entity_parser": "parser_1"
     },
     {
       "entity_identifier": "music_track",
-      "parser_directory": "parser_2"
+      "entity_parser": "parser_2"
     }
   ]
 }

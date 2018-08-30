@@ -149,13 +149,14 @@ struct GazetteerParserMetadata {
 #[derive(Serialize, Deserialize)]
 struct EntityParserMetadata {
     entity_identifier: String,
-    parser_directory: String,
+    entity_parser: String,
 }
 
 impl<T> GazetteerParser<T> where T: EntityIdentifier {
     pub fn persist<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         fs::create_dir(path.as_ref())
-            .with_context(|_| format!("Cannot create parser directory at path: {:?}", path.as_ref()))?;
+            .with_context(|_| format!("Cannot create gazetteer parser directory at path: {:?}",
+                                      path.as_ref()))?;
         let mut gazetteer_parser_metadata = GazetteerParserMetadata::default();
         for (index, entity_parser) in self.entity_parsers.iter().enumerate() {
             let parser_directory = format!("parser_{}", index + 1);
@@ -166,7 +167,7 @@ impl<T> GazetteerParser<T> where T: EntityIdentifier {
             gazetteer_parser_metadata.parsers_metadata.push(
                 EntityParserMetadata {
                     entity_identifier,
-                    parser_directory,
+                    entity_parser: parser_directory,
                 }
             )
         }
@@ -190,9 +191,9 @@ impl<T> GazetteerParser<T> where T: EntityIdentifier {
             .with_context(|_| "Cannot deserialize gazetteer parser metadata")?;
         let entity_parsers = metadata.parsers_metadata.into_iter()
             .map(|entity_parser_metadata| {
-                let parser = EntityParser::from_folder(path.as_ref().join(&entity_parser_metadata.parser_directory))
+                let parser = EntityParser::from_folder(path.as_ref().join(&entity_parser_metadata.entity_parser))
                     .with_context(|_| format!("Cannot create entity parser from path: {}",
-                                              entity_parser_metadata.parser_directory))?;
+                                              entity_parser_metadata.entity_parser))?;
                 Ok(GazetteerEntityParser {
                     entity_identifier: T::try_from_identifier(entity_parser_metadata.entity_identifier)?,
                     parser,
