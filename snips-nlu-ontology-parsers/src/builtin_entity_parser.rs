@@ -100,13 +100,13 @@ impl BuiltinEntityParser {
 
         let mut gazetteer_entities = match &self.gazetteer_parser {
             Some(gazetteer_parser) => {
-                let gazetteer_entity_kinds = filter_entity_kinds
+                let gazetteer_entity_kinds: Option<Vec<BuiltinGazetteerEntityKind>> = filter_entity_kinds
                     .map(|kinds|
                         kinds.into_iter()
                             .flat_map(|kind| kind.try_into_gazetteer_kind().ok())
                             .collect());
                 gazetteer_parser
-                    .extract_builtin_entities(sentence, gazetteer_entity_kinds.as_ref())
+                    .extract_builtin_entities(sentence, gazetteer_entity_kinds.as_ref().map(|kinds| &**kinds))
                     .unwrap_or_else(|_| vec![])
             }
             None => vec![]

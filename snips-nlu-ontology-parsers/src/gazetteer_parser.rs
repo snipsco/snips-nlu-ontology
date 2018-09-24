@@ -94,7 +94,7 @@ impl<T> GazetteerParser<T> where T: EntityIdentifier {
     pub fn extract_entities(
         &self,
         sentence: &str,
-        filter_entities: Option<&Vec<T>>,
+        filter_entities: Option<&[T]>,
     ) -> Result<Vec<GazetteerEntityMatch<T>>> {
         Ok(self.entity_parsers.iter()
             .filter(|&parser|
@@ -125,7 +125,7 @@ impl GazetteerParser<BuiltinGazetteerEntityKind> {
     pub fn extract_builtin_entities(
         &self,
         sentence: &str,
-        filter_entities: Option<&Vec<BuiltinGazetteerEntityKind>>,
+        filter_entities: Option<&[BuiltinGazetteerEntityKind]>,
     ) -> Result<Vec<BuiltinEntity>> {
         Ok(self.extract_entities(sentence, filter_entities)?
             .into_iter()
@@ -315,10 +315,10 @@ mod test {
 
         // When
         let input = "I want to listen to what s my age again by blink one eight two";
-        let artist_scope = Some(vec!["music_artist".to_string()]);
-        let result_artist = gazetteer_parser.extract_entities(input, artist_scope.as_ref());
-        let track_scope = Some(vec!["music_track".to_string()]);
-        let result_track = gazetteer_parser.extract_entities(input, track_scope.as_ref());
+        let artist_scope: &[String] = &["music_artist".to_string()];
+        let result_artist = gazetteer_parser.extract_entities(input, Some(artist_scope));
+        let track_scope: &[String] = &["music_track".to_string()];
+        let result_track = gazetteer_parser.extract_entities(input, Some(track_scope));
 
         // Then
         let expected_artist_match = GazetteerEntityMatch {

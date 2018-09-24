@@ -98,7 +98,7 @@ pub fn extract_gazetteer_entity(
         None
     };
 
-    parser.extract_entities(sentence, opt_filters.as_ref())
+    parser.extract_entities(sentence, opt_filters.as_ref().map(|filters| &**filters))
 }
 
 pub fn destroy_gazetteer_entity_parser(ptr: *mut CGazetteerEntityParser) -> Result<()> {
