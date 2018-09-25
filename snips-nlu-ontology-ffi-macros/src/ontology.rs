@@ -113,7 +113,7 @@ impl Drop for CSlotList {
 pub struct CSlot {
     /// The resolved value of the slot
     pub value: CSlotValue,
-    /// The raw value as is appeared in the input text
+    /// The raw value as it appears in the input text
     pub raw_value: *const libc::c_char,
     /// Name of the entity type of the slot
     pub entity: *const libc::c_char,
@@ -164,13 +164,13 @@ pub enum SNIPS_SLOT_VALUE_TYPE {
     SNIPS_SLOT_VALUE_TYPE_ORDINAL = 3,
     /// Instant type represented by a CInstantTimeValue
     SNIPS_SLOT_VALUE_TYPE_INSTANTTIME = 4,
-    /// Interval type respresented by a CTimeIntervalValue
+    /// Interval type represented by a CTimeIntervalValue
     SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL = 5,
     /// Amount of money type represented by a CAmountOfMoneyValue
     SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY = 6,
     /// Temperature type represented by a CTemperatureValue
     SNIPS_SLOT_VALUE_TYPE_TEMPERATURE = 7,
-    /// Duration type reperesented by a CDurationValue
+    /// Duration type represented by a CDurationValue
     SNIPS_SLOT_VALUE_TYPE_DURATION = 8,
     /// Percentage type represented by a CPercentageValue
     SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
@@ -222,21 +222,21 @@ pub type COrdinalValue = libc::int64_t;
 #[repr(C)]
 #[derive(Debug)]
 pub enum SNIPS_GRAIN {
-    /// The resolved value as a granularity of a year
+    /// The resolved value has a granularity of a year
     SNIPS_GRAIN_YEAR = 0,
-    /// The resolved value as a granularity of a quarter
+    /// The resolved value has a granularity of a quarter
     SNIPS_GRAIN_QUARTER = 1,
-    /// The resolved value as a granularity of a mount
+    /// The resolved value has a granularity of a mount
     SNIPS_GRAIN_MONTH = 2,
-    /// The resolved value as a granularity of a week
+    /// The resolved value has a granularity of a week
     SNIPS_GRAIN_WEEK = 3,
-    /// The resolved value as a granularity of a day
+    /// The resolved value has a granularity of a day
     SNIPS_GRAIN_DAY = 4,
-    /// The resolved value as a granularity of an hour
+    /// The resolved value has a granularity of an hour
     SNIPS_GRAIN_HOUR = 5,
-    /// The resolved value as a granularity of a minute
+    /// The resolved value has a granularity of a minute
     SNIPS_GRAIN_MINUTE = 6,
-    /// The resolved value as a granularity of a second
+    /// The resolved value has a granularity of a second
     SNIPS_GRAIN_SECOND = 7,
 }
 
@@ -386,7 +386,7 @@ pub struct CDurationValue {
     pub years: libc::int64_t,
     /// Number of quarters in the duration
     pub quarters: libc::int64_t,
-    /// Number of mounts in the duration
+    /// Number of months in the duration
     pub months: libc::int64_t,
     /// Number of weeks in the duration
     pub weeks: libc::int64_t,
