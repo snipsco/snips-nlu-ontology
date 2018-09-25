@@ -5,7 +5,7 @@ from pathlib import Path
 
 dylib_dir = Path(__file__).parent / "dylib"
 dylib_path = list(dylib_dir.glob("libsnips_nlu_ontology_rs*"))[0]
-lib = cdll.LoadLibrary(dylib_path)
+lib = cdll.LoadLibrary(str(dylib_path))
 
 
 @contextmanager
