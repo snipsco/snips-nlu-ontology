@@ -315,7 +315,9 @@ impl BuiltinEntityKind {
                 "2001",
                 "diciotto",
                 "cento due",
-                "tre mila nove",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "ventunesimo",
+                // "tre mila nove",
                 "cento quaranta nove",
             ],
             BuiltinEntityKind::Ordinal => &[
@@ -325,10 +327,11 @@ impl BuiltinEntityKind {
                 // "ventunesimo",
             ],
             BuiltinEntityKind::Temperature => &[
-                "70K",
-                "3°C",
-                "ventitré gradi",
-                "tre mila gradi Fahrenheit",
+                "3°",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "70K",
+                // "ventitré gradi",
+                // "tre mila gradi Fahrenheit",
             ],
             BuiltinEntityKind::Time => &[
                 "oggi",
@@ -341,7 +344,8 @@ impl BuiltinEntityKind {
                 "25%",
                 "quindici percento",
                 "20 percento",
-                "tre mila percento",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "tre mila percento",
             ],
         }
     }
