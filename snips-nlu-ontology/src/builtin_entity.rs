@@ -306,7 +306,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Duration => &[
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "1h",
-                // "3 mesi",
+                 "3 mesi",
                 // "dieci minuti",
                 // "cento due minuti",
                 // "8 anni e due giorni",
