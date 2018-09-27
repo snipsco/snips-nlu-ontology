@@ -1,6 +1,7 @@
 use std::fs;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 use conversion::*;
 use errors::*;
@@ -177,7 +178,7 @@ impl BuiltinEntityParser {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct BuiltinParserMetadata {
-    language: Language,
+    language: String,
     gazetteer_parser: Option<String>,
 }
 
@@ -194,7 +195,7 @@ impl BuiltinEntityParser {
             None
         };
         let gazetteer_parser_metadata = BuiltinParserMetadata {
-            language: self.language,
+            language: self.language.to_string(),
             gazetteer_parser: gazetteer_parser_directory,
         };
         let metadata_path = path.as_ref().join("metadata.json");
@@ -212,7 +213,8 @@ impl BuiltinEntityParser {
                                       metadata_path))?;
         let metadata: BuiltinParserMetadata = serde_json::from_reader(metadata_file)
             .with_context(|_| "Cannot deserialize builtin parser metadata")?;
-        let mut parser_loader = BuiltinEntityParserLoader::new(metadata.language);
+        let language = Language::from_str(&metadata.language)?;
+        let mut parser_loader = BuiltinEntityParserLoader::new(language);
         if let Some(gazetteer_parser_dir) = metadata.gazetteer_parser {
             let gazetteer_parser_path = path.as_ref().join(&gazetteer_parser_dir);
             parser_loader.use_gazetter_parser(gazetteer_parser_path);
