@@ -36,17 +36,18 @@ macro_rules! language_enum {
     }
 }
 
-language_enum!([DE, EN, ES, FR, JA, KO]);
+language_enum!([DE, EN, ES, FR, IT, JA, KO]);
 
 impl Language {
     pub fn full_name(&self) -> &'static str {
         match *self {
-            Language::EN => "English",
-            Language::FR => "French",
-            Language::ES => "Spanish",
-            Language::KO => "Korean",
             Language::DE => "German",
+            Language::EN => "English",
+            Language::ES => "Spanish",
+            Language::FR => "French",
+            Language::IT => "Italian",
             Language::JA => "Japanese",
+            Language::KO => "Korean",
         }
     }
 }
