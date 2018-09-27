@@ -65,7 +65,7 @@ impl BuiltinEntityParser {
         &self,
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
-    ) -> Vec<BuiltinEntity> {
+    ) -> Result<Vec<BuiltinEntity>> {
         if NON_SPACE_SEPARATED_LANGUAGES.contains(&self.language) {
             self._extract_entities_for_non_space_separated(sentence, filter_entity_kinds)
         } else {
@@ -77,7 +77,7 @@ impl BuiltinEntityParser {
         &self,
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
-    ) -> Vec<BuiltinEntity> {
+    ) -> Result<Vec<BuiltinEntity>> {
         let context = ResolverContext::default();
         let rustling_output_kinds = self.rustling_entity_kinds
             .iter()
@@ -107,22 +107,21 @@ impl BuiltinEntityParser {
                             .flat_map(|kind| kind.try_into_gazetteer_kind().ok())
                             .collect());
                 gazetteer_parser
-                    .extract_builtin_entities(sentence, gazetteer_entity_kinds.as_ref().map(|kinds| &**kinds))
-                    .unwrap_or_else(|_| vec![])
+                    .extract_builtin_entities(sentence, gazetteer_entity_kinds.as_ref().map(|kinds| &**kinds))?
             }
             None => vec![]
         };
 
         let mut entities = rustling_entities;
         entities.append(&mut gazetteer_entities);
-        entities
+        Ok(entities)
     }
 
     pub fn _extract_entities_for_non_space_separated(
         &self,
         sentence: &str,
         filter_entity_kinds: Option<&[BuiltinEntityKind]>,
-    ) -> Vec<BuiltinEntity> {
+    ) -> Result<Vec<BuiltinEntity>> {
         let original_tokens_bytes_ranges: Vec<Range<usize>> = NON_SPACE_REGEX
             .find_iter(sentence)
             .map(|m| m.start()..m.end())
@@ -134,12 +133,12 @@ impl BuiltinEntityParser {
             .join("");
 
         if original_tokens_bytes_ranges.is_empty() {
-            return vec![];
+            return Ok(vec![]);
         }
 
         let ranges_mapping = get_ranges_mapping(&original_tokens_bytes_ranges);
 
-        self._extract_entities(&*joined_sentence, filter_entity_kinds)
+        Ok(self._extract_entities(&*joined_sentence, filter_entity_kinds)?
             .into_iter()
             .filter_map(|ent| {
                 let byte_range = convert_to_byte_range(&*joined_sentence, &ent.range);
@@ -172,7 +171,7 @@ impl BuiltinEntityParser {
                     None
                 }
             })
-            .collect()
+            .collect())
     }
 }
 
@@ -240,6 +239,7 @@ mod test {
             vec![BuiltinEntityKind::Number, BuiltinEntityKind::Time],
             parser
                 .extract_entities("Book me restaurant for two people tomorrow", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -249,6 +249,7 @@ mod test {
             vec![BuiltinEntityKind::Duration],
             parser
                 .extract_entities("The weather during two weeks", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -258,6 +259,7 @@ mod test {
             vec![BuiltinEntityKind::Percentage],
             parser
                 .extract_entities("Set light to ten percents", None)
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -270,6 +272,7 @@ mod test {
                     "I would like to do a bank transfer of ten euros for my friends",
                     None,
                 )
+                .unwrap()
                 .iter()
                 .map(|e| e.entity_kind)
                 .collect_vec()
@@ -279,7 +282,7 @@ mod test {
     #[test]
     fn test_entities_extraction_with_empty_scope() {
         let parser = BuiltinEntityParserLoader::new(Language::EN).load().unwrap();
-        let entities = parser.extract_entities("tomorrow morning", Some(&[]));
+        let entities = parser.extract_entities("tomorrow morning", Some(&[])).unwrap();
         assert_eq!(Vec::<BuiltinEntity>::new(), entities);
     }
 
@@ -294,9 +297,11 @@ mod test {
 
         // When
         let above_threshold_entity = parser
-            .extract_entities("Je voudrais écouter the stones s'il vous plaît", None);
+            .extract_entities("Je voudrais écouter the stones s'il vous plaît", None)
+            .unwrap();
         let below_threshold_entity = parser
-            .extract_entities("Je voudrais écouter les stones", None);
+            .extract_entities("Je voudrais écouter les stones", None)
+            .unwrap();
 
         // Then
         let expected_entity = BuiltinEntity {
@@ -334,7 +339,7 @@ mod test {
         let parsed_entities = parser.extract_entities(
             " の カリフォル  二 千 十三 年二 月十 日  ニア州の天気予報は？",
             None,
-        );
+        ).unwrap();
         assert_eq!(1, parsed_entities.len());
         let parsed_entity = &parsed_entities[0];
         assert_eq!(expected_entity.value, parsed_entity.value);
@@ -353,7 +358,7 @@ mod test {
             parser.extract_entities(
                 "二 千 十三 年二 月十 日の カリフォルニア州の天気予報は？",
                 None,
-            )
+            ).unwrap()
         );
     }
 
@@ -363,7 +368,9 @@ mod test {
             let parser = BuiltinEntityParserLoader::new(*language).load().unwrap();
             for entity_kind in GrammarEntityKind::all() {
                 for example in (*entity_kind).examples(*language) {
-                    let results = parser.extract_entities(example, Some(&[entity_kind.into_builtin_kind()]));
+                    let results = parser
+                        .extract_entities(example, Some(&[entity_kind.into_builtin_kind()]))
+                        .unwrap();
                     assert_eq!(
                         1, results.len(),
                         "Expected 1 result for entity kind '{:?}' in language '{:?}' for example \
