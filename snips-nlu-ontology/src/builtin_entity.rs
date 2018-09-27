@@ -93,6 +93,7 @@ impl BuiltinEntityKind {
             Language::ES => self.es_examples(),
             Language::FR => self.fr_examples(),
             Language::JA => self.ja_examples(),
+            Language::IT => self.it_examples(),
             Language::KO => self.ko_examples(),
         }
     }
@@ -293,6 +294,62 @@ impl BuiltinEntityKind {
         }
     }
 
+    fn it_examples(&self) -> &[&str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "$10",
+                "cinque euro",
+                "15€",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "dieci dollari e cinque centesimi",
+            ],
+            BuiltinEntityKind::Duration => &[
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "1h",
+                 "3 mesi",
+                // "dieci minuti",
+                // "cento due minuti",
+                // "8 anni e due giorni",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+                "diciotto",
+                "cento due",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "ventunesimo",
+                // "tre mila nove",
+                "cento quaranta nove",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "primo",
+                "decima",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "ventunesimo",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "3°",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "70K",
+                // "ventitré gradi",
+                // "tre mila gradi Fahrenheit",
+            ],
+            BuiltinEntityKind::Time => &[
+                "oggi",
+                "stanotte",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "alle 1:30",
+                // "il primo giovedí di giugno",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "quindici percento",
+                "20 percento",
+                // TODO: Add these examples when they are supported by the BuiltinEntityParser
+                // "tre mila percento",
+            ],
+        }
+    }
+
     fn ja_examples(&self) -> &[&str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
@@ -433,6 +490,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -441,6 +499,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -449,6 +508,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -457,6 +517,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -465,6 +526,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -473,6 +535,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
                 Language::KO,
             ],
@@ -481,6 +544,7 @@ impl BuiltinEntityKind {
                 Language::EN,
                 Language::ES,
                 Language::FR,
+                Language::IT,
                 Language::JA,
             ]
         }

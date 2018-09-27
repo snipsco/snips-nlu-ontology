@@ -26,6 +26,8 @@ Supported languages
 +----------+------------+
 | French   | fr         |
 +----------+------------+
+| Italian  | it         |
++----------+------------+
 | Japanese | ja         |
 +----------+------------+
 | Korean   | ko         |
@@ -41,6 +43,7 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
@@ -48,6 +51,7 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
@@ -55,6 +59,7 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
@@ -62,6 +67,7 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
@@ -69,6 +75,7 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+
@@ -76,12 +83,14 @@ Supported builtin entities
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 +---------------+---------------------+---------------------+
 | Temperature   | snips/temperature   | | German            |
 |               |                     | | English           |
 |               |                     | | Spanish           |
 |               |                     | | French            |
+|               |                     | | Italian           |
 |               |                     | | Japanese          |
 |               |                     | | Korean            |
 +---------------+---------------------+---------------------+

@@ -239,12 +239,13 @@ impl<'a> FromRustling<&'a BuiltinEntityKind> for OutputKind {
 impl FromRustling<Language> for RustlingLanguage {
     fn from_rustling(lang: Language) -> Self {
         match lang {
-            Language::EN => RustlingLanguage::EN,
-            Language::FR => RustlingLanguage::FR,
-            Language::ES => RustlingLanguage::ES,
-            Language::KO => RustlingLanguage::KO,
             Language::DE => RustlingLanguage::DE,
+            Language::EN => RustlingLanguage::EN,
+            Language::ES => RustlingLanguage::ES,
+            Language::FR => RustlingLanguage::FR,
+            Language::IT => RustlingLanguage::IT,
             Language::JA => RustlingLanguage::JA,
+            Language::KO => RustlingLanguage::KO,
         }
     }
 }
