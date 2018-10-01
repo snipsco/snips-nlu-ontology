@@ -36,73 +36,70 @@ Supported languages
 Supported builtin entities
 --------------------------
 
-+---------------+---------------------+---------------------+
-| Entity        | Identifier          | Supported languages |
-+===============+=====================+=====================+
-| AmountOfMoney | snips/amountOfMoney | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| Time          | snips/datetime      | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| Duration      | snips/duration      | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| MusicAlbum    | snips/musicAlbum    | | English           |
-|               |                     | | French            |
-+---------------+---------------------+---------------------+
-| MusicArtist   | snips/musicArtist   | | English           |
-|               |                     | | French            |
-+---------------+---------------------+---------------------+
-| MusicTrack    | snips/musicTrack    | | English           |
-|               |                     | | French            |
-+---------------+---------------------+---------------------+
-| Number        | snips/number        | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| Ordinal       | snips/ordinal       | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
-| Percentage    | snips/percentage    | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-+---------------+---------------------+---------------------+
-| Temperature   | snips/temperature   | | German            |
-|               |                     | | English           |
-|               |                     | | Spanish           |
-|               |                     | | French            |
-|               |                     | | Italian           |
-|               |                     | | Japanese          |
-|               |                     | | Korean            |
-+---------------+---------------------+---------------------+
++---------------+---------------------+------------------+---------------------+
+| Entity        | Identifier          | Category         | Supported languages |
++===============+=====================+==================+=====================+
+| AmountOfMoney | snips/amountOfMoney | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
+| Time          | snips/datetime      | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
+| Duration      | snips/duration      | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
+| MusicAlbum    | snips/musicAlbum    | Gazetteer Entity | | French            |
++---------------+---------------------+------------------+---------------------+
+| MusicArtist   | snips/musicArtist   | Gazetteer Entity | | French            |
++---------------+---------------------+------------------+---------------------+
+| MusicTrack    | snips/musicTrack    | Gazetteer Entity | | French            |
++---------------+---------------------+------------------+---------------------+
+| Number        | snips/number        | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
+| Ordinal       | snips/ordinal       | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
+| Percentage    | snips/percentage    | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
++---------------+---------------------+------------------+---------------------+
+| Temperature   | snips/temperature   | Grammar Entity   | | German            |
+|               |                     |                  | | English           |
+|               |                     |                  | | Spanish           |
+|               |                     |                  | | French            |
+|               |                     |                  | | Italian           |
+|               |                     |                  | | Japanese          |
+|               |                     |                  | | Korean            |
++---------------+---------------------+------------------+---------------------+
 
 Results Examples
 ----------------
