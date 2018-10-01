@@ -367,7 +367,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn it_examples(&self) -> &[&str] {
+    fn it_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -419,6 +419,15 @@ impl BuiltinEntityKind {
                 "20 percento",
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tre mila percento",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
             ],
         }
     }
