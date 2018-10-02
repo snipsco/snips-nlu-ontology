@@ -10,9 +10,8 @@ use serde_json;
 
 use errors::*;
 use ffi_utils::{CStringArray, CReprOf, RawPointerConverter, point_to_string};
-use snips_nlu_ontology::{BuiltinEntityKind,
-                         Language,
-                         language_entity_ontology,
+use snips_nlu_ontology::{BuiltinEntityKind, BuiltinGazetteerEntityKind, GrammarEntityKind,
+                         IntoBuiltinEntityKind, Language, language_entity_ontology,
                          complete_entity_ontology};
 
 #[repr(C)]
@@ -97,6 +96,55 @@ pub fn all_builtin_entities() -> CStringArray {
     }
 }
 
+pub fn all_grammar_entities() -> CStringArray {
+    lazy_static! {
+        static ref ALL: DummyWrapper = {
+            DummyWrapper(
+                GrammarEntityKind::all()
+                    .iter()
+                    .map(|l| l.identifier().to_string())
+                    .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice()
+            )
+        };
+    }
+
+    CStringArray {
+        data: ALL.0.as_ptr() as *const *const libc::c_char,
+        size: ALL.0.len() as libc::int32_t,
+    }
+}
+
+pub fn all_gazetteer_entities() -> CStringArray {
+    lazy_static! {
+        static ref ALL: DummyWrapper = {
+            DummyWrapper(
+                BuiltinGazetteerEntityKind::all()
+                    .iter()
+                    .map(|l| l.identifier().to_string())
+                    .map(|l| CString::new(l).unwrap().into_raw() as *const libc::c_char)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice()
+            )
+        };
+    }
+
+    CStringArray {
+        data: ALL.0.as_ptr() as *const *const libc::c_char,
+        size: ALL.0.len() as libc::int32_t,
+    }
+}
+
+pub fn get_builtin_entity_shortname(
+    entity_name: *const libc::c_char,
+    result: *mut *const libc::c_char
+) -> Result<()> {
+    let entity_str = unsafe { CStr::from_ptr(entity_name) }.to_str()?;
+    let entity_kind = BuiltinEntityKind::from_identifier(entity_str)?;
+    point_to_string(result, entity_kind.to_string())
+}
+
 pub fn get_supported_builtin_entities(
     language: *const libc::c_char,
     results: *mut *const CStringArray,
@@ -104,6 +152,42 @@ pub fn get_supported_builtin_entities(
     let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
     let language = Language::from_str(&*language_str.to_uppercase())?;
     let entities = BuiltinEntityKind::all()
+        .iter()
+        .filter(|e| e.supported_languages().contains(&language))
+        .map(|e| e.identifier().to_string())
+        .collect::<Vec<_>>();
+    let c_entities = CStringArray::c_repr_of(entities)?.into_raw_pointer();
+    unsafe {
+        *results = c_entities;
+    }
+    Ok(())
+}
+
+pub fn get_supported_grammar_entities(
+    language: *const libc::c_char,
+    results: *mut *const CStringArray,
+) -> Result<()> {
+    let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
+    let language = Language::from_str(&*language_str.to_uppercase())?;
+    let entities = GrammarEntityKind::all()
+        .iter()
+        .filter(|e| e.supported_languages().contains(&language))
+        .map(|e| e.identifier().to_string())
+        .collect::<Vec<_>>();
+    let c_entities = CStringArray::c_repr_of(entities)?.into_raw_pointer();
+    unsafe {
+        *results = c_entities;
+    }
+    Ok(())
+}
+
+pub fn get_supported_builtin_gazetteer_entities(
+    language: *const libc::c_char,
+    results: *mut *const CStringArray,
+) -> Result<()> {
+    let language_str = unsafe { CStr::from_ptr(language) }.to_str()?;
+    let language = Language::from_str(&*language_str.to_uppercase())?;
+    let entities = BuiltinGazetteerEntityKind::all()
         .iter()
         .filter(|e| e.supported_languages().contains(&language))
         .map(|e| e.identifier().to_string())

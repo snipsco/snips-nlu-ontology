@@ -1,4 +1,7 @@
+use conversion::*;
+use errors::Result;
 use nlu_ontology::*;
+use rustling_ontology::ParserMatch;
 use rustling_ontology::Grain as RustlingGrain;
 use rustling_ontology::dimension::Precision as RustlingPrecision;
 use rustling_ontology::Lang as RustlingLanguage;
@@ -6,74 +9,50 @@ use rustling_ontology::output::{AmountOfMoneyOutput, DurationOutput, FloatOutput
                                 OrdinalOutput, Output, OutputKind, PercentageOutput,
                                 TemperatureOutput, TimeIntervalOutput, TimeOutput};
 
-pub trait FromRustling<T> {
-    fn from_rustling(T) -> Self;
-}
-
-pub trait IntoBuiltin<T>: Sized {
-    fn into_builtin(self) -> T;
-}
-
-impl<T, U> IntoBuiltin<U> for T
-where
-    U: FromRustling<T>,
-{
-    fn into_builtin(self) -> U {
-        U::from_rustling(self)
-    }
-}
-
-// From (and thus Into) is reflexive
-impl<T> FromRustling<T> for T {
-    fn from_rustling(t: T) -> T {
-        t
-    }
-}
-
-impl FromRustling<IntegerOutput> for NumberValue {
-    fn from_rustling(rustling_output: IntegerOutput) -> Self {
+impl OntologyFrom<IntegerOutput> for NumberValue {
+    fn ontology_from(rustling_output: IntegerOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl FromRustling<FloatOutput> for NumberValue {
-    fn from_rustling(rustling_output: FloatOutput) -> Self {
+impl OntologyFrom<FloatOutput> for NumberValue {
+    fn ontology_from(rustling_output: FloatOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl FromRustling<OrdinalOutput> for OrdinalValue {
-    fn from_rustling(rustling_output: OrdinalOutput) -> Self {
+impl OntologyFrom<OrdinalOutput> for OrdinalValue {
+    fn ontology_from(rustling_output: OrdinalOutput) -> Self {
         Self {
             value: rustling_output.0,
         }
     }
 }
 
-impl FromRustling<PercentageOutput> for PercentageValue {
-    fn from_rustling(rustling_output: PercentageOutput) -> Self {
+impl OntologyFrom<PercentageOutput> for PercentageValue {
+    fn ontology_from(rustling_output: PercentageOutput) -> Self {
         Self {
             value: rustling_output.0 as f64,
         }
     }
 }
 
-impl FromRustling<TimeOutput> for InstantTimeValue {
-    fn from_rustling(rustling_output: TimeOutput) -> Self {
+impl OntologyFrom<TimeOutput> for InstantTimeValue {
+    fn ontology_from(rustling_output: TimeOutput) -> Self {
         Self {
             value: rustling_output.moment.to_string(),
-            grain: Grain::from_rustling(rustling_output.grain),
-            precision: Precision::from_rustling(rustling_output.precision),
+            grain: Grain::ontology_from(rustling_output.grain),
+            precision: Precision::ontology_from(rustling_output.precision),
         }
     }
 }
 
-impl FromRustling<TimeIntervalOutput> for TimeIntervalValue {
-    fn from_rustling(rustling_output: TimeIntervalOutput) -> Self {
+impl OntologyFrom<TimeIntervalOutput> for TimeIntervalValue {
+    fn ontology_from(rustling_output: TimeIntervalOutput) -> Self {
         match rustling_output {
             TimeIntervalOutput::After(after) => Self {
                 from: Some(after.moment.to_string()),
@@ -96,18 +75,18 @@ impl FromRustling<TimeIntervalOutput> for TimeIntervalValue {
     }
 }
 
-impl FromRustling<AmountOfMoneyOutput> for AmountOfMoneyValue {
-    fn from_rustling(rustling_output: AmountOfMoneyOutput) -> Self {
+impl OntologyFrom<AmountOfMoneyOutput> for AmountOfMoneyValue {
+    fn ontology_from(rustling_output: AmountOfMoneyOutput) -> Self {
         Self {
             value: rustling_output.value,
-            precision: rustling_output.precision.into_builtin(),
+            precision: rustling_output.precision.ontology_into(),
             unit: rustling_output.unit.map(|s| s.to_string()),
         }
     }
 }
 
-impl FromRustling<TemperatureOutput> for TemperatureValue {
-    fn from_rustling(rustling_output: TemperatureOutput) -> Self {
+impl OntologyFrom<TemperatureOutput> for TemperatureValue {
+    fn ontology_from(rustling_output: TemperatureOutput) -> Self {
         Self {
             value: rustling_output.value,
             unit: rustling_output.unit.map(|s| s.to_string()),
@@ -115,8 +94,8 @@ impl FromRustling<TemperatureOutput> for TemperatureValue {
     }
 }
 
-impl FromRustling<DurationOutput> for DurationValue {
-    fn from_rustling(rustling_output: DurationOutput) -> Self {
+impl OntologyFrom<DurationOutput> for DurationValue {
+    fn ontology_from(rustling_output: DurationOutput) -> Self {
         let mut years: i64 = 0;
         let mut quarters: i64 = 0;
         let mut months: i64 = 0;
@@ -147,13 +126,13 @@ impl FromRustling<DurationOutput> for DurationValue {
             hours,
             minutes,
             seconds,
-            precision: rustling_output.precision.into_builtin(),
+            precision: rustling_output.precision.ontology_into(),
         }
     }
 }
 
-impl FromRustling<RustlingGrain> for Grain {
-    fn from_rustling(rustling_output: RustlingGrain) -> Self {
+impl OntologyFrom<RustlingGrain> for Grain {
+    fn ontology_from(rustling_output: RustlingGrain) -> Self {
         match rustling_output {
             RustlingGrain::Year => Grain::Year,
             RustlingGrain::Quarter => Grain::Quarter,
@@ -167,8 +146,8 @@ impl FromRustling<RustlingGrain> for Grain {
     }
 }
 
-impl FromRustling<RustlingPrecision> for Precision {
-    fn from_rustling(rustling_output: RustlingPrecision) -> Self {
+impl OntologyFrom<RustlingPrecision> for Precision {
+    fn ontology_from(rustling_output: RustlingPrecision) -> Self {
         match rustling_output {
             RustlingPrecision::Approximate => Precision::Approximate,
             RustlingPrecision::Exact => Precision::Exact,
@@ -176,24 +155,33 @@ impl FromRustling<RustlingPrecision> for Precision {
     }
 }
 
-impl FromRustling<Output> for SlotValue {
-    fn from_rustling(rustling_output: Output) -> Self {
+impl OntologyFrom<Output> for SlotValue {
+    fn ontology_from(rustling_output: Output) -> Self {
         match rustling_output {
-            Output::AmountOfMoney(v) => SlotValue::AmountOfMoney(v.into_builtin()),
-            Output::Percentage(v) => SlotValue::Percentage(v.into_builtin()),
-            Output::Duration(v) => SlotValue::Duration(v.into_builtin()),
-            Output::Float(v) => SlotValue::Number(v.into_builtin()),
-            Output::Integer(v) => SlotValue::Number(v.into_builtin()),
-            Output::Ordinal(v) => SlotValue::Ordinal(v.into_builtin()),
-            Output::Temperature(v) => SlotValue::Temperature(v.into_builtin()),
-            Output::Time(v) => SlotValue::InstantTime(v.into_builtin()),
-            Output::TimeInterval(v) => SlotValue::TimeInterval(v.into_builtin()),
+            Output::AmountOfMoney(v) => SlotValue::AmountOfMoney(v.ontology_into()),
+            Output::Percentage(v) => SlotValue::Percentage(v.ontology_into()),
+            Output::Duration(v) => SlotValue::Duration(v.ontology_into()),
+            Output::Float(v) => SlotValue::Number(v.ontology_into()),
+            Output::Integer(v) => SlotValue::Number(v.ontology_into()),
+            Output::Ordinal(v) => SlotValue::Ordinal(v.ontology_into()),
+            Output::Temperature(v) => SlotValue::Temperature(v.ontology_into()),
+            Output::Time(v) => SlotValue::InstantTime(v.ontology_into()),
+            Output::TimeInterval(v) => SlotValue::TimeInterval(v.ontology_into()),
         }
     }
 }
 
-impl<'a> FromRustling<&'a Output> for BuiltinEntityKind {
-    fn from_rustling(v: &Output) -> Self {
+pub fn convert_to_builtin(input: &str, parser_match: ParserMatch<Output>) -> BuiltinEntity {
+    BuiltinEntity {
+        value: input[parser_match.byte_range.0..parser_match.byte_range.1].into(),
+        range: parser_match.char_range.0..parser_match.char_range.1,
+        entity: parser_match.value.clone().ontology_into(),
+        entity_kind: BuiltinEntityKind::ontology_from(&parser_match.value),
+    }
+}
+
+impl<'a> OntologyFrom<&'a Output> for BuiltinEntityKind {
+    fn ontology_from(v: &Output) -> Self {
         match *v {
             Output::AmountOfMoney(_) => BuiltinEntityKind::AmountOfMoney,
             Output::Duration(_) => BuiltinEntityKind::Duration,
@@ -208,8 +196,8 @@ impl<'a> FromRustling<&'a Output> for BuiltinEntityKind {
     }
 }
 
-impl<'a> FromRustling<&'a OutputKind> for BuiltinEntityKind {
-    fn from_rustling(v: &OutputKind) -> Self {
+impl<'a> OntologyFrom<&'a OutputKind> for BuiltinEntityKind {
+    fn ontology_from(v: &OutputKind) -> Self {
         match *v {
             OutputKind::AmountOfMoney => BuiltinEntityKind::AmountOfMoney,
             OutputKind::Duration => BuiltinEntityKind::Duration,
@@ -222,22 +210,23 @@ impl<'a> FromRustling<&'a OutputKind> for BuiltinEntityKind {
     }
 }
 
-impl<'a> FromRustling<&'a BuiltinEntityKind> for OutputKind {
-    fn from_rustling(v: &BuiltinEntityKind) -> Self {
+impl<'a> TryOntologyFrom<&'a BuiltinEntityKind> for OutputKind {
+    fn try_ontology_from(v: &BuiltinEntityKind) -> Result<Self> {
         match *v {
-            BuiltinEntityKind::AmountOfMoney => OutputKind::AmountOfMoney,
-            BuiltinEntityKind::Duration => OutputKind::Duration,
-            BuiltinEntityKind::Number => OutputKind::Number,
-            BuiltinEntityKind::Ordinal => OutputKind::Ordinal,
-            BuiltinEntityKind::Temperature => OutputKind::Temperature,
-            BuiltinEntityKind::Time => OutputKind::Time,
-            BuiltinEntityKind::Percentage => OutputKind::Percentage,
+            BuiltinEntityKind::AmountOfMoney => Ok(OutputKind::AmountOfMoney),
+            BuiltinEntityKind::Duration => Ok(OutputKind::Duration),
+            BuiltinEntityKind::Number => Ok(OutputKind::Number),
+            BuiltinEntityKind::Ordinal => Ok(OutputKind::Ordinal),
+            BuiltinEntityKind::Temperature => Ok(OutputKind::Temperature),
+            BuiltinEntityKind::Time => Ok(OutputKind::Time),
+            BuiltinEntityKind::Percentage => Ok(OutputKind::Percentage),
+            _ => Err(format_err!("Cannot convert {:?} into rustling type", v)),
         }
     }
 }
 
-impl FromRustling<Language> for RustlingLanguage {
-    fn from_rustling(lang: Language) -> Self {
+impl OntologyFrom<Language> for RustlingLanguage {
+    fn ontology_from(lang: Language) -> Self {
         match lang {
             Language::DE => RustlingLanguage::DE,
             Language::EN => RustlingLanguage::EN,

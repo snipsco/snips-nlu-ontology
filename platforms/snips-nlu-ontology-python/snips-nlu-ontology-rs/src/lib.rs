@@ -1,7 +1,4 @@
-#[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate lazy_static;
 extern crate libc;
 extern crate snips_nlu_ontology;
 #[macro_use]

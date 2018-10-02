@@ -12,13 +12,16 @@ pub mod macros;
 pub mod errors;
 pub mod language;
 
-pub mod builtin_entity;
+pub mod entity;
 mod ontology;
 
-pub use builtin_entity::{BuiltinEntity,
-                         BuiltinEntityKind,
-                         language_entity_ontology,
-                         complete_entity_ontology};
+pub use entity::builtin_entity::{BuiltinEntity,
+                                 BuiltinEntityKind,
+                                 IntoBuiltinEntityKind,
+                                 language_entity_ontology,
+                                 complete_entity_ontology};
+pub use entity::gazetteer_entity::*;
+pub use entity::grammar_entity::*;
 pub use ontology::*;
 pub use language::*;
 

@@ -45,12 +45,43 @@ enum_kind!(
         Ordinal,
         Temperature,
         Time,
-        Percentage
+        Percentage,
+        MusicArtist,
+        MusicAlbum,
+        MusicTrack
     ]
 );
 
+pub trait IntoBuiltinEntityKind: Copy {
+    fn into_builtin_kind(self) -> BuiltinEntityKind;
+
+    fn identifier(&self) -> &'static str {
+        self.into_builtin_kind().identifier()
+    }
+
+    fn description(&self) -> &'static str {
+        self.into_builtin_kind().description()
+    }
+
+    fn examples(&self, language: Language) -> &'static[&'static str] {
+        self.into_builtin_kind().examples(language)
+    }
+
+    fn result_description(&self) -> String {
+        self.into_builtin_kind().result_description()
+    }
+
+    fn supported_languages(&self) -> &'static [Language] {
+        self.into_builtin_kind().supported_languages()
+    }
+
+    fn ontology_details(&self, language: Language) -> BuiltinEntityKindDetails {
+        self.into_builtin_kind().ontology_details(language)
+    }
+}
+
 impl BuiltinEntityKind {
-    pub fn identifier(&self) -> &str {
+    pub fn identifier(&self) -> &'static str {
         match *self {
             BuiltinEntityKind::AmountOfMoney => "snips/amountOfMoney",
             BuiltinEntityKind::Duration => "snips/duration",
@@ -59,6 +90,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "snips/temperature",
             BuiltinEntityKind::Time => "snips/datetime",
             BuiltinEntityKind::Percentage => "snips/percentage",
+            BuiltinEntityKind::MusicArtist => "snips/musicArtist",
+            BuiltinEntityKind::MusicAlbum => "snips/musicAlbum",
+            BuiltinEntityKind::MusicTrack => "snips/musicTrack",
         }
     }
 
@@ -72,7 +106,7 @@ impl BuiltinEntityKind {
 }
 
 impl BuiltinEntityKind {
-    pub fn description(&self) -> &str {
+    pub fn description(&self) -> &'static str {
         match *self {
             BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
             BuiltinEntityKind::Duration => "Matches a time duration",
@@ -81,12 +115,15 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "Matches a temperature",
             BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
             BuiltinEntityKind::Percentage => "Matches a percentage",
+            BuiltinEntityKind::MusicArtist => "Matches a music artist",
+            BuiltinEntityKind::MusicAlbum => "Matches a music album",
+            BuiltinEntityKind::MusicTrack => "Matches a music track",
         }
     }
 }
 
 impl BuiltinEntityKind {
-    pub fn examples(&self, language: Language) -> &[&str] {
+    pub fn examples(&self, language: Language) -> &'static[&'static str] {
         match language {
             Language::DE => self.de_examples(),
             Language::EN => self.en_examples(),
@@ -98,7 +135,7 @@ impl BuiltinEntityKind {
         }
     }
 
-    fn de_examples(&self) -> &[&str] {
+    fn de_examples(&self) -> &'static[&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -139,10 +176,19 @@ impl BuiltinEntityKind {
                 "zwanzig Prozent",
                 "zwei tausend und fünfzig Prozent",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn en_examples(&self) -> &[&str] {
+    fn en_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -186,10 +232,19 @@ impl BuiltinEntityKind {
                 "twenty percent",
                 "two hundred and fifty percents",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn es_examples(&self) -> &[&str] {
+    fn es_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -239,10 +294,19 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tres mil por ciento",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn fr_examples(&self) -> &[&str] {
+    fn fr_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -291,10 +355,19 @@ impl BuiltinEntityKind {
                 "20 pourcents",
                 "quatre vingt dix pourcents",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn it_examples(&self) -> &[&str] {
+    fn it_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "$10",
@@ -347,10 +420,19 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tre mila percento",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn ja_examples(&self) -> &[&str] {
+    fn ja_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "八ドル",
@@ -385,10 +467,19 @@ impl BuiltinEntityKind {
                 "十五%",
                 "五パーセント",
             ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 
-    fn ko_examples(&self) -> &[&str] {
+    fn ko_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -421,6 +512,15 @@ impl BuiltinEntityKind {
                 "5 월 첫째 목요일",
             ],
             BuiltinEntityKind::Percentage => &[],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                "Discovery",
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                "Harder Better Faster Stronger",
+            ],
         }
     }
 }
@@ -478,12 +578,21 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
             ]),
+            BuiltinEntityKind::MusicArtist => serde_json::to_string_pretty(&vec![
+                ::SlotValue::MusicArtist(::StringValue { value: "Daft Punk".to_string() }),
+            ]),
+            BuiltinEntityKind::MusicAlbum => serde_json::to_string_pretty(&vec![
+                ::SlotValue::MusicAlbum(::StringValue { value: "Discovery".to_string() }),
+            ]),
+            BuiltinEntityKind::MusicTrack => serde_json::to_string_pretty(&vec![
+                ::SlotValue::MusicTrack(::StringValue { value: "Harder Better Faster Stronger".to_string() }),
+            ]),
         }.unwrap()
     }
 }
 
 impl BuiltinEntityKind {
-    pub fn supported_languages(&self) -> &[Language] {
+    pub fn supported_languages(&self) -> &'static[Language] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 Language::DE,
@@ -546,6 +655,15 @@ impl BuiltinEntityKind {
                 Language::FR,
                 Language::IT,
                 Language::JA,
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                Language::FR,
+            ],
+            BuiltinEntityKind::MusicAlbum => &[
+                Language::FR,
+            ],
+            BuiltinEntityKind::MusicTrack => &[
+                Language::FR,
             ]
         }
     }
