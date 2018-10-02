@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.59.0] - 2018-10-02
+### Added
+- Support for 3 new builtin entities: `snips/musicAlbum`, `snips/musicArtist` and `snips/musicTrack`
+- Introduction of a `GazetterParser`, which allows to parse gazetteer entities
+- API to persist and load a `BuiltinEntityParser`
+
+### Changed
+- The `BuiltinEntityParser` parsing API now returns a `Result`
+- The `BuiltinEntityParser` object is now built with a `BuiltinEntityParserLoader`
+
+
 ## [0.58.0] - 2018-09-27
 ### Added
 - Limited support of Italian for: AmountOfMoney, Duration, Number, Ordinal, Temperature, Time, Percentage
@@ -77,6 +88,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.59.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.58.0...0.59.0
 [0.58.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.3...0.58.0
 [0.57.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.2...0.57.3
 [0.57.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.1...0.57.2

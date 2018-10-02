@@ -1,15 +1,15 @@
 [package]
 name = "snips-nlu-ontology-rs"
-version = "0.59.0-SNAPSHOT"
+version = "0.59.0"
 authors = ["Adrien Ball <adrien.ball@snips.ai>"]
 
 [dependencies]
 failure = "0.1"
 ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs", rev = "4292ad9" }
 libc = "0.2"
-snips-nlu-ontology = { git = "https://github.com/snipsco/snips-nlu-ontology", branch = "develop" }
-snips-nlu-ontology-ffi-macros = { git = "https://github.com/snipsco/snips-nlu-ontology", branch = "develop" }
-snips-nlu-ontology-parsers-ffi-macros = { git = "https://github.com/snipsco/snips-nlu-ontology", branch = "develop" }
+snips-nlu-ontology = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.59.0" }
+snips-nlu-ontology-ffi-macros = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.59.0" }
+snips-nlu-ontology-parsers-ffi-macros = { git = "https://github.com/snipsco/snips-nlu-ontology", tag = "0.59.0" }
 
 [lib]
 name = "snips_nlu_ontology_rs"
