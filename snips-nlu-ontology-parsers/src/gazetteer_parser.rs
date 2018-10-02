@@ -142,14 +142,14 @@ impl GazetteerParser<BuiltinGazetteerEntityKind> {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-struct GazetteerParserMetadata {
-    parsers_metadata: Vec<EntityParserMetadata>
+pub struct GazetteerParserMetadata {
+    pub parsers_metadata: Vec<EntityParserMetadata>
 }
 
 #[derive(Serialize, Deserialize)]
-struct EntityParserMetadata {
-    entity_identifier: String,
-    entity_parser: String,
+pub struct EntityParserMetadata {
+    pub entity_identifier: String,
+    pub entity_parser: String,
 }
 
 impl<T> GazetteerParser<T> where T: EntityIdentifier {
