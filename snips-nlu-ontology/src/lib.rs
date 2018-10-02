@@ -25,4 +25,4 @@ pub use entity::grammar_entity::*;
 pub use ontology::*;
 pub use language::*;
 
-pub static ONTOLOGY_VERSION: &str = "0.6.0";
+pub static ONTOLOGY_VERSION: &str = "0.7.0";
