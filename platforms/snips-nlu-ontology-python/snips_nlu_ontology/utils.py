@@ -5,7 +5,7 @@ from ctypes import c_char_p, c_int32, cdll
 from pathlib import Path
 from tempfile import mkdtemp
 
-PACKAGE_PATH = Path(__file__).parent
+PACKAGE_PATH = Path(__file__).absolute().parent
 
 dylib_dir = PACKAGE_PATH / "dylib"
 dylib_path = list(dylib_dir.glob("libsnips_nlu_ontology_rs*"))[0]

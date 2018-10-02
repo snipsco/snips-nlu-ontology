@@ -1,5 +1,6 @@
 import json
 from _ctypes import byref, pointer
+from builtins import bytes, str
 from ctypes import c_char_p, c_int, c_void_p, string_at
 from pathlib import Path
 
