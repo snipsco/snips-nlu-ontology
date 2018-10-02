@@ -43,8 +43,26 @@ macro_rules! export_nlu_ontology_c_symbols {
         }
 
         #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_entity_shortname(
+            entity_name: *const libc::c_char,
+            result: *mut *const libc::c_char
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_builtin_entity_shortname(entity_name, result))
+        }
+
+        #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_all_builtin_entities() -> ::ffi_utils::CStringArray {
             $crate::all_builtin_entities()
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_all_grammar_entities() -> ::ffi_utils::CStringArray {
+            $crate::all_grammar_entities()
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_all_gazetteer_entities() -> ::ffi_utils::CStringArray {
+            $crate::all_gazetteer_entities()
         }
 
         #[no_mangle]
@@ -53,6 +71,22 @@ macro_rules! export_nlu_ontology_c_symbols {
             results: *mut *const ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::get_supported_builtin_entities(language, results))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_supported_grammar_entities(
+            language: *const libc::c_char,
+            results: *mut *const ::ffi_utils::CStringArray,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_supported_grammar_entities(language, results))
+        }
+
+        #[no_mangle]
+        pub extern "C" fn snips_nlu_ontology_supported_builtin_gazetteer_entities(
+            language: *const libc::c_char,
+            results: *mut *const ::ffi_utils::CStringArray,
+        ) -> ::ffi_utils::SNIPS_RESULT {
+            wrap!($crate::get_supported_builtin_gazetteer_entities(language, results))
         }
 
         #[no_mangle]

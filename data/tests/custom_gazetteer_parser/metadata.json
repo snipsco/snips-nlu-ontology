@@ -1,0 +1,12 @@
+{
+  "parsers_metadata": [
+    {
+      "entity_identifier": "music_artist",
+      "entity_parser": "parser_1"
+    },
+    {
+      "entity_identifier": "music_track",
+      "entity_parser": "parser_2"
+    }
+  ]
+}

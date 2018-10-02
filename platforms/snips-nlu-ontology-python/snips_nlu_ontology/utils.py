@@ -1,12 +1,15 @@
-import os
-from _ctypes import Structure, POINTER
+import shutil
+from _ctypes import POINTER, Structure
 from contextlib import contextmanager
 from ctypes import c_char_p, c_int32, cdll
-from glob import glob
+from pathlib import Path
+from tempfile import mkdtemp
 
-dylib_dir = os.path.join(os.path.dirname(__file__), "dylib")
-dylib_path = glob(os.path.join(dylib_dir, "libsnips_nlu_ontology_rs*"))[0]
-lib = cdll.LoadLibrary(dylib_path)
+PACKAGE_PATH = Path(__file__).absolute().parent
+
+dylib_dir = PACKAGE_PATH / "dylib"
+dylib_path = list(dylib_dir.glob("libsnips_nlu_ontology_rs*"))[0]
+lib = cdll.LoadLibrary(str(dylib_path))
 
 
 @contextmanager
@@ -30,3 +33,12 @@ class CStringArray(Structure):
         ("data", POINTER(c_char_p)),
         ("size", c_int32)
     ]
+
+
+@contextmanager
+def temp_dir():
+    tmp_dir = mkdtemp()
+    try:
+        yield Path(tmp_dir)
+    finally:
+        shutil.rmtree(tmp_dir)
