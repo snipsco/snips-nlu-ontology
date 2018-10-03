@@ -4,7 +4,8 @@ from builtins import bytes, str
 from ctypes import c_char_p, c_int, c_void_p, string_at
 from pathlib import Path
 
-from snips_nlu_ontology.utils import (CStringArray, lib, string_pointer)
+from snips_nlu_ontology.utils import (CStringArray, check_ffi_error, lib,
+                                      string_pointer)
 
 
 class GazetteerEntityParser(object):
@@ -58,15 +59,8 @@ class GazetteerEntityParser(object):
         json_parser_config = bytes(json.dumps(build_config), encoding="utf8")
         exit_code = lib.snips_nlu_ontology_build_gazetteer_entity_parser(
             byref(parser), json_parser_config)
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ImportError(
-                "Something went wrong while building the gazetteer entity "
-                "parser: %s" % ffi_error_message)
+        check_ffi_error(exit_code, "Something went wrong when building the "
+                                   "gazetteer entity parser")
         return cls(parser)
 
     def parse(self, text, scope=None):
@@ -98,16 +92,8 @@ class GazetteerEntityParser(object):
         with string_pointer(c_char_p()) as ptr:
             exit_code = lib.snips_nlu_ontology_extract_gazetteer_entities_json(
                 self._parser, text.encode("utf8"), scope, byref(ptr))
-            if exit_code:
-                with string_pointer(c_char_p()) as error_msg_ptr:
-                    if lib.snips_nlu_ontology_get_last_error(
-                            byref(error_msg_ptr)) == 0:
-                        ffi_error_message = string_at(error_msg_ptr).decode(
-                            "utf8")
-                    else:
-                        ffi_error_message = "see stderr"
-                raise ValueError("Something wrong happened while extracting "
-                                 "gazetteer entities: %s" % ffi_error_message)
+            check_ffi_error(exit_code, "Something went wrong when "
+                                       "extracting gazetteer entities")
             result = string_at(ptr)
             return json.loads(result.decode("utf8"))
 
@@ -117,14 +103,8 @@ class GazetteerEntityParser(object):
             path = str(path)
         exit_code = lib.snips_nlu_ontology_persist_gazetteer_entity_parser(
             self._parser, path.encode("utf8"))
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ValueError("Something wrong happened while persisting the "
-                             "gazetteer entity parser: %s" % ffi_error_message)
+        check_ffi_error(exit_code, "Something went wrong when persisting "
+                                   "the gazetteer entity parser")
 
     @classmethod
     def from_path(cls, parser_path):
@@ -137,15 +117,8 @@ class GazetteerEntityParser(object):
         parser_path = bytes(parser_path, encoding="utf8")
         exit_code = lib.snips_nlu_ontology_load_gazetteer_entity_parser(
             byref(parser), parser_path)
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ImportError(
-                "Something went wrong while loading the gazetteer entity "
-                "parser: %s" % ffi_error_message)
+        check_ffi_error(exit_code, "Something went wrong when loading the "
+                                   "gazetteer entity parser")
         return cls(parser)
 
     def __del__(self):
