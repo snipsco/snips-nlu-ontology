@@ -4,7 +4,8 @@ from builtins import bytes, str
 from ctypes import c_char_p, c_int, c_void_p, string_at
 from pathlib import Path
 
-from snips_nlu_ontology.utils import CStringArray, lib, string_pointer
+from snips_nlu_ontology.utils import (
+    CStringArray, check_ffi_error, lib, string_pointer)
 
 
 class BuiltinEntityParser(object):
@@ -33,9 +34,8 @@ class BuiltinEntityParser(object):
         json_parser_config = bytes(json.dumps(parser_config), encoding="utf8")
         exit_code = lib.snips_nlu_ontology_create_builtin_entity_parser(
             byref(parser), json_parser_config)
-        if exit_code:
-            raise ImportError("Something went wrong while creating the "
-                              "builtin entity parser. See stderr.")
+        check_ffi_error(exit_code, "Something went wrong while creating the "
+                                   "builtin entity parser")
         return cls(parser)
 
     def parse(self, text, scope=None):
@@ -67,9 +67,8 @@ class BuiltinEntityParser(object):
         with string_pointer(c_char_p()) as ptr:
             exit_code = lib.snips_nlu_ontology_extract_builtin_entities_json(
                 self._parser, text.encode("utf8"), scope, byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while extracting "
-                                 "builtin entities. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when extracting "
+                                       "builtin entities")
             result = string_at(ptr)
             return json.loads(result.decode("utf8"))
 
@@ -79,14 +78,8 @@ class BuiltinEntityParser(object):
             path = str(path)
         exit_code = lib.snips_nlu_ontology_persist_builtin_entity_parser(
             self._parser, path.encode("utf8"))
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ValueError("Something wrong happened while persisting the "
-                             "builtin entity parser: %s" % ffi_error_message)
+        check_ffi_error(exit_code, "Something went wrong when persisting the "
+                                   "builtin entity parser")
 
     @classmethod
     def from_path(cls, parser_path):
@@ -99,15 +92,8 @@ class BuiltinEntityParser(object):
         parser_path = bytes(parser_path, encoding="utf8")
         exit_code = lib.snips_nlu_ontology_load_builtin_entity_parser(
             byref(parser), parser_path)
-        if exit_code:
-            with string_pointer(c_char_p()) as ptr:
-                if lib.snips_nlu_ontology_get_last_error(byref(ptr)) == 0:
-                    ffi_error_message = string_at(ptr).decode("utf8")
-                else:
-                    ffi_error_message = "see stderr"
-            raise ImportError(
-                "Something went wrong while loading the builtin entity "
-                "parser: %s" % ffi_error_message)
+        check_ffi_error(exit_code, "Something went wrong when loading the "
+                                   "builtin entity parser")
         return cls(parser)
 
     def __del__(self):

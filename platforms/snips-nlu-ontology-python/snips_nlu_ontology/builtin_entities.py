@@ -6,8 +6,8 @@ from _ctypes import byref, pointer
 from builtins import range, str
 from ctypes import c_char_p, string_at
 
-from snips_nlu_ontology.utils import (CStringArray, lib, string_array_pointer,
-                                      string_pointer)
+from snips_nlu_ontology.utils import (CStringArray, check_ffi_error, lib,
+                                      string_array_pointer, string_pointer)
 
 _ALL_LANGUAGES = None
 _SUPPORTED_ENTITIES = dict()
@@ -90,9 +90,8 @@ def get_builtin_entity_shortname(entity):
         with string_pointer(c_char_p()) as ptr:
             exit_code = lib.snips_nlu_ontology_entity_shortname(
                 entity.encode("utf8"), byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while retrieving "
-                                 "builtin entity shortname. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when retrieving "
+                                       "builtin entity shortname")
             result = string_at(ptr)
             _BUILTIN_ENTITIES_SHORTNAMES[entity] = result.decode("utf8")
     return _BUILTIN_ENTITIES_SHORTNAMES[entity]
@@ -114,9 +113,8 @@ def get_supported_entities(language):
         with string_array_pointer(pointer(CStringArray())) as ptr:
             exit_code = lib.snips_nlu_ontology_supported_builtin_entities(
                 language.encode("utf8"), byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while retrieving "
-                                 "supported entities. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when retrieving "
+                                       "supported entities")
             array = ptr.contents
             _SUPPORTED_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
@@ -140,9 +138,8 @@ def get_supported_gazetteer_entities(language):
             exit_code = \
                 lib.snips_nlu_ontology_supported_builtin_gazetteer_entities(
                     language.encode("utf8"), byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while retrieving "
-                                 "supported gazetteer entities. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when retrieving "
+                                       "supported gazetteer entities")
             array = ptr.contents
             _SUPPORTED_GAZETTEER_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
@@ -165,9 +162,8 @@ def get_supported_grammar_entities(language):
         with string_array_pointer(pointer(CStringArray())) as ptr:
             exit_code = lib.snips_nlu_ontology_supported_grammar_entities(
                 language.encode("utf8"), byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while retrieving "
-                                 "supported grammar entities. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when retrieving "
+                                       "supported grammar entities")
             array = ptr.contents
             _SUPPORTED_GRAMMAR_ENTITIES[language] = set(
                 array.data[i].decode("utf8") for i in range(array.size))
@@ -194,9 +190,8 @@ def get_builtin_entity_examples(builtin_entity_kind, language):
             exit_code = lib.snips_nlu_ontology_builtin_entity_examples(
                 builtin_entity_kind.encode("utf8"),
                 language.encode("utf8"), byref(ptr))
-            if exit_code:
-                raise ValueError("Something went wrong while retrieving "
-                                 "builtin entity examples. See stderr.")
+            check_ffi_error(exit_code, "Something went wrong when retrieving "
+                                       "builtin entity examples")
             array = ptr.contents
             _ENTITIES_EXAMPLES[builtin_entity_kind][language] = list(
                 array.data[i].decode("utf8") for i in range(array.size))
