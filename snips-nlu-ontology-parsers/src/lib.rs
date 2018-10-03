@@ -27,7 +27,7 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
-pub use gazetteer_entity_parser::EntityValue as CustomEntityValue;
+pub use gazetteer_entity_parser::{EntityValue as GazetteerEntityValue, Parser as GazetteerEntityParser};
 pub use builtin_entity_parser::*;
 pub use gazetteer_parser::*;
 pub use conversion::*;
