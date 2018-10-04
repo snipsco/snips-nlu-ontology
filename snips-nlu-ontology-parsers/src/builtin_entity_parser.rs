@@ -176,9 +176,9 @@ impl BuiltinEntityParser {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct BuiltinParserMetadata {
-    language: String,
-    gazetteer_parser: Option<String>,
+pub struct BuiltinParserMetadata {
+    pub language: String,
+    pub gazetteer_parser: Option<String>,
 }
 
 impl BuiltinEntityParser {
