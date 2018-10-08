@@ -11,6 +11,9 @@ import ai.snips.nlu.ontology.SlotValue.AmountOfMoneyValue
 import ai.snips.nlu.ontology.SlotValue.CustomValue
 import ai.snips.nlu.ontology.SlotValue.DurationValue
 import ai.snips.nlu.ontology.SlotValue.InstantTimeValue
+import ai.snips.nlu.ontology.SlotValue.MusicAlbumValue
+import ai.snips.nlu.ontology.SlotValue.MusicArtistValue
+import ai.snips.nlu.ontology.SlotValue.MusicTrackValue
 import ai.snips.nlu.ontology.SlotValue.NumberValue
 import ai.snips.nlu.ontology.SlotValue.PercentageValue
 import ai.snips.nlu.ontology.SlotValue.OrdinalValue
@@ -118,6 +121,9 @@ class CSlotValue : Structure(), Structure.ByValue {
         const val TEMPERATURE = 7
         const val DURATION = 8
         const val PERCENTAGE = 9
+        const val MUSICALBUM = 10
+        const val MUSICARTIST = 11
+        const val MUSICTRACK = 12
     }
 
     @JvmField var value_type: Int? = null
@@ -135,6 +141,9 @@ class CSlotValue : Structure(), Structure.ByValue {
         TEMPERATURE -> CTemperatureValue(value!!).toTemperatureValue()
         DURATION -> CDurationValue(value!!).toDurationValue()
         PERCENTAGE -> PercentageValue(value!!.getDouble(0))
+        MUSICALBUM -> MusicAlbumValue(value.readString())
+        MUSICARTIST -> MusicArtistValue(value.readString())
+        MUSICTRACK -> MusicTrackValue(value.readString())
         else -> throw IllegalArgumentException("unknown value type $value_type")
     }
 

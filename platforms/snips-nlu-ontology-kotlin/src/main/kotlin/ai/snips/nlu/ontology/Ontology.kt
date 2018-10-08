@@ -4,11 +4,14 @@ import ai.snips.nlu.ontology.SlotValue.Type.AMOUNT_OF_MONEY
 import ai.snips.nlu.ontology.SlotValue.Type.CUSTOM
 import ai.snips.nlu.ontology.SlotValue.Type.DURATION
 import ai.snips.nlu.ontology.SlotValue.Type.INSTANT_TIME
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICALBUM
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICARTIST
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICTRACK
 import ai.snips.nlu.ontology.SlotValue.Type.NUMBER
 import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
+import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
 import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
 import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
-import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
 import org.parceler.Parcel
 import org.parceler.Parcel.Serialization.BEAN
 import org.parceler.ParcelConstructor
@@ -43,6 +46,9 @@ sealed class SlotValue(val type: Type) {
         TEMPERATURE,
         DURATION,
         PERCENTAGE,
+        MUSICALBUM,
+        MUSICARTIST,
+        MUSICTRACK
     }
 
     @Parcel(BEAN)
@@ -90,6 +96,15 @@ sealed class SlotValue(val type: Type) {
             @ParcelProperty("minutes") val minutes: Long,
             @ParcelProperty("seconds") val seconds: Long,
             @ParcelProperty("precision") val precision: Precision) : SlotValue(DURATION)
+
+    @Parcel(BEAN)
+    data class MusicAlbumValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(MUSICALBUM)
+
+    @Parcel(BEAN)
+    data class MusicArtistValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(MUSICARTIST)
+
+    @Parcel(BEAN)
+    data class MusicTrackValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(MUSICTRACK)
 }
 
 
