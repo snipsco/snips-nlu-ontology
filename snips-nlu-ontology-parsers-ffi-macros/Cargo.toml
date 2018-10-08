@@ -1,6 +1,6 @@
 [package]
 name = "snips-nlu-ontology-parsers-ffi-macros"
-version = "0.59.0"
+version = "0.60.0"
 authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
 
 [dependencies]

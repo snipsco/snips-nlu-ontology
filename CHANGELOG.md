@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.60.0] - 2018-10-08
+### Changed
+- Improve error handling in python wrapper
+
+### Fixed
+- Missing builtin entities in kotlin wrapper
+
 ## [0.59.0] - 2018-10-02
 ### Added
 - Support for 3 new builtin entities: `snips/musicAlbum`, `snips/musicArtist` and `snips/musicTrack`
@@ -88,6 +95,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.60.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.59.0...0.60.0
 [0.59.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.58.0...0.59.0
 [0.58.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.3...0.58.0
 [0.57.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.57.2...0.57.3
