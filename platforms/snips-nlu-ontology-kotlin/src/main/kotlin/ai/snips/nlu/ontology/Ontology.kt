@@ -1,6 +1,17 @@
 package ai.snips.nlu.ontology
 
-import ai.snips.nlu.ontology.SlotValue.Type.*
+import ai.snips.nlu.ontology.SlotValue.Type.AMOUNT_OF_MONEY
+import ai.snips.nlu.ontology.SlotValue.Type.CUSTOM
+import ai.snips.nlu.ontology.SlotValue.Type.DURATION
+import ai.snips.nlu.ontology.SlotValue.Type.INSTANT_TIME
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICALBUM
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICARTIST
+import ai.snips.nlu.ontology.SlotValue.Type.MUSICTRACK
+import ai.snips.nlu.ontology.SlotValue.Type.NUMBER
+import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
+import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
+import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
+import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
 import org.parceler.Parcel
 import org.parceler.Parcel.Serialization.BEAN
 import org.parceler.ParcelConstructor
