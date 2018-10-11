@@ -46,8 +46,8 @@ enum_kind!(
         Temperature,
         Time,
         Percentage,
-        MusicArtist,
         MusicAlbum,
+        MusicArtist,
         MusicTrack
     ]
 );
@@ -90,8 +90,8 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "snips/temperature",
             BuiltinEntityKind::Time => "snips/datetime",
             BuiltinEntityKind::Percentage => "snips/percentage",
-            BuiltinEntityKind::MusicArtist => "snips/musicArtist",
             BuiltinEntityKind::MusicAlbum => "snips/musicAlbum",
+            BuiltinEntityKind::MusicArtist => "snips/musicArtist",
             BuiltinEntityKind::MusicTrack => "snips/musicTrack",
         }
     }
@@ -115,8 +115,8 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Temperature => "Matches a temperature",
             BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
             BuiltinEntityKind::Percentage => "Matches a percentage",
-            BuiltinEntityKind::MusicArtist => "Matches a music artist",
             BuiltinEntityKind::MusicAlbum => "Matches a music album",
+            BuiltinEntityKind::MusicArtist => "Matches a music artist",
             BuiltinEntityKind::MusicTrack => "Matches a music track",
         }
     }
@@ -176,11 +176,11 @@ impl BuiltinEntityKind {
                 "zwanzig Prozent",
                 "zwei tausend und fünfzig Prozent",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -232,11 +232,11 @@ impl BuiltinEntityKind {
                 "twenty percent",
                 "two hundred and fifty percents",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -294,11 +294,11 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tres mil por ciento",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -355,11 +355,11 @@ impl BuiltinEntityKind {
                 "20 pourcents",
                 "quatre vingt dix pourcents",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -420,11 +420,11 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "tre mila percento",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -467,11 +467,11 @@ impl BuiltinEntityKind {
                 "十五%",
                 "五パーセント",
             ],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -512,11 +512,11 @@ impl BuiltinEntityKind {
                 "5 월 첫째 목요일",
             ],
             BuiltinEntityKind::Percentage => &[],
-            BuiltinEntityKind::MusicArtist => &[
-                "Daft Punk",
-            ],
             BuiltinEntityKind::MusicAlbum => &[
                 "Discovery",
+            ],
+            BuiltinEntityKind::MusicArtist => &[
+                "Daft Punk",
             ],
             BuiltinEntityKind::MusicTrack => &[
                 "Harder Better Faster Stronger",
@@ -578,11 +578,11 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Percentage => serde_json::to_string_pretty(&vec![
                 ::SlotValue::Percentage(::PercentageValue { value: 20. }),
             ]),
-            BuiltinEntityKind::MusicArtist => serde_json::to_string_pretty(&vec![
-                ::SlotValue::MusicArtist(::StringValue { value: "Daft Punk".to_string() }),
-            ]),
             BuiltinEntityKind::MusicAlbum => serde_json::to_string_pretty(&vec![
                 ::SlotValue::MusicAlbum(::StringValue { value: "Discovery".to_string() }),
+            ]),
+            BuiltinEntityKind::MusicArtist => serde_json::to_string_pretty(&vec![
+                ::SlotValue::MusicArtist(::StringValue { value: "Daft Punk".to_string() }),
             ]),
             BuiltinEntityKind::MusicTrack => serde_json::to_string_pretty(&vec![
                 ::SlotValue::MusicTrack(::StringValue { value: "Harder Better Faster Stronger".to_string() }),
@@ -656,10 +656,10 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
             ],
-            BuiltinEntityKind::MusicArtist => &[
+            BuiltinEntityKind::MusicAlbum => &[
                 Language::FR,
             ],
-            BuiltinEntityKind::MusicAlbum => &[
+            BuiltinEntityKind::MusicArtist => &[
                 Language::FR,
             ],
             BuiltinEntityKind::MusicTrack => &[
