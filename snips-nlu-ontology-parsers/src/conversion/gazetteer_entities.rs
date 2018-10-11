@@ -14,5 +14,5 @@ pub fn convert_to_slot_value(
             }
         }
     };
-    return match_entity_kind_to_slot_value!(MusicArtist, MusicAlbum, MusicTrack);
+    return match_entity_kind_to_slot_value!(MusicAlbum, MusicArtist, MusicTrack);
 }

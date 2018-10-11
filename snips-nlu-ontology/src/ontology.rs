@@ -65,8 +65,8 @@ pub enum SlotValue {
     AmountOfMoney(AmountOfMoneyValue),
     Temperature(TemperatureValue),
     Duration(DurationValue),
-    MusicArtist(StringValue),
     MusicAlbum(StringValue),
+    MusicArtist(StringValue),
     MusicTrack(StringValue)
 }
 
