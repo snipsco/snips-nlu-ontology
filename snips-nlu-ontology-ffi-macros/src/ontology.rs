@@ -174,8 +174,11 @@ pub enum SNIPS_SLOT_VALUE_TYPE {
     SNIPS_SLOT_VALUE_TYPE_DURATION = 8,
     /// Percentage type represented by a CPercentageValue
     SNIPS_SLOT_VALUE_TYPE_PERCENTAGE = 9,
-    SNIPS_SLOT_VALUE_TYPE_MUSICARTIST = 10,
-    SNIPS_SLOT_VALUE_TYPE_MUSICALBUM = 11,
+    /// Music Album type represented by a char *
+    SNIPS_SLOT_VALUE_TYPE_MUSICALBUM = 10,
+    /// Music Artist type represented by a char *
+    SNIPS_SLOT_VALUE_TYPE_MUSICARTIST = 11,
+    /// Music Track type represented by a char *
     SNIPS_SLOT_VALUE_TYPE_MUSICTRACK = 12,
 }
 
