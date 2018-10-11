@@ -4,8 +4,8 @@ use errors::*;
 sub_entity_kind!(
     BuiltinGazetteerEntityKind,
     [
-        MusicArtist,
         MusicAlbum,
+        MusicArtist,
         MusicTrack
     ]
 );
