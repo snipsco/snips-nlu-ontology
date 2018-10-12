@@ -657,12 +657,15 @@ impl BuiltinEntityKind {
                 Language::JA,
             ],
             BuiltinEntityKind::MusicAlbum => &[
+                Language::EN,
                 Language::FR,
             ],
             BuiltinEntityKind::MusicArtist => &[
+                Language::EN,
                 Language::FR,
             ],
             BuiltinEntityKind::MusicTrack => &[
+                Language::EN,
                 Language::FR,
             ]
         }
