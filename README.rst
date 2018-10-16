@@ -63,11 +63,14 @@ Supported builtin entities
 |               |                     |                     | | Japanese          |
 |               |                     |                     | | Korean            |
 +---------------+---------------------+---------------------+---------------------+
-| MusicAlbum    | snips/musicAlbum    | `Gazetteer Entity`_ | | French            |
+| MusicAlbum    | snips/musicAlbum    | `Gazetteer Entity`_ | | English           |
+|               |                     |                     | | French            |
 +---------------+---------------------+---------------------+---------------------+
-| MusicArtist   | snips/musicArtist   | `Gazetteer Entity`_ | | French            |
+| MusicArtist   | snips/musicArtist   | `Gazetteer Entity`_ | | English           |
+|               |                     |                     | | French            |
 +---------------+---------------------+---------------------+---------------------+
-| MusicTrack    | snips/musicTrack    | `Gazetteer Entity`_ | | French            |
+| MusicTrack    | snips/musicTrack    | `Gazetteer Entity`_ | | English           |
+|               |                     |                     | | French            |
 +---------------+---------------------+---------------------+---------------------+
 | Number        | snips/number        | `Grammar Entity`_   | | German            |
 |               |                     |                     | | English           |
