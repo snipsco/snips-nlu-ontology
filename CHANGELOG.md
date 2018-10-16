@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.61.1] - 2018-10-15
+### Added
+- Support music builtin entities in english
+
+### Fixed
+- Crash with gazetteer entity parser
+
 ## [0.61.0] - 2018-10-11
 ### Fixed
 - Wrong enum values in ffi for `snips/musicArtist` and `snips/musicAlbum`
@@ -99,6 +106,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.61.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.0...0.61.1
 [0.61.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.60.0...0.61.0
 [0.60.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.59.0...0.60.0
 [0.59.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.58.0...0.59.0
