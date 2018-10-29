@@ -12,7 +12,7 @@ regex = "0.2"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-gazetteer-entity-parser = { git = "https://github.com/snipsco/gazetteer-entity-parser", tag = "0.5.1" }
+gazetteer-entity-parser = { git = "https://github.com/snipsco/gazetteer-entity-parser", tag = "0.6.0" }
 rustling-ontology = { git = "https://github.com/snipsco/rustling-ontology", tag = "0.17.5" }
 snips-nlu-ontology = { path = "../snips-nlu-ontology" }
 snips-nlu-utils = { git = "https://github.com/snipsco/snips-nlu-utils", tag = "0.6.1" }
