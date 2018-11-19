@@ -1,18 +1,21 @@
 language: python
 
-matrix:
+jobs:
   include:
-    - os: osx
+    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
+      os: osx
       osx_image: xcode8
       language: generic
       env:
         - TOXENV=py27
-    - os: osx
+    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
+      os: osx
       osx_image: xcode8
       language: generic
       env:
         - TOXENV=py36
-    - os: linux
+    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
+      os: linux
       python: 2.7
       env:
         - TOXENV=py27
