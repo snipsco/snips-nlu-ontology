@@ -289,7 +289,6 @@ impl BuiltinEntityKind {
                 "70 grados kelvin",
                 "3°C",
                 "veintitrés grados",
-                "veintitrés grados",
                 "tres mil grados fahrenheit",
                 "veinte grados centígrados",
                 "setecientos ochenta y nueve kelvin",
