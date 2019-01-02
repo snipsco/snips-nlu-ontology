@@ -273,7 +273,6 @@ impl BuiltinEntityKind {
                 "2001",
                 "dieciocho",
                 "ciento dos",
-                "diez y ocho",
                 "tres mil nueve",
                 "ciento cuarenta y nueve",
                 "cuatro cientos dieciséis",
