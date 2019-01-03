@@ -39,7 +39,7 @@ data class Range @ParcelConstructor constructor(@ParcelProperty("start") val sta
 @Parcel(BEAN)
 data class Slot @ParcelConstructor constructor(@ParcelProperty("rawValue") val rawValue: String,
                                                @ParcelProperty("value") val value: SlotValue,
-                                               @ParcelProperty("range") val range: Range?,
+                                               @ParcelProperty("range") val range: Range,
                                                @ParcelProperty("entity") val entity: String,
                                                @ParcelProperty("slotName") val slotName: String)
 
@@ -140,11 +140,11 @@ sealed class SlotValue(val type: Type) {
 
 @Parcel(BEAN)
 data class IntentClassifierResult @ParcelConstructor constructor(
-        @ParcelProperty("intentName") val intentName: String,
+        @ParcelProperty("intentName") val intentName: String?,
         @ParcelProperty("probability") val probability: Float)
 
 @Parcel(BEAN)
 data class IntentParserResult @ParcelConstructor constructor(
         @ParcelProperty("input") val input: String,
-        @ParcelProperty("intent") val intent: IntentClassifierResult?,
+        @ParcelProperty("intent") val intent: IntentClassifierResult,
         @ParcelProperty("slots") val slots: List<Slot>)

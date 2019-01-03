@@ -1,16 +1,16 @@
 use std::ops::Range;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct IntentParserResult {
     pub input: String,
-    pub intent: Option<IntentClassifierResult>,
-    pub slots: Option<Vec<Slot>>,
+    pub intent: IntentClassifierResult,
+    pub slots: Vec<Slot>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct IntentClassifierResult {
-    pub intent_name: String,
+    pub intent_name: Option<String>,
     pub probability: f32,
 }
 
@@ -19,7 +19,7 @@ pub struct IntentClassifierResult {
 pub struct Slot {
     pub raw_value: String,
     pub value: SlotValue,
-    pub range: Option<Range<usize>>,
+    pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
 }
@@ -34,7 +34,7 @@ impl Slot {
         Slot {
             raw_value: value.clone(),
             value: SlotValue::Custom(value.into()),
-            range: Some(range),
+            range,
             entity,
             slot_name,
         }
@@ -67,7 +67,7 @@ pub enum SlotValue {
     Duration(DurationValue),
     MusicAlbum(StringValue),
     MusicArtist(StringValue),
-    MusicTrack(StringValue)
+    MusicTrack(StringValue),
 }
 
 /// This struct is required in order to use serde Internally tagged enum representation
@@ -173,7 +173,7 @@ mod tests {
         let slot = Slot {
             raw_value: "value".into(),
             value: SlotValue::Custom("value".into()),
-            range: None,
+            range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
         };
@@ -186,7 +186,7 @@ mod tests {
         let slot = Slot {
             raw_value: "fifth".into(),
             value: SlotValue::Ordinal(OrdinalValue { value: 5 }),
-            range: None,
+            range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
         };
@@ -203,7 +203,7 @@ mod tests {
                 grain: Grain::Year,
                 precision: Precision::Exact,
             }),
-            range: None,
+            range: 0..10,
             entity: "toto".into(),
             slot_name: "toto".into(),
         };

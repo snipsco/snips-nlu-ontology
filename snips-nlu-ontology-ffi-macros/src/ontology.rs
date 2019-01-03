@@ -8,15 +8,15 @@ use libc;
 
 use ffi_utils::RawPointerConverter;
 
-/// Results of intent parsing
+/// Result of intent parsing
 #[repr(C)]
 #[derive(Debug)]
 pub struct CIntentParserResult {
     /// The text that was parsed
     pub input: *const libc::c_char,
-    /// The result of intent classification, may be null if no intent was detected
+    /// The result of intent classification
     pub intent: *const CIntentClassifierResult,
-    /// The slots extracted if an intent was detected
+    /// The slots extracted
     pub slots: *const CSlotList,
 }
 
@@ -24,16 +24,8 @@ impl From<::IntentParserResult> for CIntentParserResult {
     fn from(input: ::IntentParserResult) -> Self {
         Self {
             input: CString::new(input.input).unwrap().into_raw(),
-            intent: if let Some(intent) = input.intent {
-                CIntentClassifierResult::from(intent).into_raw_pointer()
-            } else {
-                null()
-            },
-            slots: if let Some(slots) = input.slots {
-                CSlotList::from(slots).into_raw_pointer()
-            } else {
-                null()
-            },
+            intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
+            slots: CSlotList::from(input.slots).into_raw_pointer(),
         }
     }
 }
@@ -58,16 +50,19 @@ pub struct CIntentClassifierResult {
 
 impl From<::IntentClassifierResult> for CIntentClassifierResult {
     fn from(input: ::IntentClassifierResult) -> Self {
+        let intent_name = input.intent_name
+            .map(|name| CString::new(name).unwrap().into_raw() as *const _)
+            .unwrap_or_else(|| null());
         Self {
+            intent_name,
             probability: input.probability,
-            intent_name: CString::new(input.intent_name).unwrap().into_raw(), // String can not contains 0
         }
     }
 }
 
 impl Drop for CIntentClassifierResult {
     fn drop(&mut self) {
-        take_back_c_string!(self.intent_name);
+        take_back_nullable_c_string!(self.intent_name);
     }
 }
 
@@ -127,17 +122,11 @@ pub struct CSlot {
 
 impl From<::Slot> for CSlot {
     fn from(input: ::Slot) -> Self {
-        let range = if let Some(range) = input.range {
-            range.start as libc::int32_t..range.end as libc::int32_t
-        } else {
-            -1..-1
-        };
-
         Self {
             raw_value: CString::new(input.raw_value).unwrap().into_raw(),
             value: CSlotValue::from(input.value),
-            range_start: range.start,
-            range_end: range.end,
+            range_start: input.range.start as libc::int32_t,
+            range_end: input.range.end as libc::int32_t,
             entity: CString::new(input.entity).unwrap().into_raw(),
             slot_name: CString::new(input.slot_name).unwrap().into_raw(),
         }
