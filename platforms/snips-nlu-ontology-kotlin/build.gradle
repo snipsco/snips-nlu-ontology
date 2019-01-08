@@ -25,6 +25,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile 'net.java.dev.jna:jna:4.5.0'
     compile 'org.parceler:parceler-api:1.1.9'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.8'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
