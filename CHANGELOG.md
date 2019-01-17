@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.61.3] - 2019-01-17
+### Added
+- Bump rustling to `0.17.7`: fix resolution of decimal numbers
+
 ## [0.61.2] - 2018-12-14
 ### Added
 - Bump rustling to `0.17.6`: better support for Italian and Spanish
@@ -110,6 +114,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.61.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.2...0.61.3
 [0.61.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.1...0.61.2
 [0.61.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.0...0.61.1
 [0.61.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.60.0...0.61.0
