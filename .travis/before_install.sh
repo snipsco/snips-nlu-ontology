@@ -16,12 +16,16 @@ if [ "$TRAVIS_OS_NAME" == "osx" ]; then
 
   case "${TOXENV}" in
     py27)
-      curl -O https://bootstrap.pypa.io/get-pip.py
-      python get-pip.py --user
+      pyenv install 2.7.14
+      pyenv global 2.7.14
       ;;
     py36)
       pyenv install 3.6.1
       pyenv global 3.6.1
+      ;;
+    py37)
+      pyenv install 3.7.2
+      pyenv global 3.7.2
       ;;
   esac
   pyenv rehash
