@@ -31,6 +31,7 @@ fun String.toPointer(): Pointer = this.toJnaPointer(RUST_ENCODING)
 fun Int?.readGrain(): Grain = CGrain.toGrain(this!!)
 fun Int?.readPrecision(): Precision = CPrecision.toPrecision(this!!)
 fun Int?.readRangeTo(end: Int?): Range = Range(this!!, end!!)
+fun Float?.readFloat(): Float? = if (this!! < 0) null else this!!
 fun CSlotValue?.readSlotValue(): SlotValue = this!!.toSlotValue()
 
 class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
@@ -252,17 +253,20 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var range_end: Int? = null
     @JvmField var entity: Pointer? = null
     @JvmField var slot_name: Pointer? = null
+    @JvmField var confidence_score: Float? = null
 
     override fun getFieldOrder() = listOf("value",
                                           "raw_value",
                                           "entity",
                                           "slot_name",
                                           "range_start",
-                                          "range_end")
+                                          "range_end",
+                                          "confidence_score")
 
     fun toSlot() = Slot(rawValue = raw_value.readString(),
                         value = value.readSlotValue(),
                         range = range_start.readRangeTo(range_end),
                         entity = entity.readString(),
-                        slotName = slot_name.readString())
+                        slotName = slot_name.readString(),
+                        confidenceScore = confidence_score.readFloat())
 }

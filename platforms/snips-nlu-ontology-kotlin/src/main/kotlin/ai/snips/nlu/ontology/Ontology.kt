@@ -41,7 +41,8 @@ data class Slot @ParcelConstructor constructor(@ParcelProperty("rawValue") val r
                                                @ParcelProperty("value") val value: SlotValue,
                                                @ParcelProperty("range") val range: Range,
                                                @ParcelProperty("entity") val entity: String,
-                                               @ParcelProperty("slotName") val slotName: String)
+                                               @ParcelProperty("slotName") val slotName: String,
+                                               @ParcelProperty("confidenceScore") val confidenceScore: Float?)
 
 enum class Precision { APPROXIMATE, EXACT }
 

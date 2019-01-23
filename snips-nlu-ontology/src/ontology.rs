@@ -22,6 +22,7 @@ pub struct Slot {
     pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
+    pub confidence_score: Option<f32>
 }
 
 impl Slot {
@@ -30,6 +31,7 @@ impl Slot {
         range: Range<usize>,
         entity: String,
         slot_name: String,
+        confidence_score: Option<f32>
     ) -> Slot {
         Slot {
             raw_value: value.clone(),
@@ -37,6 +39,7 @@ impl Slot {
             range,
             entity,
             slot_name,
+            confidence_score
         }
     }
 }
@@ -49,6 +52,7 @@ impl Slot {
             range: self.range,
             entity: self.entity,
             slot_name: self.slot_name,
+            confidence_score: self.confidence_score
         }
     }
 }
@@ -176,6 +180,7 @@ mod tests {
             range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: None
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
@@ -189,6 +194,7 @@ mod tests {
             range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: Some(0.8)
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
@@ -206,6 +212,7 @@ mod tests {
             range: 0..10,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: None
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
