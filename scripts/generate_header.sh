@@ -7,6 +7,7 @@ pushd $ROOT_DIR # Go where Cargo.lock is
 
 cbindgen \
     --crate snips-nlu-ontology-ffi \
-    --output snips-nlu-ontology-ffi/platforms/snips-nlu-ontology-c/libsnips_nlu_ontology.h
+    --output platforms/c/libsnips_nlu_ontology.h
 
 popd
+
