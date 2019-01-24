@@ -6,7 +6,7 @@ use std::slice;
 
 use libc;
 
-use ffi_utils::{RawPointerConverter, take_back_c_string, take_back_nullable_c_string};
+use ffi_utils::{take_back_c_string, take_back_nullable_c_string, RawPointerConverter};
 use snips_nlu_ontology::*;
 
 /// Result of intent parsing

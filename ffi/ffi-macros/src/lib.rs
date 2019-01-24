@@ -1,29 +1,35 @@
 mod builtin_entity;
-mod ontology;
 mod language;
+mod ontology;
 
 use snips_nlu_ontology::*;
 
 pub use builtin_entity::*;
-pub use ontology::*;
 pub use language::*;
+pub use ontology::*;
 
 #[macro_export]
 macro_rules! export_nlu_ontology_c_symbols {
     () => {
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_version() -> *const libc::c_char {
-            ::std::ffi::CString::new(snips_nlu_ontology::ONTOLOGY_VERSION).unwrap().into_raw()
+            ::std::ffi::CString::new(snips_nlu_ontology::ONTOLOGY_VERSION)
+                .unwrap()
+                .into_raw()
         }
 
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_destroy_string_array(ptr: *mut ::ffi_utils::CStringArray) -> ::ffi_utils::SNIPS_RESULT {
+        pub extern "C" fn snips_nlu_ontology_destroy_string_array(
+            ptr: *mut ::ffi_utils::CStringArray,
+        ) -> ::ffi_utils::SNIPS_RESULT {
             use ffi_utils::RawPointerConverter;
             wrap!(unsafe { ::ffi_utils::CStringArray::from_raw_pointer(ptr) })
         }
 
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_destroy_string(ptr: *mut libc::c_char) -> ::ffi_utils::SNIPS_RESULT {
+        pub extern "C" fn snips_nlu_ontology_destroy_string(
+            ptr: *mut libc::c_char,
+        ) -> ::ffi_utils::SNIPS_RESULT {
             use ffi_utils::RawPointerConverter;
             wrap!(unsafe { ::std::ffi::CString::from_raw_pointer(ptr) })
         }
@@ -36,7 +42,7 @@ macro_rules! export_nlu_ontology_c_symbols {
         #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_entity_shortname(
             entity_name: *const libc::c_char,
-            result: *mut *const libc::c_char
+            result: *mut *const libc::c_char,
         ) -> ::ffi_utils::SNIPS_RESULT {
             wrap!($crate::get_builtin_entity_shortname(entity_name, result))
         }
@@ -77,7 +83,9 @@ macro_rules! export_nlu_ontology_c_symbols {
             language: *const libc::c_char,
             results: *mut *const ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::get_supported_builtin_gazetteer_entities(language, results))
+            wrap!($crate::get_supported_builtin_gazetteer_entities(
+                language, results
+            ))
         }
 
         #[no_mangle]
@@ -86,7 +94,11 @@ macro_rules! export_nlu_ontology_c_symbols {
             language: *const libc::c_char,
             results: *mut *const ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
-            wrap!($crate::get_builtin_entity_examples(builtin_entity_kind, language, results))
+            wrap!($crate::get_builtin_entity_examples(
+                builtin_entity_kind,
+                language,
+                results
+            ))
         }
 
         #[no_mangle]
