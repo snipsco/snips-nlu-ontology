@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - The `intent` and `slots` attributes of `IntentParserResult` are no longer optional
 - The `intent_name` attribute of `IntentClassifierResult` is now optional
 - The `range` attribute of `Slot` is no longer optional
+- New optional `confidence_score` attribute in `Slot` object
 
 ## [0.62.0] - 2018-11-16
 ### Changed
