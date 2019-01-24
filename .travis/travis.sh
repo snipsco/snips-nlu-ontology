@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ev
 
-cargo check --all
+cargo build --all
 cargo test --all
 
 if [ "$KOTLIN_TESTS" == "true" ]; then
