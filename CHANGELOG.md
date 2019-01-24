@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changed
+- The `intent` and `slots` attributes of `IntentParserResult` are no longer optional
+- The `intent_name` attribute of `IntentClassifierResult` is now optional
+- The `range` attribute of `Slot` is no longer optional
+- New optional `confidence_score` attribute in `Slot` object
+
 ## [0.62.0] - 2018-11-16
 ### Changed
 - Update `gazetteer-parser` dependency
@@ -118,6 +125,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.62.0...HEAD
 [0.62.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.3...0.62.0
 [0.61.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.2...0.61.3
 [0.61.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.1...0.61.2

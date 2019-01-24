@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import unittest
 
 from snips_nlu_ontology import BuiltinEntityParser, get_all_languages
-from snips_nlu_ontology.tests.test_utils import ROOT_DIR
+from snips_nlu_ontology.tests.utils import ROOT_DIR
 from snips_nlu_ontology.utils import temp_dir
 
 BUILTIN_PARSER_PATH = ROOT_DIR / "data" / "tests" / "builtin_entity_parser"

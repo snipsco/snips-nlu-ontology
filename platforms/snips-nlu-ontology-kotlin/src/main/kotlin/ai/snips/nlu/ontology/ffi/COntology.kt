@@ -30,8 +30,9 @@ fun Pointer?.readString(): String = this!!.getString(0, RUST_ENCODING)
 fun String.toPointer(): Pointer = this.toJnaPointer(RUST_ENCODING)
 fun Int?.readGrain(): Grain = CGrain.toGrain(this!!)
 fun Int?.readPrecision(): Precision = CPrecision.toPrecision(this!!)
-fun Int?.readRangeTo(end: Int?): Range? = if (this != -1) Range(this!!, end!!) else null
-fun CSlotValue?.readSlotValue() : SlotValue = this!!.toSlotValue()
+fun Int?.readRangeTo(end: Int?): Range = Range(this!!, end!!)
+fun Float?.readFloat(): Float? = if (this!! < 0) null else this!!
+fun CSlotValue?.readSlotValue(): SlotValue = this!!.toSlotValue()
 
 class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
     init {
@@ -47,8 +48,8 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
                                           "slots")
 
     fun toIntentParserResult() = IntentParserResult(input = input.readString(),
-                                                    intent = intent?.toIntentClassifierResult(),
-                                                    slots = slots?.toSlotList() ?: listOf())
+                                                    intent = intent!!.toIntentClassifierResult(),
+                                                    slots = slots!!.toSlotList())
 
 }
 
@@ -58,7 +59,7 @@ class CIntentClassifierResult : Structure(), Structure.ByReference {
 
     override fun getFieldOrder() = listOf("intent_name", "probability")
 
-    fun toIntentClassifierResult() = IntentClassifierResult(intentName = intent_name.readString(),
+    fun toIntentClassifierResult() = IntentClassifierResult(intentName = intent_name?.readString(),
                                                             probability = probability!!)
 }
 
@@ -69,11 +70,7 @@ class CSlots : Structure(), Structure.ByReference {
 
     override fun getFieldOrder() = listOf("slots", "size")
 
-    fun toSlotList(): List<Slot> =
-            if (size > 0)
-                CSlot(slots!!).toArray(size).map { (it as CSlot).toSlot() }
-            else listOf<Slot>()
-
+    fun toSlotList(): List<Slot> = CSlot(slots!!).toArray(size).map { (it as CSlot).toSlot() }
 }
 
 object CGrain {
@@ -256,17 +253,20 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var range_end: Int? = null
     @JvmField var entity: Pointer? = null
     @JvmField var slot_name: Pointer? = null
+    @JvmField var confidence_score: Float? = null
 
     override fun getFieldOrder() = listOf("value",
                                           "raw_value",
                                           "entity",
                                           "slot_name",
                                           "range_start",
-                                          "range_end")
+                                          "range_end",
+                                          "confidence_score")
 
     fun toSlot() = Slot(rawValue = raw_value.readString(),
                         value = value.readSlotValue(),
                         range = range_start.readRangeTo(range_end),
                         entity = entity.readString(),
-                        slotName = slot_name.readString())
+                        slotName = slot_name.readString(),
+                        confidenceScore = confidence_score.readFloat())
 }

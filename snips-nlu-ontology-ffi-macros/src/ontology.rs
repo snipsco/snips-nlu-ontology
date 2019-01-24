@@ -8,15 +8,15 @@ use libc;
 
 use ffi_utils::RawPointerConverter;
 
-/// Results of intent parsing
+/// Result of intent parsing
 #[repr(C)]
 #[derive(Debug)]
 pub struct CIntentParserResult {
     /// The text that was parsed
     pub input: *const libc::c_char,
-    /// The result of intent classification, may be null if no intent was detected
+    /// The result of intent classification
     pub intent: *const CIntentClassifierResult,
-    /// The slots extracted if an intent was detected
+    /// The slots extracted
     pub slots: *const CSlotList,
 }
 
@@ -24,16 +24,8 @@ impl From<::IntentParserResult> for CIntentParserResult {
     fn from(input: ::IntentParserResult) -> Self {
         Self {
             input: CString::new(input.input).unwrap().into_raw(),
-            intent: if let Some(intent) = input.intent {
-                CIntentClassifierResult::from(intent).into_raw_pointer()
-            } else {
-                null()
-            },
-            slots: if let Some(slots) = input.slots {
-                CSlotList::from(slots).into_raw_pointer()
-            } else {
-                null()
-            },
+            intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
+            slots: CSlotList::from(input.slots).into_raw_pointer(),
         }
     }
 }
@@ -58,16 +50,20 @@ pub struct CIntentClassifierResult {
 
 impl From<::IntentClassifierResult> for CIntentClassifierResult {
     fn from(input: ::IntentClassifierResult) -> Self {
+        let intent_name = input
+            .intent_name
+            .map(|name| CString::new(name).unwrap().into_raw() as *const _)
+            .unwrap_or_else(|| null());
         Self {
+            intent_name,
             probability: input.probability,
-            intent_name: CString::new(input.intent_name).unwrap().into_raw(), // String can not contains 0
         }
     }
 }
 
 impl Drop for CIntentClassifierResult {
     fn drop(&mut self) {
-        take_back_c_string!(self.intent_name);
+        take_back_nullable_c_string!(self.intent_name);
     }
 }
 
@@ -123,23 +119,23 @@ pub struct CSlot {
     pub range_start: libc::int32_t,
     /// End index of raw value in input text
     pub range_end: libc::int32_t,
+    /// Confidence score of the slot
+    pub confidence_score: libc::c_float,
 }
 
 impl From<::Slot> for CSlot {
     fn from(input: ::Slot) -> Self {
-        let range = if let Some(range) = input.range {
-            range.start as libc::int32_t..range.end as libc::int32_t
-        } else {
-            -1..-1
-        };
-
         Self {
             raw_value: CString::new(input.raw_value).unwrap().into_raw(),
             value: CSlotValue::from(input.value),
-            range_start: range.start,
-            range_end: range.end,
+            range_start: input.range.start as libc::int32_t,
+            range_end: input.range.end as libc::int32_t,
             entity: CString::new(input.entity).unwrap().into_raw(),
             slot_name: CString::new(input.slot_name).unwrap().into_raw(),
+            confidence_score: input
+                .confidence_score
+                .map(|v| v as libc::c_float)
+                .unwrap_or(-1.),
         }
     }
 }
@@ -188,14 +184,24 @@ impl<'a> From<&'a ::SlotValue> for SNIPS_SLOT_VALUE_TYPE {
             &::SlotValue::Custom(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM,
             &::SlotValue::Number(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER,
             &::SlotValue::Ordinal(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL,
-            &::SlotValue::InstantTime(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME,
-            &::SlotValue::TimeInterval(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL,
-            &::SlotValue::AmountOfMoney(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY,
-            &::SlotValue::Temperature(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE,
+            &::SlotValue::InstantTime(_) => {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME
+            }
+            &::SlotValue::TimeInterval(_) => {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL
+            }
+            &::SlotValue::AmountOfMoney(_) => {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY
+            }
+            &::SlotValue::Temperature(_) => {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE
+            }
             &::SlotValue::Duration(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION,
             &::SlotValue::Percentage(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE,
             &::SlotValue::MusicAlbum(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM,
-            &::SlotValue::MusicArtist(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST,
+            &::SlotValue::MusicArtist(_) => {
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST
+            }
             &::SlotValue::MusicTrack(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK,
         }
     }
@@ -464,18 +470,42 @@ impl Drop for CSlotValue {
     fn drop(&mut self) {
         let _ = unsafe {
             match self.value_type {
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => CString::drop_raw_pointer(self.value),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => CNumberValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => COrdinalValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => CInstantTimeValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => CTimeIntervalValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => CAmountOfMoneyValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => CTemperatureValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => CDurationValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE => CPercentageValue::drop_raw_pointer(self.value as _),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => CString::drop_raw_pointer(self.value),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => CString::drop_raw_pointer(self.value),
-                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => CString::drop_raw_pointer(self.value),
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => {
+                    CNumberValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => {
+                    COrdinalValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => {
+                    CInstantTimeValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => {
+                    CTimeIntervalValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => {
+                    CAmountOfMoneyValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => {
+                    CTemperatureValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => {
+                    CDurationValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_PERCENTAGE => {
+                    CPercentageValue::drop_raw_pointer(self.value as _)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => {
+                    CString::drop_raw_pointer(self.value)
+                }
             }
         };
     }

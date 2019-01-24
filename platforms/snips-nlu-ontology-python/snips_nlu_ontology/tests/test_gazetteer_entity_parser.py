@@ -4,7 +4,7 @@ import unittest
 from builtins import str
 
 from snips_nlu_ontology import GazetteerEntityParser
-from snips_nlu_ontology.tests.test_utils import ROOT_DIR
+from snips_nlu_ontology.tests.utils import ROOT_DIR
 from snips_nlu_ontology.utils import temp_dir
 
 CUSTOM_PARSER_PATH = ROOT_DIR / "data" / "tests" / "custom_gazetteer_parser"

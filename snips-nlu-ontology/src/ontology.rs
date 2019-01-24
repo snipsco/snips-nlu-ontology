@@ -1,16 +1,16 @@
 use std::ops::Range;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct IntentParserResult {
     pub input: String,
-    pub intent: Option<IntentClassifierResult>,
-    pub slots: Option<Vec<Slot>>,
+    pub intent: IntentClassifierResult,
+    pub slots: Vec<Slot>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct IntentClassifierResult {
-    pub intent_name: String,
+    pub intent_name: Option<String>,
     pub probability: f32,
 }
 
@@ -19,9 +19,10 @@ pub struct IntentClassifierResult {
 pub struct Slot {
     pub raw_value: String,
     pub value: SlotValue,
-    pub range: Option<Range<usize>>,
+    pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
+    pub confidence_score: Option<f32>
 }
 
 impl Slot {
@@ -30,13 +31,15 @@ impl Slot {
         range: Range<usize>,
         entity: String,
         slot_name: String,
+        confidence_score: Option<f32>
     ) -> Slot {
         Slot {
             raw_value: value.clone(),
             value: SlotValue::Custom(value.into()),
-            range: Some(range),
+            range,
             entity,
             slot_name,
+            confidence_score
         }
     }
 }
@@ -49,6 +52,7 @@ impl Slot {
             range: self.range,
             entity: self.entity,
             slot_name: self.slot_name,
+            confidence_score: self.confidence_score
         }
     }
 }
@@ -67,7 +71,7 @@ pub enum SlotValue {
     Duration(DurationValue),
     MusicAlbum(StringValue),
     MusicArtist(StringValue),
-    MusicTrack(StringValue)
+    MusicTrack(StringValue),
 }
 
 /// This struct is required in order to use serde Internally tagged enum representation
@@ -173,9 +177,10 @@ mod tests {
         let slot = Slot {
             raw_value: "value".into(),
             value: SlotValue::Custom("value".into()),
-            range: None,
+            range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: None
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
@@ -186,9 +191,10 @@ mod tests {
         let slot = Slot {
             raw_value: "fifth".into(),
             value: SlotValue::Ordinal(OrdinalValue { value: 5 }),
-            range: None,
+            range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: Some(0.8)
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
@@ -203,9 +209,10 @@ mod tests {
                 grain: Grain::Year,
                 precision: Precision::Exact,
             }),
-            range: None,
+            range: 0..10,
             entity: "toto".into(),
             slot_name: "toto".into(),
+            confidence_score: None
         };
         assert!(serde_json::to_string(&slot).is_ok());
         assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
