@@ -6,8 +6,6 @@
 # will have compiled files and executables
 target/
 
-/Cargo.toml
-
 # Remove Cargo.lock from gitignore if creating an executable, leave it for libraries
 # More information here http://doc.crates.io/guide.html#cargotoml-vs-cargolock
 Cargo.lock

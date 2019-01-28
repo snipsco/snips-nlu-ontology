@@ -1,9 +1,27 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.63.0]
+### Changed
+- The `intent` and `slots` attributes of `IntentParserResult` are no longer optional
+- The `intent_name` attribute of `IntentClassifierResult` is now optional
+- The `range` attribute of `Slot` is no longer optional
+- New optional `confidence_score` attribute in `Slot` object
+
+### Removed
+- Entity parser crate has been moved to the `snips-nlu-parsers` repository
+
 ## [0.62.0] - 2018-11-16
 ### Changed
 - Update `gazetteer-parser` dependency
+
+## [0.61.3] - 2019-01-17
+### Added
+- Bump rustling to `0.17.7`: fix resolution of decimal numbers
+
+## [0.61.2] - 2018-12-14
+### Added
+- Bump rustling to `0.17.6`: better support for Italian and Spanish
 
 ## [0.61.1] - 2018-10-15
 ### Added
@@ -110,7 +128,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
-[0.62.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.1...0.62.0
+[0.63.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.62.0...0.63.0
+[0.62.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.3...0.62.0
+[0.61.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.2...0.61.3
+[0.61.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.1...0.61.2
 [0.61.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.0...0.61.1
 [0.61.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.60.0...0.61.0
 [0.60.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.59.0...0.60.0

@@ -8,9 +8,7 @@ Snips NLU Ontology
    :target: https://ci.appveyor.com/project/snipsco/snips-nlu-ontology
 
 Ontology of the Snips NLU library API which describes supported languages and builtin entities.
-Please refer to `this page <platforms/snips-nlu-ontology-python>`_ for the python wrapper.
 
-Ontology version: 0.7.0
 
 Supported languages
 -------------------

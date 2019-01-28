@@ -1,0 +1,15 @@
+[package]
+name = "snips-nlu-ontology-ffi"
+version = "0.63.0"
+authors = ["Kevin Lefevre <kevin.lefevre@snips.ai>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1"
+ffi-utils = { git = "https://github.com/snipsco/snips-utils-rs", rev = "291ce1d" }
+libc = "0.2"
+snips-nlu-ontology = { path = ".." }
+snips-nlu-ontology-ffi-macros = { path = "ffi-macros" }
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
