@@ -1,47 +1,18 @@
-language: python
+language: rust
+cache:
+  - cargo
 
-jobs:
-  include:
-    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
-      os: osx
-      osx_image: xcode8
-      language: generic
-      env:
-        - TOXENV=py27
-    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
-      os: osx
-      osx_image: xcode8
-      language: generic
-      env:
-        - TOXENV=py36
-    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
-      os: osx
-      osx_image: xcode8
-      language: generic
-      env:
-        - TOXENV=py37
-    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
-      os: linux
-      python: 2.7
-      env:
-        - TOXENV=py27
-    - os: linux
-      python: 3.6
-      env:
-        - TOXENV=py36
-    - if: env(TRAVIS_BRANCH) = master or branch =~ /^main\/.+$/
-      os: linux
-      python: 3.7
-      # cf https://github.com/travis-ci/travis-ci/issues/9815
-      dist: xenial
-      sudo: true
-      env:
-        - TOXENV=py37
+env:
+  global:
+  - RUST_BACKTRACE=1
 
-before_install: . ./.travis/before_install.sh
+matrix:
+    include:
+    - rust: stable
+      env: KOTLIN_TESTS=true
+    - rust: beta
+    - rust: nightly
+    allow_failures:
+    - rust: nightly
 
-install:
-  - ./.travis/install.sh
-
-script:
-  - ./.travis/test.sh
+script: ".travis/travis.sh"

@@ -1,8 +1,0 @@
-[package]
-name = "snips-nlu-ontology-doc"
-version = "0.63.0-SNAPSHOT"
-authors = ["Adrien Ball <adrien.ball@snips.ai>"]
-
-[build-dependencies]
-snips-nlu-ontology = { path = "../snips-nlu-ontology" }
-prettytable-rs = "0.6"

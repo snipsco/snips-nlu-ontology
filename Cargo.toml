@@ -1,0 +1,28 @@
+[package]
+name = "snips-nlu-ontology"
+version = "0.63.0-SNAPSHOT"
+authors = [
+    "Adrien Ball <adrien.ball@snips.ai>",
+    "Thibaut Lorrain <thibaut.lorrain@snips.ai>",
+    "Kevin Lefevre <kevin.lefevre@snips.ai",
+]
+repository = "https://github.com/snipsco/snips-nlu-ontology"
+description = "Ontology of the Rust NLU library API"
+edition = "2018"
+
+[workspace]
+members = [
+    ".",
+    "doc",
+    "ffi",
+    "ffi/ffi-macros",
+]
+
+[dependencies]
+failure = "0.1"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+
+[dev-dependencies]
+serde_test = "1.0"
