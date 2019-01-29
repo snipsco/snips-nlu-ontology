@@ -1,11 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.63.1]
+## [0.63.1] - 2019-01-29
 ### Fixed
 - Bug in kotlin binding when converting `CSlots` into `List<Slot>`
 
-## [0.63.0]
+## [0.63.0] - 2019-01-28
 ### Changed
 - The `intent` and `slots` attributes of `IntentParserResult` are no longer optional
 - The `intent_name` attribute of `IntentClassifierResult` is now optional
