@@ -70,7 +70,10 @@ class CSlots : Structure(), Structure.ByReference {
 
     override fun getFieldOrder() = listOf("slots", "size")
 
-    fun toSlotList(): List<Slot> = CSlot(slots!!).toArray(size).map { (it as CSlot).toSlot() }
+    fun toSlotList(): List<Slot> =
+            if (size > 0)
+                CSlot(slots!!).toArray(size).map { (it as CSlot).toSlot() }
+            else listOf<Slot>()
 }
 
 object CGrain {
