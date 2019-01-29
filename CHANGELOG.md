@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.63.1]
+### Fixed
+- Bug in kotlin binding when converting `CSlots` into `List<Slot>`
+
 ## [0.63.0]
 ### Changed
 - The `intent` and `slots` attributes of `IntentParserResult` are no longer optional
@@ -128,6 +132,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.63.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.0...0.63.1
 [0.63.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.62.0...0.63.0
 [0.62.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.3...0.62.0
 [0.61.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.2...0.61.3
