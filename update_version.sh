@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 NEW_VERSION=${1?"usage $0 <new version>"}
 
