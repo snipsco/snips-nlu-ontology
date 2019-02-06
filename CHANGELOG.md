@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.63.2] - 2019-02-06
+### Changed
+- Kotlin wrapper: update kotlin to 1.3.11
+
 ## [0.63.1] - 2019-01-29
 ### Fixed
 - Bug in kotlin binding when converting `CSlots` into `List<Slot>`
@@ -132,6 +136,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.63.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.1...0.63.2
 [0.63.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.0...0.63.1
 [0.63.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.62.0...0.63.0
 [0.62.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.61.3...0.62.0
