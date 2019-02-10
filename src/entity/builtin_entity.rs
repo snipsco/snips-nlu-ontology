@@ -136,6 +136,7 @@ impl BuiltinEntityKind {
             Language::FR => self.fr_examples(),
             Language::JA => self.ja_examples(),
             Language::IT => self.it_examples(),
+            Language::PT => self.pt_examples(),
             Language::KO => self.ko_examples(),
         }
     }
@@ -423,6 +424,54 @@ impl BuiltinEntityKind {
                 "sessanta sei percento",
                 "diciotto per cento",
                 "venti nove per cento",
+            ],
+            BuiltinEntityKind::MusicAlbum => &["Discovery"],
+            BuiltinEntityKind::MusicArtist => &["Daft Punk"],
+            BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+        }
+    }
+
+    fn pt_examples(&self) -> &'static [&'static str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "$10",
+                "15€",
+                "cinco euros",
+                "16,65 €",
+                "dois euros e cinco centavos",
+                "dez libras esterlinas",
+                "845584 francos suíços",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "1h",
+                "3 meses",
+                "dez minutos",
+                "meia hora",
+                "oito anos e dois semanas",
+                "um ano quatro semanas e tres horas",
+            ],
+            BuiltinEntityKind::Number => &[
+                "2001",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "primera",
+                "novento",
+            ],
+            BuiltinEntityKind::Temperature => &[
+                "70 graus kelvin",
+                "3°C",
+                "dez graus",
+                "quatro graus centígrados",
+                "sete graus abaixo cero",
+                "-459,67 °F",
+            ],
+            BuiltinEntityKind::Time => &[
+                "hoje",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+                "quatro porciento",
+                "quatro por ciento",
             ],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
