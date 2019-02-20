@@ -136,7 +136,8 @@ impl BuiltinEntityKind {
             Language::FR => self.fr_examples(),
             Language::JA => self.ja_examples(),
             Language::IT => self.it_examples(),
-            Language::PT => self.pt_examples(),
+            Language::PT_PT => self.pt_examples(),
+            Language::PT_BR => self.pt_examples(),
             Language::KO => self.ko_examples(),
         }
     }
