@@ -22,6 +22,7 @@ pub struct Slot {
     pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")] 
     pub confidence_score: Option<f32>,
 }
 
