@@ -11,7 +11,7 @@ pub struct IntentParserResult {
 #[serde(rename_all = "camelCase")]
 pub struct IntentClassifierResult {
     pub intent_name: Option<String>,
-    pub probability: f32,
+    pub confidence_score: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
