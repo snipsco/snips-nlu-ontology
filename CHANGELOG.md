@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.64.0] - 2019-02-27
+### Added
+- Support for Portuguese (PT-PT and PT-BR)
+
+### Changed
+- Rename the `probability` output field to `confidence_score` in the intent
+- When we serialize the slots to JSON the `confidenceScore` field is dropped if null
+
 ## [0.63.2] - 2019-02-06
 ### Changed
 - Kotlin wrapper: update kotlin to 1.3.11
@@ -136,6 +144,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.64.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.2...0.64.0
 [0.63.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.1...0.63.2
 [0.63.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.0...0.63.1
 [0.63.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.62.0...0.63.0
