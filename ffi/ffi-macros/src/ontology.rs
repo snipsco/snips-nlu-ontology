@@ -46,7 +46,7 @@ pub struct CIntentClassifierResult {
     /// Name of the intent detected
     pub intent_name: *const libc::c_char,
     /// Between 0 and 1
-    pub probability: libc::c_float,
+    pub confidence_score: libc::c_float,
 }
 
 impl From<IntentClassifierResult> for CIntentClassifierResult {
@@ -57,7 +57,7 @@ impl From<IntentClassifierResult> for CIntentClassifierResult {
             .unwrap_or_else(|| null());
         Self {
             intent_name,
-            probability: input.probability,
+            confidence_score: input.confidence_score,
         }
     }
 }

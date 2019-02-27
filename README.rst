@@ -6,27 +6,35 @@ Snips NLU Ontology
 
 Ontology of the Snips NLU library API which describes supported languages and builtin entities.
 
+Important Note
+--------------
+
+The code related to builtin entity parsing has been moved to the `snips-nlu-parsers`_ repository.
 
 Supported languages
 -------------------
 
-+----------+------------+
-| Language | Identifier |
-+==========+============+
-| German   | de         |
-+----------+------------+
-| English  | en         |
-+----------+------------+
-| Spanish  | es         |
-+----------+------------+
-| French   | fr         |
-+----------+------------+
-| Italian  | it         |
-+----------+------------+
-| Japanese | ja         |
-+----------+------------+
-| Korean   | ko         |
-+----------+------------+
++---------------------+------------+
+| Language            | Identifier |
++=====================+============+
+| German              | de         |
++---------------------+------------+
+| English             | en         |
++---------------------+------------+
+| Spanish             | es         |
++---------------------+------------+
+| French              | fr         |
++---------------------+------------+
+| Italian             | it         |
++---------------------+------------+
+| Portuguese - Europe | pt_pt      |
++---------------------+------------+
+| Portuguese - Brazil | pt_br      |
++---------------------+------------+
+| Japanese            | ja         |
++---------------------+------------+
+| Korean              | ko         |
++---------------------+------------+
 
 Supported builtin entities
 --------------------------
@@ -271,3 +279,4 @@ Temperature
 .. _Rustling: https://github.com/snipsco/rustling-ontology
 .. _duckling: https://github.com/facebook/duckling
 .. _gazetteer entity parser: https://github.com/snipsco/gazetteer-entity-parser
+.. _snips-nlu-parsers: https://github.com/snipsco/snips-nlu-parsers

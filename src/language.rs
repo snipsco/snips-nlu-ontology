@@ -38,7 +38,7 @@ macro_rules! language_enum {
     }
 }
 
-language_enum!([DE, EN, ES, FR, IT, JA, KO]);
+language_enum!([DE, EN, ES, FR, IT, PT_PT, PT_BR, JA, KO]);
 
 impl Language {
     pub fn full_name(&self) -> &'static str {
@@ -48,6 +48,8 @@ impl Language {
             Language::ES => "Spanish",
             Language::FR => "French",
             Language::IT => "Italian",
+            Language::PT_PT => "Portuguese - Europe",
+            Language::PT_BR => "Portuguese - Brazil",
             Language::JA => "Japanese",
             Language::KO => "Korean",
         }
