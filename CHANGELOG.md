@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.64.3] - 2019-02-27
+### Fixed
+- Portuguese builtin entity examples
 
 ## [0.64.2] - 2019-02-27
 ### Fixed
@@ -153,6 +156,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.64.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.2...0.64.3
 [0.64.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.1...0.64.2
 [0.64.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.0...0.64.1
 [0.64.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.63.2...0.64.0

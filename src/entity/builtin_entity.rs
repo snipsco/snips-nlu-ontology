@@ -444,7 +444,7 @@ impl BuiltinEntityKind {
                 "845584 francos suíços",
             ],
             BuiltinEntityKind::Duration => &[
-                "1h",
+                "1 hora",
                 "3 meses",
                 "dez minutos",
                 "meia hora",
@@ -456,7 +456,6 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Ordinal => &[
                 "primera",
-                "novento",
             ],
             BuiltinEntityKind::Temperature => &[
                 "70 graus kelvin",
