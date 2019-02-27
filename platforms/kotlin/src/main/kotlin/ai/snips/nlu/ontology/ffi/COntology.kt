@@ -55,16 +55,15 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
 
 class CIntentClassifierResult : Structure(), Structure.ByReference {
     @JvmField var intent_name: Pointer? = null
-    @JvmField var probability: Float? = null
+    @JvmField var confidence_score: Float? = null
 
-    override fun getFieldOrder() = listOf("intent_name", "probability")
+    override fun getFieldOrder() = listOf("intent_name", "confidence_score")
 
     fun toIntentClassifierResult() = IntentClassifierResult(intentName = intent_name?.readString(),
-                                                            probability = probability!!)
+                                                            confidenceScore = confidence_score!!)
 }
 
 class CSlots : Structure(), Structure.ByReference {
-
     @JvmField var slots: Pointer? = null
     @JvmField var size: Int = -1
 

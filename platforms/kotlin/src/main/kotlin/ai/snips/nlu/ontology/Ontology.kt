@@ -138,11 +138,10 @@ sealed class SlotValue(val type: Type) {
     data class MusicTrackValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(MUSICTRACK)
 }
 
-
 @Parcel(BEAN)
 data class IntentClassifierResult @ParcelConstructor constructor(
         @ParcelProperty("intentName") val intentName: String?,
-        @ParcelProperty("probability") val probability: Float)
+        @ParcelProperty("confidenceScore") val confidenceScore: Float)
 
 @Parcel(BEAN)
 data class IntentParserResult @ParcelConstructor constructor(
