@@ -435,7 +435,7 @@ impl BuiltinEntityKind {
     fn pt_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
-                "$10",
+                "10$",
                 "15€",
                 "cinco euros",
                 "16,65 €",
