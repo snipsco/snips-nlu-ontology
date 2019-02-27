@@ -602,6 +602,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Duration => &[
                 Language::DE,
@@ -611,6 +613,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Number => &[
                 Language::DE,
@@ -620,6 +624,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Ordinal => &[
                 Language::DE,
@@ -629,6 +635,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Temperature => &[
                 Language::DE,
@@ -638,6 +646,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Time => &[
                 Language::DE,
@@ -647,6 +657,8 @@ impl BuiltinEntityKind {
                 Language::IT,
                 Language::JA,
                 Language::KO,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::Percentage => &[
                 Language::DE,
@@ -655,6 +667,8 @@ impl BuiltinEntityKind {
                 Language::FR,
                 Language::IT,
                 Language::JA,
+                Language::PT_BR,
+                Language::PT_PT,
             ],
             BuiltinEntityKind::MusicAlbum => &[Language::EN, Language::FR],
             BuiltinEntityKind::MusicArtist => &[Language::EN, Language::FR],
