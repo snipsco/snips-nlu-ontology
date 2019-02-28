@@ -462,7 +462,6 @@ impl BuiltinEntityKind {
                 "3°C",
                 "dez graus",
                 "quatro graus centígrados",
-                "sete graus abaixo cero",
                 "-459,67 °F",
             ],
             BuiltinEntityKind::Time => &[
@@ -470,8 +469,6 @@ impl BuiltinEntityKind {
             ],
             BuiltinEntityKind::Percentage => &[
                 "25%",
-                "quatro porciento",
-                "quatro por ciento",
             ],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
