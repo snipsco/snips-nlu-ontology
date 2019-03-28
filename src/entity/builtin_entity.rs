@@ -224,6 +224,7 @@ impl BuiltinEntityKind {
                 "Twenty three degrees",
                 "one hundred degrees fahrenheit",
             ],
+            // TODO: Add cases for Datetime complement (date + time combinations, mainly)
             BuiltinEntityKind::Datetime => &[
                 "Today",
                 "at 8 a.m.",
@@ -252,15 +253,19 @@ impl BuiltinEntityKind {
                 "january",
                 "2019",
                 "from monday to friday",
-                "from wednesday 27 to saturday 30",
+                "from wednesday 27th to saturday 30th",
                 "this week"
             ],
             BuiltinEntityKind::TimePeriod => &[
-                "tonight",
-                "this morning",
-                "until dinner today",
+                // "tonight" currently not interpreted as a TimePeriod because intersected with
+                // today's date, which makes it interpreted as a date+time (will be fixed)
+                //"tonight",
+                // "this morning" currently not interpreted as a TimePeriod (same reason)
+                // "this morning",
+                "until dinner",
                 "from five to ten",
-                "this evening after eight thirty",
+                // This is currently bugged + interpreted as TimePeriod (same reason, with "this")
+                // "this evening after eight thirty",
                 "by the end of the day",
             ],
             BuiltinEntityKind::Percentage => {
@@ -801,6 +806,27 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicArtist => &[Language::EN, Language::FR],
             BuiltinEntityKind::MusicTrack => &[Language::EN, Language::FR],
         }
+    }
+
+    pub fn map_to_supported(&self, language: &Language) -> BuiltinEntityKind {
+        // FIXME: That must not be the right way to get the type of self
+        let builtin_entity_kind = self.clone();
+        let result = match language {
+                // English supports all Datetime subkinds (so all builtin kinds)
+                Language::EN => builtin_entity_kind,
+                // Other language need to remap Datetime subkinds to Datetime
+                _ => {
+                    match builtin_entity_kind {
+                        BuiltinEntityKind::Date |
+                        BuiltinEntityKind::Time |
+                        BuiltinEntityKind::DatePeriod |
+                        BuiltinEntityKind::TimePeriod => BuiltinEntityKind::Datetime,
+                        _ => builtin_entity_kind,
+                    }
+                }
+            };
+        eprintln!("map_to_supported({:?}, {:?}) => {:?}", builtin_entity_kind, language, result);
+        result
     }
 }
 
