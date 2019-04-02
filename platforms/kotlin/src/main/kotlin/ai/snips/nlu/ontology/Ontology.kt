@@ -24,6 +24,8 @@ import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
 import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
 import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
 import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -49,37 +51,41 @@ enum class Precision { APPROXIMATE, EXACT }
 enum class Grain { YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND }
 
 // TODO : add converters to JSR310 / ThreeTen types
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "kind")
 @JsonSubTypes(
-        Type(value = CustomValue::class, name = "CUSTOM"),
-        Type(value = NumberValue::class, name = "NUMBER"),
-        Type(value = OrdinalValue::class, name = "ORDINAL"),
-        Type(value = InstantTimeValue::class, name = "INSTANT_TIME"),
-        Type(value = TimeIntervalValue::class, name = "TIME_INTERVAL"),
-        Type(value = AmountOfMoneyValue::class, name = "AMOUNT_OF_MONEY"),
-        Type(value = TemperatureValue::class, name = "TEMPERATURE"),
-        Type(value = DurationValue::class, name = "DURATION"),
-        Type(value = PercentageValue::class, name = "PERCENTAGE"),
-        Type(value = MusicAlbumValue::class, name = "MUSICALBUM"),
-        Type(value = MusicArtistValue::class, name = "MUSICARTIST"),
-        Type(value = MusicTrackValue::class, name = "MUSICTRACK")
+        Type(value = CustomValue::class, name = "Custom"),
+        Type(value = NumberValue::class, name = "Number"),
+        Type(value = OrdinalValue::class, name = "Ordinal"),
+        Type(value = InstantTimeValue::class, name = "InstantTime"),
+        Type(value = TimeIntervalValue::class, name = "TimeInterval"),
+        Type(value = AmountOfMoneyValue::class, name = "AmountOfMoney"),
+        Type(value = TemperatureValue::class, name = "Temperature"),
+        Type(value = DurationValue::class, name = "Duration"),
+        Type(value = PercentageValue::class, name = "Percentage"),
+        Type(value = MusicAlbumValue::class, name = "MusicAlbum"),
+        Type(value = MusicArtistValue::class, name = "MusicArtist"),
+        Type(value = MusicTrackValue::class, name = "MusicTrack")
 )
-sealed class SlotValue(val type: Type) {
+sealed class SlotValue(val kind: Type) {
+
+    @JsonIgnore
+    @Deprecated("use kind instead")
+    val type = kind
 
     @Parcel
     enum class Type {
-        CUSTOM,
-        NUMBER,
-        ORDINAL,
-        INSTANT_TIME,
-        TIME_INTERVAL,
-        AMOUNT_OF_MONEY,
-        TEMPERATURE,
-        DURATION,
-        PERCENTAGE,
-        MUSICALBUM,
-        MUSICARTIST,
-        MUSICTRACK
+        @JsonProperty("Custom") CUSTOM,
+        @JsonProperty("Number") NUMBER,
+        @JsonProperty("Ordinal") ORDINAL,
+        @JsonProperty("InstantTime") INSTANT_TIME,
+        @JsonProperty("TimeInterval") TIME_INTERVAL,
+        @JsonProperty("AmountOfMoney") AMOUNT_OF_MONEY,
+        @JsonProperty("Temperature") TEMPERATURE,
+        @JsonProperty("Duration") DURATION,
+        @JsonProperty("Percentage") PERCENTAGE,
+        @JsonProperty("MusicAlbum") MUSICALBUM,
+        @JsonProperty("MusicArtist") MUSICARTIST,
+        @JsonProperty("MusicTrack") MUSICTRACK
     }
 
     @Parcel(BEAN)
