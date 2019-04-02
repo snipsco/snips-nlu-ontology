@@ -122,7 +122,7 @@ impl BuiltinEntityKind {
     pub fn description(&self) -> &'static str {
         match *self {
             BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
-            BuiltinEntityKind::Duration => "Matches a  time duration",
+            BuiltinEntityKind::Duration => "Matches a time duration",
             BuiltinEntityKind::Number => "Matches a cardinal number",
             BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
