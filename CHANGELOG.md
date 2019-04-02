@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.64.5] - 2019-04-02
+### Fixed
+- Make the json serialization of kotlin object the same as the rust one
+
 ## [0.64.4] - 2019-02-28
 ### Fixed
 - Portuguese builtin entity examples
@@ -160,6 +164,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.64.5]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.4...0.64.5
 [0.64.4]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.3...0.64.4
 [0.64.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.2...0.64.3
 [0.64.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.1...0.64.2
