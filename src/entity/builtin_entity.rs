@@ -122,7 +122,7 @@ impl BuiltinEntityKind {
     pub fn description(&self) -> &'static str {
         match *self {
             BuiltinEntityKind::AmountOfMoney => "Matches an amount of money",
-            BuiltinEntityKind::Duration => "Matches a date/time duration",
+            BuiltinEntityKind::Duration => "Matches a  time duration",
             BuiltinEntityKind::Number => "Matches a cardinal number",
             BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
@@ -662,8 +662,8 @@ impl BuiltinEntityKind {
             ]),
             BuiltinEntityKind::Date => serde_json::to_string_pretty(&vec![
                 SlotValue::InstantTime(InstantTimeValue {
-                    value: "2017-06-13 18:00:00 +02:00".to_string(),
-                    grain: Grain::Hour,
+                    value: "2017-06-13 00:00:00 +02:00".to_string(),
+                    grain: Grain::Day,
                     precision: Precision::Exact,
                 }),
             ]),
@@ -676,8 +676,8 @@ impl BuiltinEntityKind {
             ]),
             BuiltinEntityKind::DatePeriod => serde_json::to_string_pretty(&vec![
                 SlotValue::TimeInterval(TimeIntervalValue {
-                    from: Some("2017-06-07 18:00:00 +02:00".to_string()),
-                    to: Some("2017-06-09 18:00:00 +02:00".to_string()),
+                    from: Some("2017-06-07 00:00:00 +02:00".to_string()),
+                    to: Some("2017-06-09 00:00:00 +02:00".to_string()),
                 }),
             ]),
             BuiltinEntityKind::TimePeriod => serde_json::to_string_pretty(&vec![
@@ -780,18 +780,10 @@ impl BuiltinEntityKind {
                 Language::PT_BR,
                 Language::PT_PT,
             ],
-            BuiltinEntityKind::Date => &[
-                Language::EN,
-            ],
-            BuiltinEntityKind::Time => &[
-                Language::EN,
-            ],
-            BuiltinEntityKind::DatePeriod => &[
-                Language::EN,
-            ],
-            BuiltinEntityKind::TimePeriod => &[
-                Language::EN,
-            ],
+            BuiltinEntityKind::Date => &[Language::EN, ],
+            BuiltinEntityKind::Time => &[Language::EN, ],
+            BuiltinEntityKind::DatePeriod => &[Language::EN, ],
+            BuiltinEntityKind::TimePeriod => &[Language::EN, ],
             BuiltinEntityKind::Percentage => &[
                 Language::DE,
                 Language::EN,
@@ -808,26 +800,6 @@ impl BuiltinEntityKind {
         }
     }
 
-    pub fn map_to_supported(&self, language: &Language) -> BuiltinEntityKind {
-        // FIXME: That must not be the right way to get the type of self
-        let builtin_entity_kind = self.clone();
-        let result = match language {
-                // English supports all Datetime subkinds (so all builtin kinds)
-                Language::EN => builtin_entity_kind,
-                // Other language need to remap Datetime subkinds to Datetime
-                _ => {
-                    match builtin_entity_kind {
-                        BuiltinEntityKind::Date |
-                        BuiltinEntityKind::Time |
-                        BuiltinEntityKind::DatePeriod |
-                        BuiltinEntityKind::TimePeriod => BuiltinEntityKind::Datetime,
-                        _ => builtin_entity_kind,
-                    }
-                }
-            };
-        eprintln!("map_to_supported({:?}, {:?}) => {:?}", builtin_entity_kind, language, result);
-        result
-    }
 }
 
 impl BuiltinEntityKind {
