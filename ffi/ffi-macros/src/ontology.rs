@@ -5,8 +5,9 @@ use std::ptr::null;
 use std::slice;
 
 use libc;
-
-use ffi_utils::{take_back_c_string, take_back_nullable_c_string, RawPointerConverter};
+use failure::{Fallible, ResultExt, bail};
+use ffi_utils::{take_back_c_string, take_back_nullable_c_string, create_rust_string_from,
+                create_optional_rust_string_from, RawPointerConverter, AsRust};
 use snips_nlu_ontology::*;
 
 /// Result of intent parsing
@@ -174,6 +175,21 @@ impl From<Slot> for CSlot {
                 .map(|v| v as libc::c_float)
                 .unwrap_or(-1.),
         }
+    }
+}
+
+impl AsRust<Slot> for CSlot {
+    fn as_rust(&self) -> Fallible<Slot> {
+        Ok(
+            Slot {
+                raw_value: create_rust_string_from!(self.raw_value),
+                value: self.value.as_rust()?,
+                range: (self.range_start as usize..self.range_end as usize),
+                entity: create_rust_string_from!(self.entity),
+                slot_name: create_rust_string_from!(self.slot_name),
+                confidence_score: Some(self.confidence_score),
+            }
+        )
     }
 }
 
@@ -494,6 +510,111 @@ impl From<SlotValue> for CSlotValue {
             SlotValue::MusicTrack(v) => CString::new(v.value).unwrap().into_raw() as _,
         };
         Self { value_type, value }
+    }
+}
+
+impl AsRust<SlotValue> for CSlotValue {
+    fn as_rust(&self) -> Fallible<SlotValue> {
+        match self.value_type {
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
+                Ok(SlotValue::Custom(StringValue {
+                    value: create_rust_string_from!(self.value as *const libc::c_char)
+                }))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => {
+                let number_value: f64 = unsafe { *(self.value as *const CNumberValue) };
+                Ok(SlotValue::Number(NumberValue { value: number_value }))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => {
+                let ordinal_value: i64 = unsafe { *(self.value as *const COrdinalValue) };
+                Ok(SlotValue::Ordinal(OrdinalValue { value: ordinal_value }))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => {
+                let c_instant_time_value = unsafe { &*(self.value as *const CInstantTimeValue) };
+
+                let instant_time_value = InstantTimeValue {
+                    value: create_rust_string_from!(c_instant_time_value.value),
+                    grain: match c_instant_time_value.grain {
+                        SNIPS_GRAIN::SNIPS_GRAIN_YEAR => Grain::Year,
+                        SNIPS_GRAIN::SNIPS_GRAIN_QUARTER => Grain::Quarter,
+                        SNIPS_GRAIN::SNIPS_GRAIN_MONTH => Grain::Month,
+                        SNIPS_GRAIN::SNIPS_GRAIN_WEEK => Grain::Week,
+                        SNIPS_GRAIN::SNIPS_GRAIN_DAY => Grain::Day,
+                        SNIPS_GRAIN::SNIPS_GRAIN_HOUR => Grain::Hour,
+                        SNIPS_GRAIN::SNIPS_GRAIN_MINUTE => Grain::Minute,
+                        SNIPS_GRAIN::SNIPS_GRAIN_SECOND => Grain::Second
+                    },
+                    precision: match c_instant_time_value.precision {
+                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
+                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact
+                    },
+                };
+                Ok(SlotValue::InstantTime(instant_time_value))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => {
+                let c_time_interval_value = unsafe { &*(self.value as *const CTimeIntervalValue) };
+                let time_interval_value = TimeIntervalValue {
+                    from: create_optional_rust_string_from!(c_time_interval_value.from),
+                    to: create_optional_rust_string_from!(c_time_interval_value.to),
+                };
+                Ok(SlotValue::TimeInterval(time_interval_value))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => {
+                let c_amount_of_money_value = unsafe { &*(self.value as *const CAmountOfMoneyValue) };
+
+                let amount_of_money_value = AmountOfMoneyValue {
+                    value: c_amount_of_money_value.value,
+                    precision: match c_amount_of_money_value.precision {
+                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact,
+                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
+                    },
+                    unit: create_optional_rust_string_from!(c_amount_of_money_value.unit),
+                };
+                Ok(SlotValue::AmountOfMoney(amount_of_money_value))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => {
+                let c_temperature_value = unsafe { &*(self.value as *const CTemperatureValue) };
+                let temperature_value = TemperatureValue {
+                    value: c_temperature_value.value,
+                    unit: create_optional_rust_string_from!(c_temperature_value.unit),
+                };
+                Ok(SlotValue::Temperature(temperature_value))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => {
+                let c_duration_value = unsafe { &*(self.value as *const CDurationValue) };
+                let duration_value = DurationValue {
+                    years: c_duration_value.years,
+                    quarters: c_duration_value.quarters,
+                    months: c_duration_value.months,
+                    weeks: c_duration_value.weeks,
+                    days: c_duration_value.days,
+                    hours: c_duration_value.hours,
+                    minutes: c_duration_value.minutes,
+                    seconds: c_duration_value.seconds,
+                    precision: match c_duration_value.precision {
+                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
+                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact,
+                    },
+                };
+                Ok(SlotValue::Duration(duration_value))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => {
+                Ok(SlotValue::MusicAlbum(StringValue {
+                    value: create_rust_string_from!(self.value as *const libc::c_char)
+                }))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => {
+                Ok(SlotValue::MusicArtist(StringValue {
+                    value: create_rust_string_from!(self.value as *const libc::c_char)
+                }))
+            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => {
+                Ok(SlotValue::MusicTrack(StringValue {
+                    value: create_rust_string_from!(self.value as *const libc::c_char)
+                }))
+            }
+            _ => bail!("The provided slot value type doesn't exists. Cannot perform conversion to Rust object ")
+        }
     }
 }
 
