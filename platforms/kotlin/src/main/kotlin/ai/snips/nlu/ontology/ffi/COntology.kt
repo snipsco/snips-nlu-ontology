@@ -71,7 +71,7 @@ class CIntentClassifierResult(p: Pointer?) : Structure(p), Structure.ByReference
                                                             confidenceScore = confidence_score!!)
 }
 
-class CIntentClassifierResultList(p: Pointer?) : Structure(p), Structure.ByReference {
+class CIntentClassifierResultArray(p: Pointer?) : Structure(p), Structure.ByReference {
 
     @JvmField var intent_classifier_results: Pointer? = null
     @JvmField var size: Int = -1
