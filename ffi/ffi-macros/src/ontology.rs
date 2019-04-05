@@ -68,6 +68,42 @@ impl Drop for CIntentClassifierResult {
     }
 }
 
+/// Wrapper around a list of IntentClassifierResult
+#[repr(C)]
+#[derive(Debug)]
+pub struct CIntentClassifierResultList {
+    /// Pointer to the first result of the list
+    pub intent_classifier_results: *const CIntentClassifierResult,
+    /// Number of results in the list
+    pub size: libc::int32_t,
+}
+
+impl From<Vec<IntentClassifierResult>> for CIntentClassifierResultList {
+    fn from(input: Vec<IntentClassifierResult>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            intent_classifier_results: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CIntentClassifierResult::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CIntentClassifierResult,
+        }
+    }
+}
+
+impl Drop for CIntentClassifierResultList {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.intent_classifier_results as *mut CIntentClassifierResult,
+                self.size as usize,
+            ))
+        };
+    }
+}
+
 /// Wrapper around a slot list
 #[repr(C)]
 #[derive(Debug)]

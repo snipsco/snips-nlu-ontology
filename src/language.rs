@@ -3,6 +3,7 @@ use failure::bail;
 macro_rules! language_enum {
     ([$($language:ident),*]) => {
         #[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Hash, Eq)]
+        #[allow(non_camel_case_types)]
         pub enum Language {
             $( $language, )*
         }

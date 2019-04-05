@@ -35,13 +35,14 @@ fun Float?.readFloat(): Float? = if (this!! < 0) null else this!!
 fun CSlotValue?.readSlotValue(): SlotValue = this!!.toSlotValue()
 
 class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var input: Pointer? = null
     @JvmField var intent: CIntentClassifierResult? = null
     @JvmField var slots: CSlots? = null
+
+    init {
+        read()
+    }
 
     override fun getFieldOrder() = listOf("input",
                                           "intent",
@@ -53,9 +54,16 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
 
 }
 
-class CIntentClassifierResult : Structure(), Structure.ByReference {
+class CIntentClassifierResult(p: Pointer?) : Structure(p), Structure.ByReference {
+
     @JvmField var intent_name: Pointer? = null
     @JvmField var confidence_score: Float? = null
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
 
     override fun getFieldOrder() = listOf("intent_name", "confidence_score")
 
@@ -63,9 +71,37 @@ class CIntentClassifierResult : Structure(), Structure.ByReference {
                                                             confidenceScore = confidence_score!!)
 }
 
-class CSlots : Structure(), Structure.ByReference {
+class CIntentClassifierResultList(p: Pointer?) : Structure(p), Structure.ByReference {
+
+    @JvmField var intent_classifier_results: Pointer? = null
+    @JvmField var size: Int = -1
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
+
+    override fun getFieldOrder() = listOf("intent_classifier_results", "size")
+
+    fun toIntentClassifierResultList(): List<IntentClassifierResult> =
+            if (size > 0)
+                CIntentClassifierResult(intent_classifier_results!!)
+                        .toArray(size)
+                        .map { (it as CIntentClassifierResult).toIntentClassifierResult() }
+            else listOf<IntentClassifierResult>()
+}
+
+class CSlots(p: Pointer?) : Structure(p), Structure.ByReference {
+
     @JvmField var slots: Pointer? = null
     @JvmField var size: Int = -1
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
 
     override fun getFieldOrder() = listOf("slots", "size")
 
@@ -149,14 +185,17 @@ class CSlotValue : Structure(), Structure.ByValue {
 }
 
 class CInstantTimeValue(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var value: Pointer? = null
     @JvmField var grain: Int? = null
     @JvmField var precision: Int? = null
+
+    init {
+        read()
+    }
+
     override fun getFieldOrder() = listOf("value", "grain", "precision")
+
     fun toInstantTimeValue(): InstantTimeValue {
         return InstantTimeValue(value = value.readString(),
                                 grain = grain.readGrain(),
@@ -166,24 +205,28 @@ class CInstantTimeValue(p: Pointer) : Structure(p), Structure.ByReference {
 }
 
 class CTimeIntervalValue(p: Pointer) : Structure(p), Structure.ByReference {
+
+    @JvmField var from: Pointer? = null
+    @JvmField var to: Pointer? = null
+
     init {
         read()
     }
 
-    @JvmField var from: Pointer? = null
-    @JvmField var to: Pointer? = null
     override fun getFieldOrder() = listOf("from", "to")
+
     fun toTimeIntervalValue() = TimeIntervalValue(from = from?.readString(), to = to?.readString())
 }
 
 class CAmountOfMoneyValue(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var value: Float? = null
     @JvmField var precision: Int? = null
     @JvmField var unit: Pointer? = null
+
+    init {
+        read()
+    }
 
     override fun getFieldOrder() = listOf("unit", "value", "precision")
 
@@ -193,12 +236,13 @@ class CAmountOfMoneyValue(p: Pointer) : Structure(p), Structure.ByReference {
 }
 
 class CTemperatureValue(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var value: Float? = null
     @JvmField var unit: Pointer? = null
+
+    init {
+        read()
+    }
 
     override fun getFieldOrder() = listOf("unit", "value")
 
@@ -208,9 +252,6 @@ class CTemperatureValue(p: Pointer) : Structure(p), Structure.ByReference {
 }
 
 class CDurationValue(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var years: Long? = null
     @JvmField var quarters: Long? = null
@@ -221,6 +262,10 @@ class CDurationValue(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var minutes: Long? = null
     @JvmField var seconds: Long? = null
     @JvmField var precision: Int? = null
+
+    init {
+        read()
+    }
 
     override fun getFieldOrder() = listOf("years",
                                           "quarters",
@@ -245,9 +290,6 @@ class CDurationValue(p: Pointer) : Structure(p), Structure.ByReference {
 
 
 class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
-    init {
-        read()
-    }
 
     @JvmField var raw_value: Pointer? = null
     @JvmField var value: CSlotValue? = null
@@ -256,6 +298,10 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var entity: Pointer? = null
     @JvmField var slot_name: Pointer? = null
     @JvmField var confidence_score: Float? = null
+
+    init {
+        read()
+    }
 
     override fun getFieldOrder() = listOf("value",
                                           "raw_value",
