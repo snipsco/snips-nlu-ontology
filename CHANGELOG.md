@@ -1,9 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.64.6] - 2019-04-08
+### Added
+- Add converters from C to Rust for ontology objects [#135](https://github.com/snipsco/snips-nlu-ontology/pull/135)
+
+### Fixed
+- Update ffi and kotlin bindings [#136](https://github.com/snipsco/snips-nlu-ontology/pull/136)
+
 ## [0.64.5] - 2019-04-02
 ### Fixed
-- Make the json serialization of kotlin object the same as the rust one
+- Make the json serialization of kotlin object the same as the rust one [#133](https://github.com/snipsco/snips-nlu-ontology/pull/133)
 
 ## [0.64.4] - 2019-02-28
 ### Fixed
@@ -164,6 +171,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.64.6]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.5...0.64.6
 [0.64.5]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.4...0.64.5
 [0.64.4]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.3...0.64.4
 [0.64.3]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.2...0.64.3
