@@ -808,6 +808,15 @@ mod tests {
             confidence_score: Some(0.5),
         });
 
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "raw_value".to_string(),
+            value: SlotValue::Custom("slot_value".to_string().into()),
+            range: 0..1,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: None,
+        });
+
         let instant_time_value = InstantTimeValue {
             value: "value".to_string(),
             grain: Grain::Year,
