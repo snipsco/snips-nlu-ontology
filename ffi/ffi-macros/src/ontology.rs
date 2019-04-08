@@ -4,10 +4,12 @@ use std::ffi::CString;
 use std::ptr::null;
 use std::slice;
 
+use failure::{bail, Fallible, ResultExt};
+use ffi_utils::{
+    create_optional_rust_string_from, create_rust_string_from, take_back_c_string,
+    take_back_nullable_c_string, AsRust, RawPointerConverter,
+};
 use libc;
-use failure::{Fallible, ResultExt, bail};
-use ffi_utils::{take_back_c_string, take_back_nullable_c_string, create_rust_string_from,
-                create_optional_rust_string_from, RawPointerConverter, AsRust};
 use snips_nlu_ontology::*;
 
 /// Result of intent parsing
@@ -113,6 +115,23 @@ impl From<Vec<IntentClassifierResult>> for CIntentClassifierResultArray {
     }
 }
 
+impl AsRust<Vec<IntentClassifierResult>> for CIntentClassifierResultArray {
+    fn as_rust(&self) -> Fallible<Vec<IntentClassifierResult>> {
+        let mut result = vec![];
+        let ic_results = unsafe {
+            std::slice::from_raw_parts_mut(
+                self.intent_classifier_results as *mut CIntentClassifierResult,
+                self.size as usize,
+            )
+        };
+
+        for ic_result in ic_results {
+            result.push(ic_result.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
 impl Drop for CIntentClassifierResultArray {
     fn drop(&mut self) {
         let _ = unsafe {
@@ -152,9 +171,8 @@ impl From<Vec<Slot>> for CSlotList {
 impl AsRust<Vec<Slot>> for CSlotList {
     fn as_rust(&self) -> Fallible<Vec<Slot>> {
         let mut result = vec![];
-        let slots = unsafe {
-            std::slice::from_raw_parts_mut(self.slots as *mut CSlot, self.size as usize)
-        };
+        let slots =
+            unsafe { std::slice::from_raw_parts_mut(self.slots as *mut CSlot, self.size as usize) };
 
         for slot in slots {
             result.push(slot.as_rust()?)
@@ -213,16 +231,18 @@ impl From<Slot> for CSlot {
 
 impl AsRust<Slot> for CSlot {
     fn as_rust(&self) -> Fallible<Slot> {
-        Ok(
-            Slot {
-                raw_value: create_rust_string_from!(self.raw_value),
-                value: self.value.as_rust()?,
-                range: (self.range_start as usize..self.range_end as usize),
-                entity: create_rust_string_from!(self.entity),
-                slot_name: create_rust_string_from!(self.slot_name),
-                confidence_score: if self.confidence_score < 0.0 { None } else { Some(self.confidence_score) },
-            }
-        )
+        Ok(Slot {
+            raw_value: create_rust_string_from!(self.raw_value),
+            value: self.value.as_rust()?,
+            range: (self.range_start as usize..self.range_end as usize),
+            entity: create_rust_string_from!(self.entity),
+            slot_name: create_rust_string_from!(self.slot_name),
+            confidence_score: if self.confidence_score < 0.0 {
+                None
+            } else {
+                Some(self.confidence_score)
+            },
+        })
     }
 }
 
@@ -627,16 +647,20 @@ impl From<SlotValue> for CSlotValue {
 impl AsRust<SlotValue> for CSlotValue {
     fn as_rust(&self) -> Fallible<SlotValue> {
         match self.value_type {
-            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
-                Ok(SlotValue::Custom(create_rust_string_from!(self.value as *const libc::c_char).into()))
-            }
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => Ok(SlotValue::Custom(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => {
                 let number_value: f64 = unsafe { *(self.value as *const CNumberValue) };
-                Ok(SlotValue::Number(NumberValue { value: number_value }))
+                Ok(SlotValue::Number(NumberValue {
+                    value: number_value,
+                }))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_ORDINAL => {
                 let ordinal_value: i64 = unsafe { *(self.value as *const COrdinalValue) };
-                Ok(SlotValue::Ordinal(OrdinalValue { value: ordinal_value }))
+                Ok(SlotValue::Ordinal(OrdinalValue {
+                    value: ordinal_value,
+                }))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => {
                 let c_instant_time_value = unsafe { &*(self.value as *const CInstantTimeValue) };
@@ -649,7 +673,8 @@ impl AsRust<SlotValue> for CSlotValue {
                 Ok(SlotValue::TimeInterval(time_interval_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => {
-                let c_amount_of_money_value = unsafe { &*(self.value as *const CAmountOfMoneyValue) };
+                let c_amount_of_money_value =
+                    unsafe { &*(self.value as *const CAmountOfMoneyValue) };
                 let amount_of_money_value = c_amount_of_money_value.as_rust()?;
                 Ok(SlotValue::AmountOfMoney(amount_of_money_value))
             }
@@ -663,16 +688,19 @@ impl AsRust<SlotValue> for CSlotValue {
                 let duration_value = c_duration_value.as_rust()?;
                 Ok(SlotValue::Duration(duration_value))
             }
-            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => {
-                Ok(SlotValue::MusicAlbum(create_rust_string_from!(self.value as *const libc::c_char).into()))
-            }
-            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => {
-                Ok(SlotValue::MusicArtist(create_rust_string_from!(self.value as *const libc::c_char).into()))
-            }
-            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => {
-                Ok(SlotValue::MusicTrack(create_rust_string_from!(self.value as *const libc::c_char).into()))
-            }
-            _ => bail!("The provided slot value type : {:?} doesn't exists. Cannot perform conversion to Rust object ", self.value_type)
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => Ok(SlotValue::MusicAlbum(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => Ok(SlotValue::MusicArtist(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => Ok(SlotValue::MusicTrack(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
+            _ => bail!(
+                "Unknown slot value type: {:?}. Cannot perform conversion to Rust object.",
+                self.value_type
+            ),
         }
     }
 }
@@ -722,15 +750,14 @@ impl Drop for CSlotValue {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     pub fn round_trip_test<T, U>(input: T)
-        where
-            T: Clone + PartialEq + std::fmt::Debug,
-            U: From<T> + AsRust<T>,
+    where
+        T: Clone + PartialEq + std::fmt::Debug,
+        U: From<T> + AsRust<T>,
     {
         let c = U::from(input.clone());
 
@@ -868,7 +895,7 @@ mod tests {
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
                 confidence_score: Some(0.5),
-            }
+            },
         ])
     }
 
@@ -881,6 +908,20 @@ mod tests {
     }
 
     #[test]
+    fn round_trip_c_intent_classifier_result_array() {
+        round_trip_test::<_, CIntentClassifierResultArray>(vec![
+            IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.5,
+            },
+            IntentClassifierResult {
+                intent_name: None,
+                confidence_score: 0.5,
+            },
+        ])
+    }
+
+    #[test]
     fn round_trip_c_intent_parser_result() {
         round_trip_test::<_, CIntentParserResult>(IntentParserResult {
             input: "input".to_string(),
@@ -888,16 +929,16 @@ mod tests {
                 intent_name: Some("intent_name".to_string()),
                 confidence_score: 0.5,
             },
-            slots: vec![
-                Slot {
-                    raw_value: "raw_value".to_string(),
-                    value: SlotValue::Custom(StringValue { value: "custom_slot".to_string() }),
-                    range: 0..42,
-                    entity: "entity".to_string(),
-                    slot_name: "slot_name".to_string(),
-                    confidence_score: Some(1.0),
-                }
-            ],
+            slots: vec![Slot {
+                raw_value: "raw_value".to_string(),
+                value: SlotValue::Custom(StringValue {
+                    value: "custom_slot".to_string(),
+                }),
+                range: 0..42,
+                entity: "entity".to_string(),
+                slot_name: "slot_name".to_string(),
+                confidence_score: Some(1.0),
+            }],
         })
     }
 }
