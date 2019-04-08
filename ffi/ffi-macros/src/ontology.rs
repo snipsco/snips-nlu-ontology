@@ -32,6 +32,16 @@ impl From<IntentParserResult> for CIntentParserResult {
     }
 }
 
+impl AsRust<IntentParserResult> for CIntentParserResult {
+    fn as_rust(&self) -> Fallible<IntentParserResult> {
+        Ok(IntentParserResult {
+            input: create_rust_string_from!(self.input),
+            intent: unsafe { &*self.intent }.as_rust()?,
+            slots: unsafe { &*self.slots }.as_rust()?,
+        })
+    }
+}
+
 impl Drop for CIntentParserResult {
     fn drop(&mut self) {
         take_back_c_string!(self.input);
@@ -60,6 +70,15 @@ impl From<IntentClassifierResult> for CIntentClassifierResult {
             intent_name,
             confidence_score: input.confidence_score,
         }
+    }
+}
+
+impl AsRust<IntentClassifierResult> for CIntentClassifierResult {
+    fn as_rust(&self) -> Fallible<IntentClassifierResult> {
+        Ok(IntentClassifierResult {
+            intent_name: create_optional_rust_string_from!(self.intent_name),
+            confidence_score: self.confidence_score as f32,
+        })
     }
 }
 
@@ -130,6 +149,20 @@ impl From<Vec<Slot>> for CSlotList {
     }
 }
 
+impl AsRust<Vec<Slot>> for CSlotList {
+    fn as_rust(&self) -> Fallible<Vec<Slot>> {
+        let mut result = vec![];
+        let slots = unsafe {
+            std::slice::from_raw_parts_mut(self.slots as *mut CSlot, self.size as usize)
+        };
+
+        for slot in slots {
+            result.push(slot.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
 impl Drop for CSlotList {
     fn drop(&mut self) {
         let _ = unsafe {
@@ -187,7 +220,7 @@ impl AsRust<Slot> for CSlot {
                 range: (self.range_start as usize..self.range_end as usize),
                 entity: create_rust_string_from!(self.entity),
                 slot_name: create_rust_string_from!(self.slot_name),
-                confidence_score: Some(self.confidence_score),
+                confidence_score: if self.confidence_score < 0.0 { None } else { Some(self.confidence_score) },
             }
         )
     }
@@ -273,6 +306,15 @@ impl From<Precision> for SNIPS_PRECISION {
     }
 }
 
+impl AsRust<Precision> for SNIPS_PRECISION {
+    fn as_rust(&self) -> Fallible<Precision> {
+        Ok(match self {
+            SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
+            SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact,
+        })
+    }
+}
+
 /// Representation of a number value
 pub type CNumberValue = libc::c_double;
 /// Representation of a percentage value
@@ -317,6 +359,21 @@ impl From<Grain> for SNIPS_GRAIN {
     }
 }
 
+impl AsRust<Grain> for SNIPS_GRAIN {
+    fn as_rust(&self) -> Fallible<Grain> {
+        Ok(match self {
+            SNIPS_GRAIN::SNIPS_GRAIN_YEAR => Grain::Year,
+            SNIPS_GRAIN::SNIPS_GRAIN_QUARTER => Grain::Quarter,
+            SNIPS_GRAIN::SNIPS_GRAIN_MONTH => Grain::Month,
+            SNIPS_GRAIN::SNIPS_GRAIN_WEEK => Grain::Week,
+            SNIPS_GRAIN::SNIPS_GRAIN_DAY => Grain::Day,
+            SNIPS_GRAIN::SNIPS_GRAIN_HOUR => Grain::Hour,
+            SNIPS_GRAIN::SNIPS_GRAIN_MINUTE => Grain::Minute,
+            SNIPS_GRAIN::SNIPS_GRAIN_SECOND => Grain::Second,
+        })
+    }
+}
+
 /// Representation of an instant value
 #[repr(C)]
 #[derive(Debug)]
@@ -336,6 +393,16 @@ impl From<InstantTimeValue> for CInstantTimeValue {
             grain: SNIPS_GRAIN::from(value.grain),
             precision: SNIPS_PRECISION::from(value.precision),
         }
+    }
+}
+
+impl AsRust<InstantTimeValue> for CInstantTimeValue {
+    fn as_rust(&self) -> Fallible<InstantTimeValue> {
+        Ok(InstantTimeValue {
+            value: create_rust_string_from!(self.value),
+            grain: self.grain.as_rust()?,
+            precision: self.precision.as_rust()?,
+        })
     }
 }
 
@@ -372,6 +439,15 @@ impl From<TimeIntervalValue> for CTimeIntervalValue {
     }
 }
 
+impl AsRust<TimeIntervalValue> for CTimeIntervalValue {
+    fn as_rust(&self) -> Fallible<TimeIntervalValue> {
+        Ok(TimeIntervalValue {
+            from: create_optional_rust_string_from!(self.from),
+            to: create_optional_rust_string_from!(self.to),
+        })
+    }
+}
+
 impl Drop for CTimeIntervalValue {
     fn drop(&mut self) {
         take_back_nullable_c_string!(self.from);
@@ -405,6 +481,16 @@ impl From<AmountOfMoneyValue> for CAmountOfMoneyValue {
     }
 }
 
+impl AsRust<AmountOfMoneyValue> for CAmountOfMoneyValue {
+    fn as_rust(&self) -> Fallible<AmountOfMoneyValue> {
+        Ok(AmountOfMoneyValue {
+            value: self.value as f32,
+            precision: self.precision.as_rust()?,
+            unit: create_optional_rust_string_from!(self.unit),
+        })
+    }
+}
+
 impl Drop for CAmountOfMoneyValue {
     fn drop(&mut self) {
         take_back_nullable_c_string!(self.unit)
@@ -431,6 +517,15 @@ impl From<TemperatureValue> for CTemperatureValue {
                 null()
             },
         }
+    }
+}
+
+impl AsRust<TemperatureValue> for CTemperatureValue {
+    fn as_rust(&self) -> Fallible<TemperatureValue> {
+        Ok(TemperatureValue {
+            value: self.value as f32,
+            unit: create_optional_rust_string_from!(self.unit),
+        })
     }
 }
 
@@ -480,6 +575,22 @@ impl From<DurationValue> for CDurationValue {
     }
 }
 
+impl AsRust<DurationValue> for CDurationValue {
+    fn as_rust(&self) -> Fallible<DurationValue> {
+        Ok(DurationValue {
+            years: self.years as i64,
+            quarters: self.quarters as i64,
+            months: self.months as i64,
+            weeks: self.weeks as i64,
+            days: self.days as i64,
+            hours: self.hours as i64,
+            minutes: self.minutes as i64,
+            seconds: self.seconds as i64,
+            precision: self.precision.as_rust()?,
+        })
+    }
+}
+
 /// A slot value
 #[repr(C)]
 #[derive(Debug)]
@@ -517,9 +628,7 @@ impl AsRust<SlotValue> for CSlotValue {
     fn as_rust(&self) -> Fallible<SlotValue> {
         match self.value_type {
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
-                Ok(SlotValue::Custom(StringValue {
-                    value: create_rust_string_from!(self.value as *const libc::c_char)
-                }))
+                Ok(SlotValue::Custom(create_rust_string_from!(self.value as *const libc::c_char).into()))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_NUMBER => {
                 let number_value: f64 = unsafe { *(self.value as *const CNumberValue) };
@@ -531,89 +640,39 @@ impl AsRust<SlotValue> for CSlotValue {
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_INSTANTTIME => {
                 let c_instant_time_value = unsafe { &*(self.value as *const CInstantTimeValue) };
-
-                let instant_time_value = InstantTimeValue {
-                    value: create_rust_string_from!(c_instant_time_value.value),
-                    grain: match c_instant_time_value.grain {
-                        SNIPS_GRAIN::SNIPS_GRAIN_YEAR => Grain::Year,
-                        SNIPS_GRAIN::SNIPS_GRAIN_QUARTER => Grain::Quarter,
-                        SNIPS_GRAIN::SNIPS_GRAIN_MONTH => Grain::Month,
-                        SNIPS_GRAIN::SNIPS_GRAIN_WEEK => Grain::Week,
-                        SNIPS_GRAIN::SNIPS_GRAIN_DAY => Grain::Day,
-                        SNIPS_GRAIN::SNIPS_GRAIN_HOUR => Grain::Hour,
-                        SNIPS_GRAIN::SNIPS_GRAIN_MINUTE => Grain::Minute,
-                        SNIPS_GRAIN::SNIPS_GRAIN_SECOND => Grain::Second
-                    },
-                    precision: match c_instant_time_value.precision {
-                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
-                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact
-                    },
-                };
+                let instant_time_value = c_instant_time_value.as_rust()?;
                 Ok(SlotValue::InstantTime(instant_time_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TIMEINTERVAL => {
                 let c_time_interval_value = unsafe { &*(self.value as *const CTimeIntervalValue) };
-                let time_interval_value = TimeIntervalValue {
-                    from: create_optional_rust_string_from!(c_time_interval_value.from),
-                    to: create_optional_rust_string_from!(c_time_interval_value.to),
-                };
+                let time_interval_value = c_time_interval_value.as_rust()?;
                 Ok(SlotValue::TimeInterval(time_interval_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_AMOUNTOFMONEY => {
                 let c_amount_of_money_value = unsafe { &*(self.value as *const CAmountOfMoneyValue) };
-
-                let amount_of_money_value = AmountOfMoneyValue {
-                    value: c_amount_of_money_value.value,
-                    precision: match c_amount_of_money_value.precision {
-                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact,
-                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
-                    },
-                    unit: create_optional_rust_string_from!(c_amount_of_money_value.unit),
-                };
+                let amount_of_money_value = c_amount_of_money_value.as_rust()?;
                 Ok(SlotValue::AmountOfMoney(amount_of_money_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_TEMPERATURE => {
                 let c_temperature_value = unsafe { &*(self.value as *const CTemperatureValue) };
-                let temperature_value = TemperatureValue {
-                    value: c_temperature_value.value,
-                    unit: create_optional_rust_string_from!(c_temperature_value.unit),
-                };
+                let temperature_value = c_temperature_value.as_rust()?;
                 Ok(SlotValue::Temperature(temperature_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_DURATION => {
                 let c_duration_value = unsafe { &*(self.value as *const CDurationValue) };
-                let duration_value = DurationValue {
-                    years: c_duration_value.years,
-                    quarters: c_duration_value.quarters,
-                    months: c_duration_value.months,
-                    weeks: c_duration_value.weeks,
-                    days: c_duration_value.days,
-                    hours: c_duration_value.hours,
-                    minutes: c_duration_value.minutes,
-                    seconds: c_duration_value.seconds,
-                    precision: match c_duration_value.precision {
-                        SNIPS_PRECISION::SNIPS_PRECISION_APPROXIMATE => Precision::Approximate,
-                        SNIPS_PRECISION::SNIPS_PRECISION_EXACT => Precision::Exact,
-                    },
-                };
+                let duration_value = c_duration_value.as_rust()?;
                 Ok(SlotValue::Duration(duration_value))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM => {
-                Ok(SlotValue::MusicAlbum(StringValue {
-                    value: create_rust_string_from!(self.value as *const libc::c_char)
-                }))
+                Ok(SlotValue::MusicAlbum(create_rust_string_from!(self.value as *const libc::c_char).into()))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST => {
-                Ok(SlotValue::MusicArtist(StringValue {
-                    value: create_rust_string_from!(self.value as *const libc::c_char)
-                }))
+                Ok(SlotValue::MusicArtist(create_rust_string_from!(self.value as *const libc::c_char).into()))
             }
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => {
-                Ok(SlotValue::MusicTrack(StringValue {
-                    value: create_rust_string_from!(self.value as *const libc::c_char)
-                }))
+                Ok(SlotValue::MusicTrack(create_rust_string_from!(self.value as *const libc::c_char).into()))
             }
-            _ => bail!("The provided slot value type doesn't exists. Cannot perform conversion to Rust object ")
+            _ => bail!("The provided slot value type : {:?} doesn't exists. Cannot perform conversion to Rust object ", self.value_type)
         }
     }
 }
@@ -660,5 +719,184 @@ impl Drop for CSlotValue {
                 }
             }
         };
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    pub fn round_trip_test<T, U>(input: T)
+        where
+            T: Clone + PartialEq + std::fmt::Debug,
+            U: From<T> + AsRust<T>,
+    {
+        let c = U::from(input.clone());
+
+        let result = c.as_rust().expect("could not convert back to rust");
+        assert_eq!(result, input);
+    }
+
+    #[test]
+    fn round_trip_c_duration_value() {
+        round_trip_test::<_, CDurationValue>(DurationValue {
+            years: 2,
+            quarters: 1,
+            months: 4,
+            weeks: 2,
+            days: 12,
+            hours: 1,
+            minutes: 27,
+            seconds: 59,
+            precision: Precision::Approximate,
+        })
+    }
+
+    #[test]
+    fn round_trip_c_temperature_value() {
+        round_trip_test::<_, CTemperatureValue>(TemperatureValue {
+            value: 23.0,
+            unit: Some("°C".to_string()),
+        })
+    }
+
+    #[test]
+    fn round_trip_c_amount_of_value() {
+        round_trip_test::<_, CAmountOfMoneyValue>(AmountOfMoneyValue {
+            value: 2350.0,
+            precision: Precision::Exact,
+            unit: Some("€".to_string()),
+        })
+    }
+
+    #[test]
+    fn round_trip_c_time_interval_value() {
+        round_trip_test::<_, CTimeIntervalValue>(TimeIntervalValue {
+            from: Some("from".to_string()),
+            to: Some("to".to_string()),
+        })
+    }
+
+    #[test]
+    fn round_trip_c_instant_time_value() {
+        round_trip_test::<_, CInstantTimeValue>(InstantTimeValue {
+            value: "value".to_string(),
+            grain: Grain::Year,
+            precision: Precision::Approximate,
+        })
+    }
+
+    #[test]
+    fn round_trip_snips_grain() {
+        round_trip_test::<_, SNIPS_GRAIN>(Grain::Second)
+    }
+
+    #[test]
+    fn round_trip_snips_precision() {
+        round_trip_test::<_, SNIPS_PRECISION>(Precision::Approximate)
+    }
+
+    #[test]
+    fn round_trip_c_slot() {
+        let slot_value = StringValue {
+            value: "yeah!".to_string()
+        };
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "dummy string".to_string(),
+            value: SlotValue::Custom(slot_value),
+            range: 0..100,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: Some(0.8),
+        });
+
+        let instant_time_value = InstantTimeValue {
+            value: "yolo".to_string(),
+            grain: Grain::Year,
+            precision: Precision::Approximate,
+        };
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "dummy string".to_string(),
+            value: SlotValue::InstantTime(instant_time_value),
+            range: 0..100,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: Some(0.8),
+        });
+
+        let instant_time_value = TimeIntervalValue {
+            from: Some("lol".to_string()),
+            to: Some("lol".to_string()),
+        };
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "dummy string".to_string(),
+            value: SlotValue::TimeInterval(instant_time_value),
+            range: 0..100,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: Some(0.8),
+        });
+    }
+
+    #[test]
+    fn round_trip_c_slot_list() {
+        let temperature_value = TemperatureValue {
+            value: 21.0,
+            unit: Some("°C".to_string()),
+        };
+
+        let custom_value = StringValue {
+            value: "dummy string value".to_string()
+        };
+
+
+        round_trip_test::<_, CSlotList>(vec![
+            Slot {
+                raw_value: "raw_value_slot".to_string(),
+                value: SlotValue::Custom(custom_value),
+                range: 0..42,
+                entity: "entity".to_string(),
+                slot_name: "slot_name".to_string(),
+                confidence_score: Some(1.0),
+            },
+            Slot {
+                raw_value: "".to_string(),
+                value: SlotValue::Temperature(temperature_value),
+                range: (0..42),
+                entity: "entity".to_string(),
+                slot_name: "slot_name".to_string(),
+                confidence_score: Some(0.5),
+            }
+        ])
+    }
+
+    #[test]
+    fn round_trip_c_intent_classifier_result() {
+        round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
+            intent_name: Some("intent_name".to_string()),
+            confidence_score: 0.6,
+        })
+    }
+
+    #[test]
+    fn round_trip_c_intent_parser_result() {
+        round_trip_test::<_, CIntentParserResult>(IntentParserResult {
+            input: "input".to_string(),
+            intent: IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.5,
+            },
+            slots: vec![
+                Slot {
+                    raw_value: "raw_value_slot".to_string(),
+                    value: SlotValue::Custom(StringValue { value: "custom_slot".to_string() }),
+                    range: 0..42,
+                    entity: "entity".to_string(),
+                    slot_name: "slot_name".to_string(),
+                    confidence_score: Some(1.0),
+                }
+            ],
+        })
     }
 }
