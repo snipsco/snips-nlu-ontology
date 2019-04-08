@@ -741,14 +741,14 @@ mod tests {
     #[test]
     fn round_trip_c_duration_value() {
         round_trip_test::<_, CDurationValue>(DurationValue {
-            years: 2,
-            quarters: 1,
-            months: 4,
-            weeks: 2,
-            days: 12,
-            hours: 1,
-            minutes: 27,
-            seconds: 59,
+            years: 1,
+            quarters: 2,
+            months: 3,
+            weeks: 4,
+            days: 5,
+            hours: 6,
+            minutes: 7,
+            seconds: 8,
             precision: Precision::Approximate,
         })
     }
@@ -756,7 +756,7 @@ mod tests {
     #[test]
     fn round_trip_c_temperature_value() {
         round_trip_test::<_, CTemperatureValue>(TemperatureValue {
-            value: 23.0,
+            value: 20.0,
             unit: Some("°C".to_string()),
         })
     }
@@ -764,7 +764,7 @@ mod tests {
     #[test]
     fn round_trip_c_amount_of_value() {
         round_trip_test::<_, CAmountOfMoneyValue>(AmountOfMoneyValue {
-            value: 2350.0,
+            value: 1234.0,
             precision: Precision::Exact,
             unit: Some("€".to_string()),
         })
@@ -799,30 +799,27 @@ mod tests {
 
     #[test]
     fn round_trip_c_slot() {
-        let slot_value = StringValue {
-            value: "yeah!".to_string()
-        };
         round_trip_test::<_, CSlot>(Slot {
-            raw_value: "dummy string".to_string(),
-            value: SlotValue::Custom(slot_value),
-            range: 0..100,
+            raw_value: "raw_value".to_string(),
+            value: SlotValue::Custom("slot_value".to_string().into()),
+            range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
-            confidence_score: Some(0.8),
+            confidence_score: Some(0.5),
         });
 
         let instant_time_value = InstantTimeValue {
-            value: "yolo".to_string(),
+            value: "value".to_string(),
             grain: Grain::Year,
             precision: Precision::Approximate,
         };
         round_trip_test::<_, CSlot>(Slot {
-            raw_value: "dummy string".to_string(),
+            raw_value: "raw_value".to_string(),
             value: SlotValue::InstantTime(instant_time_value),
-            range: 0..100,
+            range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
-            confidence_score: Some(0.8),
+            confidence_score: Some(0.5),
         });
 
         let instant_time_value = TimeIntervalValue {
@@ -830,31 +827,26 @@ mod tests {
             to: Some("lol".to_string()),
         };
         round_trip_test::<_, CSlot>(Slot {
-            raw_value: "dummy string".to_string(),
+            raw_value: "raw_value".to_string(),
             value: SlotValue::TimeInterval(instant_time_value),
-            range: 0..100,
+            range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
-            confidence_score: Some(0.8),
+            confidence_score: Some(0.5),
         });
     }
 
     #[test]
     fn round_trip_c_slot_list() {
         let temperature_value = TemperatureValue {
-            value: 21.0,
+            value: 20.0,
             unit: Some("°C".to_string()),
         };
-
-        let custom_value = StringValue {
-            value: "dummy string value".to_string()
-        };
-
 
         round_trip_test::<_, CSlotList>(vec![
             Slot {
                 raw_value: "raw_value_slot".to_string(),
-                value: SlotValue::Custom(custom_value),
+                value: SlotValue::Custom("custom_value".to_string().into()),
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -875,7 +867,7 @@ mod tests {
     fn round_trip_c_intent_classifier_result() {
         round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
             intent_name: Some("intent_name".to_string()),
-            confidence_score: 0.6,
+            confidence_score: 0.5,
         })
     }
 
@@ -889,7 +881,7 @@ mod tests {
             },
             slots: vec![
                 Slot {
-                    raw_value: "raw_value_slot".to_string(),
+                    raw_value: "raw_value".to_string(),
                     value: SlotValue::Custom(StringValue { value: "custom_slot".to_string() }),
                     range: 0..42,
                     entity: "entity".to_string(),
