@@ -9,6 +9,7 @@ use snips_nlu_ontology::Language;
 // ffi's type `*const libc::c_char` isn't
 struct DummyWrapper(Box<[*const libc::c_char]>);
 
+unsafe impl Send for DummyWrapper {}
 unsafe impl Sync for DummyWrapper {}
 
 pub fn supported_languages() -> CStringArray {

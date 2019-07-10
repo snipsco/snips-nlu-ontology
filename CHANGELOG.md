@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.64.8] - 2019-07-10
+### Fixed
+- Fix issue with libc and `Send` trait
+
 ## [0.64.7] - 2019-06-18
 ### Fixed
 - Portuguese builtin entity examples
@@ -175,6 +179,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.64.8]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.7...0.64.8
 [0.64.7]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.6...0.64.7
 [0.64.6]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.5...0.64.6
 [0.64.5]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.4...0.64.5

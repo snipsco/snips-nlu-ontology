@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-version = "0.64.7"
+version = "0.64.8"
 group = "ai.snips"
 
 
