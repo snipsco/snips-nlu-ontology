@@ -78,7 +78,9 @@ impl Drop for CBuiltinEntityArray {
 // ffi's type `*const libc::c_char` isn't
 struct DummyWrapper(Box<[*const libc::c_char]>);
 
+unsafe impl Send for DummyWrapper {}
 unsafe impl Sync for DummyWrapper {}
+
 
 pub fn all_builtin_entities() -> CStringArray {
     lazy_static! {
