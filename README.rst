@@ -52,6 +52,24 @@ Supported builtin entities
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
+| City          | snips/city          | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
+|               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
++---------------+---------------------+---------------------+-----------------------+
+| Country       | snips/country       | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
+|               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
++---------------+---------------------+---------------------+-----------------------+
 | Date          | snips/date          | `Grammar Entity`_   | | English             |
 +---------------+---------------------+---------------------+-----------------------+
 | DatePeriod    | snips/datePeriod    | `Grammar Entity`_   | | English             |
@@ -114,6 +132,15 @@ Supported builtin entities
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
+| Region        | snips/region        | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
+|               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
++---------------+---------------------+---------------------+-----------------------+
 | Temperature   | snips/temperature   | `Grammar Entity`_   | | German              |
 |               |                     |                     | | English             |
 |               |                     |                     | | Spanish             |
@@ -156,6 +183,32 @@ AmountOfMoney
        "value": 10.05,
        "precision": "Approximate",
        "unit": "€"
+     }
+   ]
+
+----
+City
+----
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "City",
+       "value": "Paris"
+     }
+   ]
+
+-------
+Country
+-------
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "Country",
+       "value": "France"
      }
    ]
 
@@ -304,6 +357,19 @@ Percentage
      {
        "kind": "Percentage",
        "value": 20.0
+     }
+   ]
+
+------
+Region
+------
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "Region",
+       "value": "California"
      }
    ]
 
