@@ -94,14 +94,35 @@ Supported builtin entities
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
-| MusicAlbum    | snips/musicAlbum    | `Gazetteer Entity`_ | | English             |
+| MusicAlbum    | snips/musicAlbum    | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
 |               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Korean              |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
-| MusicArtist   | snips/musicArtist   | `Gazetteer Entity`_ | | English             |
+| MusicArtist   | snips/musicArtist   | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
 |               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Korean              |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
-| MusicTrack    | snips/musicTrack    | `Gazetteer Entity`_ | | English             |
+| MusicTrack    | snips/musicTrack    | `Gazetteer Entity`_ | | German              |
+|               |                     |                     | | English             |
+|               |                     |                     | | Spanish             |
 |               |                     |                     | | French              |
+|               |                     |                     | | Italian             |
+|               |                     |                     | | Japanese            |
+|               |                     |                     | | Korean              |
+|               |                     |                     | | Portuguese - Brazil |
+|               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
 | Number        | snips/number        | `Grammar Entity`_   | | German              |
 |               |                     |                     | | English             |

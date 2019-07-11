@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Add datetime subtypes [#144](https://github.com/snipsco/snips-nlu-ontology/pull/144)
 - Add geographical entities [#145](https://github.com/snipsco/snips-nlu-ontology/pull/145)
+- Support Music entities in all languages [#147](https://github.com/snipsco/snips-nlu-ontology/pull/147)
 
 ## [0.64.8] - 2019-07-10
 ### Fixed
