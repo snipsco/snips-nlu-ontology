@@ -71,9 +71,9 @@ enum class Grain { YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND }
         Type(value = MusicAlbumValue::class, name = "MusicAlbum"),
         Type(value = MusicArtistValue::class, name = "MusicArtist"),
         Type(value = MusicTrackValue::class, name = "MusicTrack"),
-        Type(value = City::class, name = "City"),
-        Type(value = Country::class, name = "Country"),
-        Type(value = Region::class, name = "Region")
+        Type(value = CityValue::class, name = "City"),
+        Type(value = CountryValue::class, name = "Country"),
+        Type(value = RegionValue::class, name = "Region")
 )
 sealed class SlotValue(val kind: Type) {
 
