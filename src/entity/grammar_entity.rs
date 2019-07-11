@@ -11,7 +11,11 @@ sub_entity_kind!(
         Number,
         Ordinal,
         Temperature,
+        Datetime,
+        Date,
         Time,
+        DatePeriod,
+        TimePeriod,
         Percentage
     ]
 );

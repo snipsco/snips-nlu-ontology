@@ -49,7 +49,11 @@ enum_kind!(
         Number,
         Ordinal,
         Temperature,
+        Datetime,
+        Date,
         Time,
+        DatePeriod,
+        TimePeriod,
         Percentage,
         MusicAlbum,
         MusicArtist,
@@ -93,7 +97,11 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Number => "snips/number",
             BuiltinEntityKind::Ordinal => "snips/ordinal",
             BuiltinEntityKind::Temperature => "snips/temperature",
-            BuiltinEntityKind::Time => "snips/datetime",
+            BuiltinEntityKind::Datetime => "snips/datetime",
+            BuiltinEntityKind::Date => "snips/date",
+            BuiltinEntityKind::Time => "snips/time",
+            BuiltinEntityKind::DatePeriod => "snips/datePeriod",
+            BuiltinEntityKind::TimePeriod => "snips/timePeriod",
             BuiltinEntityKind::Percentage => "snips/percentage",
             BuiltinEntityKind::MusicAlbum => "snips/musicAlbum",
             BuiltinEntityKind::MusicArtist => "snips/musicArtist",
@@ -118,7 +126,11 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Number => "Matches a cardinal number",
             BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
-            BuiltinEntityKind::Time => "Matches a date, time, interval or a date and time together",
+            BuiltinEntityKind::Datetime => "Matches a date, time, interval or a date and time together",
+            BuiltinEntityKind::Date => "Matches a date",
+            BuiltinEntityKind::Time => "Matches a time of day",
+            BuiltinEntityKind::DatePeriod => "Matches a period of time spanning over days or larger grains",
+            BuiltinEntityKind::TimePeriod => "Matches a period of time spanning over hours or smaller grains",
             BuiltinEntityKind::Percentage => "Matches a percentage",
             BuiltinEntityKind::MusicAlbum => "Matches a music album",
             BuiltinEntityKind::MusicArtist => "Matches a music artist",
@@ -164,12 +176,19 @@ impl BuiltinEntityKind {
                 "Dreiundzwanzig Grad",
                 "zweiunddreißig Grad Fahrenheit",
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "Heute",
                 "16.30 Uhr",
                 "in 1 Stunde",
                 "dritter Dienstag im Juni",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &[
                 "25%",
                 "zwanzig Prozent",
@@ -205,12 +224,49 @@ impl BuiltinEntityKind {
                 "Twenty three degrees",
                 "one hundred degrees fahrenheit",
             ],
-            BuiltinEntityKind::Time => &[
+            // TODO: Add cases for Datetime complement (date + time combinations, mainly)
+            BuiltinEntityKind::Datetime => &[
                 "Today",
                 "at 8 a.m.",
                 "4:30 pm",
                 "in 1 hour",
                 "the 3rd tuesday of June",
+            ],
+            BuiltinEntityKind::Date => &[
+                "today",
+                "on Wednesday",
+                "March 26th",
+                "saturday january 19",
+                "monday 15th april 2019",
+                "the day after tomorrow",
+            ],
+            BuiltinEntityKind::Time => &[
+                "now",
+                "at noon",
+                "at 8 a.m.",
+                "4:30 pm",
+                "in one hour",
+                "for ten o'clock",
+                "at ten in the evening",
+            ],
+            BuiltinEntityKind::DatePeriod => &[
+                "january",
+                "2019",
+                "from monday to friday",
+                "from wednesday 27th to saturday 30th",
+                "this week"
+            ],
+            BuiltinEntityKind::TimePeriod => &[
+                // "tonight" currently not interpreted as a TimePeriod because intersected with
+                // today's date, which makes it interpreted as a date+time (will be fixed)
+                //"tonight",
+                // "this morning" currently not interpreted as a TimePeriod (same reason)
+                // "this morning",
+                "until dinner",
+                "from five to ten",
+                // This is currently bugged + interpreted as TimePeriod (same reason, with "this")
+                // "this evening after eight thirty",
+                "by the end of the day",
             ],
             BuiltinEntityKind::Percentage => {
                 &["25%", "twenty percent", "two hundred and fifty percents"]
@@ -272,7 +328,7 @@ impl BuiltinEntityKind {
                 "quince grados bajo cero",
                 "-459,67 °F",
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "hoy",
                 "esta noche",
                 "a la 1:30",
@@ -283,6 +339,13 @@ impl BuiltinEntityKind {
                 // TODO: Add these examples when they are supported by the BuiltinEntityParser
                 // "las próximas navidades",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &[
                 "25%",
                 "quince por ciento",
@@ -336,7 +399,7 @@ impl BuiltinEntityKind {
                 "45 degrés celsius",
                 "deux cent degrés Fahrenheit",
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "Aujourd'hui",
                 "à 14:30",
                 "demain matin",
@@ -344,6 +407,13 @@ impl BuiltinEntityKind {
                 "dans 1 heure",
                 "le premier jeudi de Juin",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &["25%", "20 pourcents", "quatre vingt dix pourcents"],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
@@ -405,7 +475,7 @@ impl BuiltinEntityKind {
                 "settant uno fahrenheit",
                 "due cento novanta cinque gradi kelvin",
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "domattina",
                 "giovedì prossimo",
                 "a febbraio",
@@ -416,6 +486,13 @@ impl BuiltinEntityKind {
                 "alle 1:30",
                 "il primo giovedí di giugno",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &[
                 "25%",
                 "due percento",
@@ -464,9 +541,16 @@ impl BuiltinEntityKind {
                 "quatro graus centígrados",
                 "-459,67 °F",
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "hoje",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &[
                 "25%",
             ],
@@ -483,12 +567,19 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Number => &["十二", "二千五", "四千三百二"],
             BuiltinEntityKind::Ordinal => &["十一番目", "九十一番目"],
             BuiltinEntityKind::Temperature => &["五度", "二十五度", "マイナス十度"],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 "一昨日",
                 "次の水曜日",
                 "十三時三十分",
                 "二千十三年十二月二十三日",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &["十五%", "五パーセント"],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
@@ -503,7 +594,14 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Number => &["2001", "삼천", "스물 둘", "천 아흔 아홉"],
             BuiltinEntityKind::Ordinal => &["첫", "첫번째"],
             BuiltinEntityKind::Temperature => &["5도", "섭씨 20도", "화씨 백 도"],
-            BuiltinEntityKind::Time => &["오늘", "14시 30 분에", "5 월 첫째 목요일"],
+            BuiltinEntityKind::Datetime => &["오늘", "14시 30 분에", "5 월 첫째 목요일"],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Percentage => &[],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
@@ -551,7 +649,7 @@ impl BuiltinEntityKind {
                     unit: Some("fahrenheit".to_string()),
                 }),
             ]),
-            BuiltinEntityKind::Time => serde_json::to_string_pretty(&vec![
+            BuiltinEntityKind::Datetime => serde_json::to_string_pretty(&vec![
                 SlotValue::InstantTime(InstantTimeValue {
                     value: "2017-06-13 18:00:00 +02:00".to_string(),
                     grain: Grain::Hour,
@@ -560,6 +658,32 @@ impl BuiltinEntityKind {
                 SlotValue::TimeInterval(TimeIntervalValue {
                     from: Some("2017-06-07 18:00:00 +02:00".to_string()),
                     to: Some("2017-06-08 00:00:00 +02:00".to_string()),
+                }),
+            ]),
+            BuiltinEntityKind::Date => serde_json::to_string_pretty(&vec![
+                SlotValue::InstantTime(InstantTimeValue {
+                    value: "2017-06-13 00:00:00 +02:00".to_string(),
+                    grain: Grain::Day,
+                    precision: Precision::Exact,
+                }),
+            ]),
+            BuiltinEntityKind::Time => serde_json::to_string_pretty(&vec![
+                SlotValue::InstantTime(InstantTimeValue {
+                    value: "2017-06-13 18:00:00 +02:00".to_string(),
+                    grain: Grain::Hour,
+                    precision: Precision::Exact,
+                }),
+            ]),
+            BuiltinEntityKind::DatePeriod => serde_json::to_string_pretty(&vec![
+                SlotValue::TimeInterval(TimeIntervalValue {
+                    from: Some("2017-06-07 00:00:00 +02:00".to_string()),
+                    to: Some("2017-06-09 00:00:00 +02:00".to_string()),
+                }),
+            ]),
+            BuiltinEntityKind::TimePeriod => serde_json::to_string_pretty(&vec![
+                SlotValue::TimeInterval(TimeIntervalValue {
+                    from: Some("2017-06-07 18:00:00 +02:00".to_string()),
+                    to: Some("2017-06-07 20:00:00 +02:00".to_string()),
                 }),
             ]),
             BuiltinEntityKind::Percentage => {
@@ -645,7 +769,7 @@ impl BuiltinEntityKind {
                 Language::PT_BR,
                 Language::PT_PT,
             ],
-            BuiltinEntityKind::Time => &[
+            BuiltinEntityKind::Datetime => &[
                 Language::DE,
                 Language::EN,
                 Language::ES,
@@ -656,6 +780,10 @@ impl BuiltinEntityKind {
                 Language::PT_BR,
                 Language::PT_PT,
             ],
+            BuiltinEntityKind::Date => &[Language::EN, ],
+            BuiltinEntityKind::Time => &[Language::EN, ],
+            BuiltinEntityKind::DatePeriod => &[Language::EN, ],
+            BuiltinEntityKind::TimePeriod => &[Language::EN, ],
             BuiltinEntityKind::Percentage => &[
                 Language::DE,
                 Language::EN,
@@ -671,6 +799,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicTrack => &[Language::EN, Language::FR],
         }
     }
+
 }
 
 impl BuiltinEntityKind {
@@ -785,7 +914,7 @@ mod tests {
                 grain: Grain::Year,
                 precision: Precision::Exact,
             }),
-            entity_kind: BuiltinEntityKind::Time,
+            entity_kind: BuiltinEntityKind::Datetime,
         };
 
         assert_tokens(

@@ -52,7 +52,11 @@ Supported builtin entities
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
-| Time          | snips/datetime      | `Grammar Entity`_   | | German              |
+| Date          | snips/date          | `Grammar Entity`_   | | English             |
++---------------+---------------------+---------------------+-----------------------+
+| DatePeriod    | snips/datePeriod    | `Grammar Entity`_   | | English             |
++---------------+---------------------+---------------------+-----------------------+
+| Datetime      | snips/datetime      | `Grammar Entity`_   | | German              |
 |               |                     |                     | | English             |
 |               |                     |                     | | Spanish             |
 |               |                     |                     | | French              |
@@ -120,6 +124,10 @@ Supported builtin entities
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
+| Time          | snips/time          | `Grammar Entity`_   | | English             |
++---------------+---------------------+---------------------+-----------------------+
+| TimePeriod    | snips/timePeriod    | `Grammar Entity`_   | | English             |
++---------------+---------------------+---------------------+-----------------------+
 
 Grammar Entity
 --------------
@@ -152,8 +160,37 @@ AmountOfMoney
    ]
 
 ----
-Time
+Date
 ----
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "InstantTime",
+       "value": "2017-06-13 00:00:00 +02:00",
+       "grain": "Day",
+       "precision": "Exact"
+     }
+   ]
+
+----------
+DatePeriod
+----------
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "TimeInterval",
+       "from": "2017-06-07 00:00:00 +02:00",
+       "to": "2017-06-09 00:00:00 +02:00"
+     }
+   ]
+
+--------
+Datetime
+--------
 
 .. code-block:: json
 
@@ -286,6 +323,35 @@ Temperature
        "kind": "Temperature",
        "value": 60.0,
        "unit": "fahrenheit"
+     }
+   ]
+
+----
+Time
+----
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "InstantTime",
+       "value": "2017-06-13 18:00:00 +02:00",
+       "grain": "Hour",
+       "precision": "Exact"
+     }
+   ]
+
+----------
+TimePeriod
+----------
+
+.. code-block:: json
+
+   [
+     {
+       "kind": "TimeInterval",
+       "from": "2017-06-07 18:00:00 +02:00",
+       "to": "2017-06-07 20:00:00 +02:00"
      }
    ]
 
