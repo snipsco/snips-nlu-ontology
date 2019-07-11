@@ -282,6 +282,12 @@ pub enum SNIPS_SLOT_VALUE_TYPE {
     SNIPS_SLOT_VALUE_TYPE_MUSICARTIST = 11,
     /// Music Track type represented by a char *
     SNIPS_SLOT_VALUE_TYPE_MUSICTRACK = 12,
+    /// City type represented by a char *
+    SNIPS_SLOT_VALUE_TYPE_CITY = 13,
+    /// Country type represented by a char *
+    SNIPS_SLOT_VALUE_TYPE_COUNTRY = 14,
+    /// Region type represented by a char *
+    SNIPS_SLOT_VALUE_TYPE_REGION = 15,
 }
 
 impl<'a> From<&'a SlotValue> for SNIPS_SLOT_VALUE_TYPE {
@@ -303,6 +309,9 @@ impl<'a> From<&'a SlotValue> for SNIPS_SLOT_VALUE_TYPE {
             &SlotValue::MusicAlbum(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICALBUM,
             &SlotValue::MusicArtist(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICARTIST,
             &SlotValue::MusicTrack(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK,
+            &SlotValue::City(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CITY,
+            &SlotValue::Country(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_COUNTRY,
+            &SlotValue::Region(_) => SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_REGION,
         }
     }
 }
@@ -639,6 +648,9 @@ impl From<SlotValue> for CSlotValue {
             SlotValue::MusicAlbum(v) => CString::new(v.value).unwrap().into_raw() as _,
             SlotValue::MusicArtist(v) => CString::new(v.value).unwrap().into_raw() as _,
             SlotValue::MusicTrack(v) => CString::new(v.value).unwrap().into_raw() as _,
+            SlotValue::City(v) => CString::new(v.value).unwrap().into_raw() as _,
+            SlotValue::Country(v) => CString::new(v.value).unwrap().into_raw() as _,
+            SlotValue::Region(v) => CString::new(v.value).unwrap().into_raw() as _,
         };
         Self { value_type, value }
     }
@@ -697,6 +709,15 @@ impl AsRust<SlotValue> for CSlotValue {
             SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => Ok(SlotValue::MusicTrack(
                 create_rust_string_from!(self.value as *const libc::c_char).into(),
             )),
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CITY => Ok(SlotValue::City(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_COUNTRY => Ok(SlotValue::Country(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
+            SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_REGION => Ok(SlotValue::Region(
+                create_rust_string_from!(self.value as *const libc::c_char).into(),
+            )),
             _ => bail!(
                 "Unknown slot value type: {:?}. Cannot perform conversion to Rust object.",
                 self.value_type
@@ -743,6 +764,15 @@ impl Drop for CSlotValue {
                     CString::drop_raw_pointer(self.value)
                 }
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_MUSICTRACK => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CITY => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_COUNTRY => {
+                    CString::drop_raw_pointer(self.value)
+                }
+                SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_REGION => {
                     CString::drop_raw_pointer(self.value)
                 }
             }
