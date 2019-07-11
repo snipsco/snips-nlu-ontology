@@ -206,9 +206,19 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["Berlin", "Essen", "Zurich", "Paris"],
-            BuiltinEntityKind::Country => &["Frankreich"],
-            BuiltinEntityKind::Region => &["Bayern", "Tirol"],
+            BuiltinEntityKind::City => &[
+                "Berlin",
+                "Essen",
+                "Zurich",
+                "Paris",
+            ],
+            BuiltinEntityKind::Country => &[
+                "Frankreich",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Bayern",
+                "Tirol",
+            ],
         }
     }
 
@@ -286,9 +296,19 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["San Francisco", "Los Angeles", "Beijing", "Paris"],
-            BuiltinEntityKind::Country => &["France"],
-            BuiltinEntityKind::Region => &["California", "Washington"],
+            BuiltinEntityKind::City => &[
+                "San Francisco",
+                "Los Angeles",
+                "Beijing",
+                "Paris",
+            ],
+            BuiltinEntityKind::Country => &[
+                "France",
+            ],
+            BuiltinEntityKind::Region => &[
+                "California",
+                "Washington",
+            ],
         }
     }
 
@@ -375,9 +395,19 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["Madrid", "Barcelona", "Bilbao", "Paris"],
-            BuiltinEntityKind::Country => &["Francia"],
-            BuiltinEntityKind::Region => &["Andalusia", "Catalonia"],
+            BuiltinEntityKind::City => &[
+                "Madrid",
+                "Barcelona",
+                "Bilbao",
+                "Paris",
+            ],
+            BuiltinEntityKind::Country => &[
+                "Francia",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Andalusia",
+                "Catalonia",
+            ],
         }
     }
 
@@ -442,10 +472,15 @@ impl BuiltinEntityKind {
                 "Bruxelles",
                 "Pékin",
                 "Londres",
-                "Luxembourg",
             ],
-            BuiltinEntityKind::Country => &["France"],
-            BuiltinEntityKind::Region => &["Bretagne", "Corse", "Province de Liège"],
+            BuiltinEntityKind::Country => &[
+                "France",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Bretagne",
+                "Corse",
+                "Province de Liège",
+            ],
         }
     }
 
@@ -534,9 +569,18 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["San Francisco", "Roma", "Agrigente"],
-            BuiltinEntityKind::Country => &["Italia"],
-            BuiltinEntityKind::Region => &["Sardinia", "Sicilia"],
+            BuiltinEntityKind::City => &[
+                "San Francisco",
+                "Roma",
+                "Agrigente",
+            ],
+            BuiltinEntityKind::Country => &[
+                "Italia",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Sardinia",
+                "Sicilia",
+            ],
         }
     }
 
@@ -559,8 +603,12 @@ impl BuiltinEntityKind {
                 "oito anos e dois semanas",
                 "um ano quatro semanas e tres horas",
             ],
-            BuiltinEntityKind::Number => &["2001"],
-            BuiltinEntityKind::Ordinal => &["primeira"],
+            BuiltinEntityKind::Number => &[
+                "2001",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "primeira",
+            ],
             BuiltinEntityKind::Temperature => &[
                 "70 graus kelvin",
                 "3°C",
@@ -568,14 +616,28 @@ impl BuiltinEntityKind {
                 "quatro graus centígrados",
                 "-459,67 °F",
             ],
-            BuiltinEntityKind::Datetime => &["hoje"],
-            BuiltinEntityKind::Percentage => &["25%"],
+            BuiltinEntityKind::Datetime => &[
+                "hoje",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+            ],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["São Paulo", "Rio", "Los Angeles", "Paris"],
-            BuiltinEntityKind::Country => &["Brasil"],
-            BuiltinEntityKind::Region => &["Bahia", "Amazonas"],
+            BuiltinEntityKind::City => &[
+                "São Paulo",
+                "Rio",
+                "Los Angeles",
+                "Paris",
+            ],
+            BuiltinEntityKind::Country => &[
+                "Brasil",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Bahia",
+                "Amazonas",
+            ],
         }
     }
 
@@ -605,8 +667,12 @@ impl BuiltinEntityKind {
                 "oito anos e dois semanas",
                 "um ano quatro semanas e tres horas",
             ],
-            BuiltinEntityKind::Number => &["2001"],
-            BuiltinEntityKind::Ordinal => &["primeira"],
+            BuiltinEntityKind::Number => &[
+                "2001",
+            ],
+            BuiltinEntityKind::Ordinal => &[
+                "primeira",
+            ],
             BuiltinEntityKind::Temperature => &[
                 "70 graus kelvin",
                 "3°C",
@@ -614,14 +680,28 @@ impl BuiltinEntityKind {
                 "quatro graus centígrados",
                 "-459,67 °F",
             ],
-            BuiltinEntityKind::Time => &["hoje"],
-            BuiltinEntityKind::Percentage => &["25%"],
+            BuiltinEntityKind::Time => &[
+                "hoje",
+            ],
+            BuiltinEntityKind::Percentage => &[
+                "25%",
+            ],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["Liboa", "Porto", "Amadora"],
-            BuiltinEntityKind::Country => &["Portugal", "Espanha "],
-            BuiltinEntityKind::Region => &["Norte", "Alentejo"],
+            BuiltinEntityKind::City => &[
+                "Liboa",
+                "Porto",
+                "Amadora",
+            ],
+            BuiltinEntityKind::Country => &[
+                "Portugal",
+                "Espanha",
+            ],
+            BuiltinEntityKind::Region => &[
+                "Norte",
+                "Alentejo",
+            ],
         }
     }
 
@@ -649,9 +729,18 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["パリ", "東京", "京都"],
-            BuiltinEntityKind::Country => &["日本"],
-            BuiltinEntityKind::Region => &["北海道", "関東地方"],
+            BuiltinEntityKind::City => &[
+                "パリ",
+                "東京",
+                "京都",
+            ],
+            BuiltinEntityKind::Country => &[
+                "日本",
+            ],
+            BuiltinEntityKind::Region => &[
+                "北海道",
+                "関東地方",
+            ],
         }
     }
 
@@ -674,9 +763,18 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
-            BuiltinEntityKind::City => &["서울", "파리", "부산광역시"],
-            BuiltinEntityKind::Country => &["프랑스"],
-            BuiltinEntityKind::Region => &["충청도", "강원도"],
+            BuiltinEntityKind::City => &[
+                "서울",
+                "파리",
+                "부산광역시",
+            ],
+            BuiltinEntityKind::Country => &[
+                "프랑스",
+            ],
+            BuiltinEntityKind::Region => &[
+                "충청도",
+                "강원도",
+            ],
         }
     }
 }
