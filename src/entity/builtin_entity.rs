@@ -532,7 +532,7 @@ impl BuiltinEntityKind {
                 "2001",
             ],
             BuiltinEntityKind::Ordinal => &[
-                "primera",
+                "primeira",
             ],
             BuiltinEntityKind::Temperature => &[
                 "70 graus kelvin",
