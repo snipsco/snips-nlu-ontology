@@ -1,6 +1,8 @@
 package ai.snips.nlu.ontology
 
 import ai.snips.nlu.ontology.SlotValue.AmountOfMoneyValue
+import ai.snips.nlu.ontology.SlotValue.CityValue
+import ai.snips.nlu.ontology.SlotValue.CountryValue
 import ai.snips.nlu.ontology.SlotValue.CustomValue
 import ai.snips.nlu.ontology.SlotValue.DurationValue
 import ai.snips.nlu.ontology.SlotValue.InstantTimeValue
@@ -10,9 +12,12 @@ import ai.snips.nlu.ontology.SlotValue.MusicTrackValue
 import ai.snips.nlu.ontology.SlotValue.NumberValue
 import ai.snips.nlu.ontology.SlotValue.OrdinalValue
 import ai.snips.nlu.ontology.SlotValue.PercentageValue
+import ai.snips.nlu.ontology.SlotValue.RegionValue
 import ai.snips.nlu.ontology.SlotValue.TemperatureValue
 import ai.snips.nlu.ontology.SlotValue.TimeIntervalValue
 import ai.snips.nlu.ontology.SlotValue.Type.AMOUNT_OF_MONEY
+import ai.snips.nlu.ontology.SlotValue.Type.CITY
+import ai.snips.nlu.ontology.SlotValue.Type.COUNTRY
 import ai.snips.nlu.ontology.SlotValue.Type.CUSTOM
 import ai.snips.nlu.ontology.SlotValue.Type.DURATION
 import ai.snips.nlu.ontology.SlotValue.Type.INSTANT_TIME
@@ -22,6 +27,7 @@ import ai.snips.nlu.ontology.SlotValue.Type.MUSICTRACK
 import ai.snips.nlu.ontology.SlotValue.Type.NUMBER
 import ai.snips.nlu.ontology.SlotValue.Type.ORDINAL
 import ai.snips.nlu.ontology.SlotValue.Type.PERCENTAGE
+import ai.snips.nlu.ontology.SlotValue.Type.REGION
 import ai.snips.nlu.ontology.SlotValue.Type.TEMPERATURE
 import ai.snips.nlu.ontology.SlotValue.Type.TIME_INTERVAL
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -64,7 +70,10 @@ enum class Grain { YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND }
         Type(value = PercentageValue::class, name = "Percentage"),
         Type(value = MusicAlbumValue::class, name = "MusicAlbum"),
         Type(value = MusicArtistValue::class, name = "MusicArtist"),
-        Type(value = MusicTrackValue::class, name = "MusicTrack")
+        Type(value = MusicTrackValue::class, name = "MusicTrack"),
+        Type(value = CityValue::class, name = "City"),
+        Type(value = CountryValue::class, name = "Country"),
+        Type(value = RegionValue::class, name = "Region")
 )
 sealed class SlotValue(val kind: Type) {
 
@@ -85,7 +94,10 @@ sealed class SlotValue(val kind: Type) {
         @JsonProperty("Percentage") PERCENTAGE,
         @JsonProperty("MusicAlbum") MUSICALBUM,
         @JsonProperty("MusicArtist") MUSICARTIST,
-        @JsonProperty("MusicTrack") MUSICTRACK
+        @JsonProperty("MusicTrack") MUSICTRACK,
+        @JsonProperty("City") CITY,
+        @JsonProperty("Country") COUNTRY,
+        @JsonProperty("Region") REGION
     }
 
     @Parcel(BEAN)
@@ -142,6 +154,15 @@ sealed class SlotValue(val kind: Type) {
 
     @Parcel(BEAN)
     data class MusicTrackValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(MUSICTRACK)
+
+    @Parcel(BEAN)
+    data class CityValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(CITY)
+
+    @Parcel(BEAN)
+    data class CountryValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(COUNTRY)
+
+    @Parcel(BEAN)
+    data class RegionValue @ParcelConstructor constructor(@ParcelProperty("value") val value: String) : SlotValue(REGION)
 }
 
 @Parcel(BEAN)

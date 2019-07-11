@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- Add datetime subtypes [#144](https://github.com/snipsco/snips-nlu-ontology/pull/144)
+- Add geographical entities [#145](https://github.com/snipsco/snips-nlu-ontology/pull/145)
+
 ## [0.64.8] - 2019-07-10
 ### Fixed
 - Fix issue with libc and `Send` trait
@@ -179,6 +184,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.8...HEAD
 [0.64.8]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.7...0.64.8
 [0.64.7]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.6...0.64.7
 [0.64.6]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.5...0.64.6

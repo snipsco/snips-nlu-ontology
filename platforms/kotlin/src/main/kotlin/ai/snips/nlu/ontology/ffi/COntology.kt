@@ -9,6 +9,8 @@ import ai.snips.nlu.ontology.Slot
 import ai.snips.nlu.ontology.SlotValue
 import ai.snips.nlu.ontology.SlotValue.AmountOfMoneyValue
 import ai.snips.nlu.ontology.SlotValue.CustomValue
+import ai.snips.nlu.ontology.SlotValue.CityValue
+import ai.snips.nlu.ontology.SlotValue.CountryValue
 import ai.snips.nlu.ontology.SlotValue.DurationValue
 import ai.snips.nlu.ontology.SlotValue.InstantTimeValue
 import ai.snips.nlu.ontology.SlotValue.MusicAlbumValue
@@ -16,6 +18,7 @@ import ai.snips.nlu.ontology.SlotValue.MusicArtistValue
 import ai.snips.nlu.ontology.SlotValue.MusicTrackValue
 import ai.snips.nlu.ontology.SlotValue.NumberValue
 import ai.snips.nlu.ontology.SlotValue.PercentageValue
+import ai.snips.nlu.ontology.SlotValue.RegionValue
 import ai.snips.nlu.ontology.SlotValue.OrdinalValue
 import ai.snips.nlu.ontology.SlotValue.TemperatureValue
 import ai.snips.nlu.ontology.SlotValue.TimeIntervalValue
@@ -159,6 +162,9 @@ class CSlotValue : Structure(), Structure.ByValue {
         const val MUSICALBUM = 10
         const val MUSICARTIST = 11
         const val MUSICTRACK = 12
+        const val CITY = 13
+        const val COUNTRY = 14
+        const val REGION = 15
     }
 
     @JvmField var value_type: Int? = null
@@ -179,6 +185,9 @@ class CSlotValue : Structure(), Structure.ByValue {
         MUSICALBUM -> MusicAlbumValue(value.readString())
         MUSICARTIST -> MusicArtistValue(value.readString())
         MUSICTRACK -> MusicTrackValue(value.readString())
+        CITY -> CityValue(value.readString())
+        COUNTRY -> CountryValue(value.readString())
+        REGION -> RegionValue(value.readString())
         else -> throw IllegalArgumentException("unknown value type $value_type")
     }
 
