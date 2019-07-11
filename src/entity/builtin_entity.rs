@@ -209,7 +209,7 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::City => &[
                 "Berlin",
                 "Essen",
-                "Zurich",
+                "Zürich",
                 "Paris",
             ],
             BuiltinEntityKind::Country => &[
