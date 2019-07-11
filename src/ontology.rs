@@ -73,6 +73,9 @@ pub enum SlotValue {
     MusicAlbum(StringValue),
     MusicArtist(StringValue),
     MusicTrack(StringValue),
+    City(StringValue),
+    Country(StringValue),
+    Region(StringValue),
 }
 
 /// This struct is required in order to use serde Internally tagged enum representation

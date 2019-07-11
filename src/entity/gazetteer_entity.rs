@@ -5,7 +5,7 @@ use failure::format_err;
 
 sub_entity_kind!(
     BuiltinGazetteerEntityKind,
-    [MusicAlbum, MusicArtist, MusicTrack]
+    [City, Country, MusicAlbum, MusicArtist, MusicTrack, Region]
 );
 
 pub trait TryIntoBuiltinGazetteerEntityKind {

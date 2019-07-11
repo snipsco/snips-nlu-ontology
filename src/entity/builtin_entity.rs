@@ -53,7 +53,10 @@ enum_kind!(
         Percentage,
         MusicAlbum,
         MusicArtist,
-        MusicTrack
+        MusicTrack,
+        City,
+        Country,
+        Region
     ]
 );
 
@@ -98,6 +101,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => "snips/musicAlbum",
             BuiltinEntityKind::MusicArtist => "snips/musicArtist",
             BuiltinEntityKind::MusicTrack => "snips/musicTrack",
+            BuiltinEntityKind::City => "snips/city",
+            BuiltinEntityKind::Country => "snips/country",
+            BuiltinEntityKind::Region => "snips/region",
         }
     }
 
@@ -123,6 +129,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => "Matches a music album",
             BuiltinEntityKind::MusicArtist => "Matches a music artist",
             BuiltinEntityKind::MusicTrack => "Matches a music track",
+            BuiltinEntityKind::City => "Matches main local and world cities",
+            BuiltinEntityKind::Country => "Matches countries around the world",
+            BuiltinEntityKind::Region => "Matches local administrative regions",
         }
     }
 }
@@ -136,8 +145,8 @@ impl BuiltinEntityKind {
             Language::FR => self.fr_examples(),
             Language::JA => self.ja_examples(),
             Language::IT => self.it_examples(),
-            Language::PT_PT => self.pt_examples(),
-            Language::PT_BR => self.pt_examples(),
+            Language::PT_PT => self.pt_pt_examples(),
+            Language::PT_BR => self.pt_br_examples(),
             Language::KO => self.ko_examples(),
         }
     }
@@ -178,6 +187,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["Berlin", "Essen", "Zurich", "Paris"],
+            BuiltinEntityKind::Country => &["Frankreich"],
+            BuiltinEntityKind::Region => &["Bayern", "Tirol"],
         }
     }
 
@@ -218,6 +230,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["San Francisco", "Los Angeles", "Beijing", "Paris"],
+            BuiltinEntityKind::Country => &["France"],
+            BuiltinEntityKind::Region => &["California", "Washington"],
         }
     }
 
@@ -297,6 +312,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["Madrid", "Barcelona", "Bilbao", "Paris"],
+            BuiltinEntityKind::Country => &["Francia"],
+            BuiltinEntityKind::Region => &["Andalusia", "Catalonia"],
         }
     }
 
@@ -348,6 +366,16 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &[
+                "Paris",
+                "Brest",
+                "Bruxelles",
+                "Pékin",
+                "Londres",
+                "Luxembourg",
+            ],
+            BuiltinEntityKind::Country => &["France"],
+            BuiltinEntityKind::Region => &["Bretagne", "Corse", "Province de Liège"],
         }
     }
 
@@ -429,10 +457,13 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["San Francisco", "Roma", "Agrigente"],
+            BuiltinEntityKind::Country => &["Italia"],
+            BuiltinEntityKind::Region => &["Sardinia", "Sicilia"],
         }
     }
 
-    fn pt_examples(&self) -> &'static [&'static str] {
+    fn pt_br_examples(&self) -> &'static [&'static str] {
         match *self {
             BuiltinEntityKind::AmountOfMoney => &[
                 "10$",
@@ -451,12 +482,8 @@ impl BuiltinEntityKind {
                 "oito anos e dois semanas",
                 "um ano quatro semanas e tres horas",
             ],
-            BuiltinEntityKind::Number => &[
-                "2001",
-            ],
-            BuiltinEntityKind::Ordinal => &[
-                "primeira",
-            ],
+            BuiltinEntityKind::Number => &["2001"],
+            BuiltinEntityKind::Ordinal => &["primeira"],
             BuiltinEntityKind::Temperature => &[
                 "70 graus kelvin",
                 "3°C",
@@ -464,15 +491,53 @@ impl BuiltinEntityKind {
                 "quatro graus centígrados",
                 "-459,67 °F",
             ],
-            BuiltinEntityKind::Time => &[
-                "hoje",
-            ],
-            BuiltinEntityKind::Percentage => &[
-                "25%",
-            ],
+            BuiltinEntityKind::Time => &["hoje"],
+            BuiltinEntityKind::Percentage => &["25%"],
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["São Paulo", "Rio", "Los Angeles", "Paris"],
+            BuiltinEntityKind::Country => &["Brasil"],
+            BuiltinEntityKind::Region => &["Bahia", "Amazonas"],
+        }
+    }
+
+    fn pt_pt_examples(&self) -> &'static [&'static str] {
+        match *self {
+            BuiltinEntityKind::AmountOfMoney => &[
+                "10$",
+                "15€",
+                "cinco euros",
+                "16,65 €",
+                "dois euros e cinco centavos",
+                "dez libras esterlinas",
+                "845584 francos suíços",
+            ],
+            BuiltinEntityKind::Duration => &[
+                "1 hora",
+                "3 meses",
+                "dez minutos",
+                "meia hora",
+                "oito anos e dois semanas",
+                "um ano quatro semanas e tres horas",
+            ],
+            BuiltinEntityKind::Number => &["2001"],
+            BuiltinEntityKind::Ordinal => &["primeira"],
+            BuiltinEntityKind::Temperature => &[
+                "70 graus kelvin",
+                "3°C",
+                "dez graus",
+                "quatro graus centígrados",
+                "-459,67 °F",
+            ],
+            BuiltinEntityKind::Time => &["hoje"],
+            BuiltinEntityKind::Percentage => &["25%"],
+            BuiltinEntityKind::MusicAlbum => &["Discovery"],
+            BuiltinEntityKind::MusicArtist => &["Daft Punk"],
+            BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["Liboa", "Porto", "Amadora"],
+            BuiltinEntityKind::Country => &["Portugal", "Espanha "],
+            BuiltinEntityKind::Region => &["Norte", "Alentejo"],
         }
     }
 
@@ -493,6 +558,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["パリ", "東京", "京都"],
+            BuiltinEntityKind::Country => &["日本"],
+            BuiltinEntityKind::Region => &["北海道", "関東地方"],
         }
     }
 
@@ -508,6 +576,9 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &["Discovery"],
             BuiltinEntityKind::MusicArtist => &["Daft Punk"],
             BuiltinEntityKind::MusicTrack => &["Harder Better Faster Stronger"],
+            BuiltinEntityKind::City => &["서울", "파리", "부산광역시"],
+            BuiltinEntityKind::Country => &["프랑스"],
+            BuiltinEntityKind::Region => &["충청도", "강원도"],
         }
     }
 }
@@ -580,6 +651,21 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicTrack => {
                 serde_json::to_string_pretty(&vec![SlotValue::MusicTrack(StringValue {
                     value: "Harder Better Faster Stronger".to_string(),
+                })])
+            }
+            BuiltinEntityKind::City => {
+                serde_json::to_string_pretty(&vec![SlotValue::City(StringValue {
+                    value: "Paris".to_string(),
+                })])
+            }
+            BuiltinEntityKind::Country => {
+                serde_json::to_string_pretty(&vec![SlotValue::Country(StringValue {
+                    value: "France".to_string(),
+                })])
+            }
+            BuiltinEntityKind::Region => {
+                serde_json::to_string_pretty(&vec![SlotValue::Region(StringValue {
+                    value: "California".to_string(),
                 })])
             }
         }
@@ -669,6 +755,36 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::MusicAlbum => &[Language::EN, Language::FR],
             BuiltinEntityKind::MusicArtist => &[Language::EN, Language::FR],
             BuiltinEntityKind::MusicTrack => &[Language::EN, Language::FR],
+            BuiltinEntityKind::City => &[
+                Language::DE,
+                Language::EN,
+                Language::ES,
+                Language::FR,
+                Language::IT,
+                Language::JA,
+                Language::PT_BR,
+                Language::PT_PT,
+            ],
+            BuiltinEntityKind::Country => &[
+                Language::DE,
+                Language::EN,
+                Language::ES,
+                Language::FR,
+                Language::IT,
+                Language::JA,
+                Language::PT_BR,
+                Language::PT_PT,
+            ],
+            BuiltinEntityKind::Region => &[
+                Language::DE,
+                Language::EN,
+                Language::ES,
+                Language::FR,
+                Language::IT,
+                Language::JA,
+                Language::PT_BR,
+                Language::PT_PT,
+            ],
         }
     }
 }
