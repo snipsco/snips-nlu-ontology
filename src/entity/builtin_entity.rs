@@ -595,6 +595,16 @@ impl BuiltinEntityKind {
                 "dez libras esterlinas",
                 "845584 francos suíços",
             ],
+            // Datetime subtypes not supported for this language,
+            // cf. BuiltinEntityKind.supported_languages(),
+            // but how to make this function aware of that?
+            BuiltinEntityKind::Datetime => &[
+                "hoje",
+            ],
+            BuiltinEntityKind::Date => &[],
+            BuiltinEntityKind::Time => &[],
+            BuiltinEntityKind::DatePeriod => &[],
+            BuiltinEntityKind::TimePeriod => &[],
             BuiltinEntityKind::Duration => &[
                 "1 hora",
                 "3 meses",
@@ -615,9 +625,6 @@ impl BuiltinEntityKind {
                 "dez graus",
                 "quatro graus centígrados",
                 "-459,67 °F",
-            ],
-            BuiltinEntityKind::Datetime => &[
-                "hoje",
             ],
             BuiltinEntityKind::Percentage => &[
                 "25%",
@@ -655,6 +662,9 @@ impl BuiltinEntityKind {
             // Datetime subtypes not supported for this language,
             // cf. BuiltinEntityKind.supported_languages(),
             // but how to make this function aware of that?
+            BuiltinEntityKind::Datetime => &[
+                "hoje",
+            ],
             BuiltinEntityKind::Date => &[],
             BuiltinEntityKind::Time => &[],
             BuiltinEntityKind::DatePeriod => &[],
@@ -679,9 +689,6 @@ impl BuiltinEntityKind {
                 "dez graus",
                 "quatro graus centígrados",
                 "-459,67 °F",
-            ],
-            BuiltinEntityKind::Time => &[
-                "hoje",
             ],
             BuiltinEntityKind::Percentage => &[
                 "25%",
