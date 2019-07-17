@@ -12,7 +12,7 @@ cargo build --all
 
 if [[ `git status --porcelain` ]]; then
   echo "The build step produced some changes that are not versioned"
-  echo git status
+  git status
   exit 1
 fi
 
