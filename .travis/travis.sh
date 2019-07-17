@@ -9,6 +9,13 @@ fi
 export PATH="$HOME/.cargo/bin:$PATH"
 
 cargo build --all
+
+if [[ `git status --porcelain` ]]; then
+  echo "The build step produced some changes that are not versioned"
+  echo git status
+  exit 1
+fi
+
 cargo test --all
 
 if [[ "$KOTLIN_TESTS" == "true" ]]; then
