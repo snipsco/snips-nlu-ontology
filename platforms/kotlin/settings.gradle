@@ -16,4 +16,3 @@ include 'services:webservice'
 */
 
 rootProject.name = 'snips-nlu-ontology'
-include ':snips-nlu-ontology-export'
