@@ -100,7 +100,6 @@ Supported builtin entities
 |               |                     |                     | | French              |
 |               |                     |                     | | Italian             |
 |               |                     |                     | | Japanese            |
-|               |                     |                     | | Korean              |
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
@@ -110,7 +109,6 @@ Supported builtin entities
 |               |                     |                     | | French              |
 |               |                     |                     | | Italian             |
 |               |                     |                     | | Japanese            |
-|               |                     |                     | | Korean              |
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
@@ -120,7 +118,6 @@ Supported builtin entities
 |               |                     |                     | | French              |
 |               |                     |                     | | Italian             |
 |               |                     |                     | | Japanese            |
-|               |                     |                     | | Korean              |
 |               |                     |                     | | Portuguese - Brazil |
 |               |                     |                     | | Portuguese - Europe |
 +---------------+---------------------+---------------------+-----------------------+
