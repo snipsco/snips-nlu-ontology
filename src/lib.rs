@@ -16,5 +16,3 @@ pub use entity::gazetteer_entity::*;
 pub use entity::grammar_entity::*;
 pub use language::*;
 pub use ontology::*;
-
-pub static ONTOLOGY_VERSION: &str = "0.7.0";

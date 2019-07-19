@@ -12,13 +12,6 @@ pub use ontology::*;
 macro_rules! export_nlu_ontology_c_symbols {
     () => {
         #[no_mangle]
-        pub extern "C" fn snips_nlu_ontology_version() -> *const libc::c_char {
-            ::std::ffi::CString::new(snips_nlu_ontology::ONTOLOGY_VERSION)
-                .unwrap()
-                .into_raw()
-        }
-
-        #[no_mangle]
         pub extern "C" fn snips_nlu_ontology_destroy_string_array(
             ptr: *mut ::ffi_utils::CStringArray,
         ) -> ::ffi_utils::SNIPS_RESULT {
