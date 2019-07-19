@@ -1,9 +1,5 @@
 #![allow(non_camel_case_types)]
 
-use std::ffi::CString;
-use std::ptr::null;
-use std::slice;
-
 use failure::{bail, Fallible, ResultExt};
 use ffi_utils::{
     create_optional_rust_string_from, create_rust_string_from, take_back_c_string,
@@ -11,6 +7,9 @@ use ffi_utils::{
 };
 use libc;
 use snips_nlu_ontology::*;
+use std::ffi::CString;
+use std::ptr::null;
+use std::slice;
 
 /// Result of intent parsing
 #[repr(C)]

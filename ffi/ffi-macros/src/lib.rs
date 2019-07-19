@@ -1,12 +1,10 @@
 mod builtin_entity;
 mod language;
 mod ontology;
-
-use snips_nlu_ontology::*;
-
 pub use builtin_entity::*;
 pub use language::*;
 pub use ontology::*;
+use snips_nlu_ontology::*;
 
 #[macro_export]
 macro_rules! export_nlu_ontology_c_symbols {

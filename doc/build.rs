@@ -1,11 +1,10 @@
 #[macro_use]
 extern crate prettytable;
 
-use std::fs::File;
-use std::io::prelude::*;
-
 use prettytable::Table;
 use snips_nlu_ontology::*;
+use std::fs::File;
+use std::io::prelude::*;
 
 fn main() {
     let mut readme = String::new();
@@ -63,11 +62,7 @@ fn add_supported_builtin_entities(readme: &mut String) {
     readme.push_str("\n");
     let mut table = Table::new();
     table.set_format(*prettytable::format::consts::FORMAT_DEFAULT);
-    table.set_titles(row![
-        "Entity",
-        "Identifier",
-        "Category"
-    ]);
+    table.set_titles(row!["Entity", "Identifier", "Category"]);
 
     let mut all_entities = BuiltinEntityKind::all().iter().collect::<Vec<_>>();
     all_entities.sort_by(|a, b| a.identifier().cmp(b.identifier()));
@@ -77,11 +72,7 @@ fn add_supported_builtin_entities(readme: &mut String) {
             .ok()
             .map(|_| "`Gazetteer Entity`_".to_string())
             .unwrap_or_else(|| "`Grammar Entity`_".to_string());
-        table.add_row(row![
-            entity.to_string(),
-            entity.identifier(),
-            category
-        ]);
+        table.add_row(row![entity.to_string(), entity.identifier(), category]);
     }
     readme.push_str(&*table.to_string());
     readme.push_str("\n");

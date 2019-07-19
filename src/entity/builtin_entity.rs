@@ -1,12 +1,10 @@
-use std::ops::Range;
-
-use failure::format_err;
-use serde::Deserialize;
-use serde_json;
-
 use crate::enum_kind;
 use crate::errors::*;
 use crate::ontology::*;
+use failure::format_err;
+use serde::Deserialize;
+use serde_json;
+use std::ops::Range;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct BuiltinEntity {
@@ -119,11 +117,17 @@ impl BuiltinEntityKind {
             BuiltinEntityKind::Number => "Matches a cardinal number",
             BuiltinEntityKind::Ordinal => "Matches an ordinal number",
             BuiltinEntityKind::Temperature => "Matches a temperature",
-            BuiltinEntityKind::Datetime => "Matches a date, time, interval or a date and time together",
+            BuiltinEntityKind::Datetime => {
+                "Matches a date, time, interval or a date and time together"
+            }
             BuiltinEntityKind::Date => "Matches a date",
             BuiltinEntityKind::Time => "Matches a time of day",
-            BuiltinEntityKind::DatePeriod => "Matches a period of time spanning over days or larger grains",
-            BuiltinEntityKind::TimePeriod => "Matches a period of time spanning over hours or smaller grains",
+            BuiltinEntityKind::DatePeriod => {
+                "Matches a period of time spanning over days or larger grains"
+            }
+            BuiltinEntityKind::TimePeriod => {
+                "Matches a period of time spanning over hours or smaller grains"
+            }
             BuiltinEntityKind::Percentage => "Matches a percentage",
             BuiltinEntityKind::MusicAlbum => "Matches a music album",
             BuiltinEntityKind::MusicArtist => "Matches a music artist",
@@ -185,32 +189,32 @@ impl BuiltinEntityKind {
                     to: Some("2017-06-08 00:00:00 +02:00".to_string()),
                 }),
             ]),
-            BuiltinEntityKind::Date => serde_json::to_string_pretty(&vec![
-                SlotValue::InstantTime(InstantTimeValue {
+            BuiltinEntityKind::Date => {
+                serde_json::to_string_pretty(&vec![SlotValue::InstantTime(InstantTimeValue {
                     value: "2017-06-13 00:00:00 +02:00".to_string(),
                     grain: Grain::Day,
                     precision: Precision::Exact,
-                }),
-            ]),
-            BuiltinEntityKind::Time => serde_json::to_string_pretty(&vec![
-                SlotValue::InstantTime(InstantTimeValue {
+                })])
+            }
+            BuiltinEntityKind::Time => {
+                serde_json::to_string_pretty(&vec![SlotValue::InstantTime(InstantTimeValue {
                     value: "2017-06-13 18:00:00 +02:00".to_string(),
                     grain: Grain::Hour,
                     precision: Precision::Exact,
-                }),
-            ]),
-            BuiltinEntityKind::DatePeriod => serde_json::to_string_pretty(&vec![
-                SlotValue::TimeInterval(TimeIntervalValue {
+                })])
+            }
+            BuiltinEntityKind::DatePeriod => {
+                serde_json::to_string_pretty(&vec![SlotValue::TimeInterval(TimeIntervalValue {
                     from: Some("2017-06-07 00:00:00 +02:00".to_string()),
                     to: Some("2017-06-09 00:00:00 +02:00".to_string()),
-                }),
-            ]),
-            BuiltinEntityKind::TimePeriod => serde_json::to_string_pretty(&vec![
-                SlotValue::TimeInterval(TimeIntervalValue {
+                })])
+            }
+            BuiltinEntityKind::TimePeriod => {
+                serde_json::to_string_pretty(&vec![SlotValue::TimeInterval(TimeIntervalValue {
                     from: Some("2017-06-07 18:00:00 +02:00".to_string()),
                     to: Some("2017-06-07 20:00:00 +02:00".to_string()),
-                }),
-            ]),
+                })])
+            }
             BuiltinEntityKind::Percentage => {
                 serde_json::to_string_pretty(&vec![SlotValue::Percentage(PercentageValue {
                     value: 20.,
