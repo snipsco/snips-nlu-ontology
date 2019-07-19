@@ -8,10 +8,7 @@ pub mod macros;
 pub mod entity;
 mod ontology;
 
-pub use entity::builtin_entity::{
-    complete_entity_ontology, language_entity_ontology, BuiltinEntity, BuiltinEntityKind,
-    IntoBuiltinEntityKind,
-};
+pub use entity::builtin_entity::{BuiltinEntity, BuiltinEntityKind, IntoBuiltinEntityKind};
 pub use entity::gazetteer_entity::*;
 pub use entity::grammar_entity::*;
 pub use language::*;

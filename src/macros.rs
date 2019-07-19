@@ -34,6 +34,12 @@ macro_rules! enum_kind {
                 }
             }
         }
+
+        impl IntoBuiltinEntityKind for $kindname {
+            fn into_builtin_kind(self) -> BuiltinEntityKind {
+                self
+            }
+        }
     }
 }
 
