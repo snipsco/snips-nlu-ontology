@@ -1,11 +1,10 @@
 #[macro_use]
 extern crate prettytable;
 
-use std::fs::File;
-use std::io::prelude::*;
-
 use prettytable::Table;
 use snips_nlu_ontology::*;
+use std::fs::File;
+use std::io::prelude::*;
 
 fn main() {
     let mut readme = String::new();
@@ -35,11 +34,6 @@ fn add_header(readme: &mut String) {
     readme.push_str("Ontology of the Snips NLU library API which describes supported languages and builtin entities.\n");
     readme.push_str("\n");
 
-    readme.push_str("Important Note\n");
-    readme.push_str("--------------\n");
-    readme.push_str("\n");
-    readme.push_str("The code related to builtin entity parsing has been moved to the `snips-nlu-parsers`_ repository.\n");
-
     readme.push_str("\n");
 }
 
@@ -63,32 +57,17 @@ fn add_supported_builtin_entities(readme: &mut String) {
     readme.push_str("\n");
     let mut table = Table::new();
     table.set_format(*prettytable::format::consts::FORMAT_DEFAULT);
-    table.set_titles(row![
-        "Entity",
-        "Identifier",
-        "Category",
-        "Supported languages"
-    ]);
+    table.set_titles(row!["Entity", "Identifier", "Category"]);
 
     let mut all_entities = BuiltinEntityKind::all().iter().collect::<Vec<_>>();
     all_entities.sort_by(|a, b| a.identifier().cmp(b.identifier()));
 
     for entity in all_entities.clone() {
-        let supported_languages: String = entity
-            .supported_languages()
-            .iter()
-            .map(|l| format!("| {}\n", l.full_name()))
-            .collect();
         let category = BuiltinGazetteerEntityKind::from_identifier(entity.identifier())
             .ok()
             .map(|_| "`Gazetteer Entity`_".to_string())
             .unwrap_or_else(|| "`Grammar Entity`_".to_string());
-        table.add_row(row![
-            entity.to_string(),
-            entity.identifier(),
-            category,
-            supported_languages
-        ]);
+        table.add_row(row![entity.to_string(), entity.identifier(), category]);
     }
     readme.push_str(&*table.to_string());
     readme.push_str("\n");
@@ -169,5 +148,4 @@ fn add_footer(readme: &mut String) {
     readme.push_str(
         ".. _gazetteer entity parser: https://github.com/snipsco/gazetteer-entity-parser\n",
     );
-    readme.push_str(".. _snips-nlu-parsers: https://github.com/snipsco/snips-nlu-parsers\n");
 }

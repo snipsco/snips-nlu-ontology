@@ -1,9 +1,8 @@
-use libc;
-use std::ffi::CString;
-
 use ffi_utils::CStringArray;
 use lazy_static::lazy_static;
+use libc;
 use snips_nlu_ontology::Language;
+use std::ffi::CString;
 
 // We are forced to wrap this Box because lazy_static! require to be Sync but
 // ffi's type `*const libc::c_char` isn't
