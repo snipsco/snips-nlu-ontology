@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.66.0]
 ### Changed
+- Remove references to entity parsing [#151](https://github.com/snipsco/snips-nlu-ontology/pull/151)
 - Remove support for music entities in korean [#148](https://github.com/snipsco/snips-nlu-ontology/pull/148)
 - Remove snips-nlu-ontology-export kotlin package [#149](https://github.com/snipsco/snips-nlu-ontology/pull/149)
 
