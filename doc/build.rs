@@ -34,11 +34,6 @@ fn add_header(readme: &mut String) {
     readme.push_str("Ontology of the Snips NLU library API which describes supported languages and builtin entities.\n");
     readme.push_str("\n");
 
-    readme.push_str("Important Note\n");
-    readme.push_str("--------------\n");
-    readme.push_str("\n");
-    readme.push_str("The code related to builtin entity parsing has been moved to the `snips-nlu-parsers`_ repository.\n");
-
     readme.push_str("\n");
 }
 
@@ -153,5 +148,4 @@ fn add_footer(readme: &mut String) {
     readme.push_str(
         ".. _gazetteer entity parser: https://github.com/snipsco/gazetteer-entity-parser\n",
     );
-    readme.push_str(".. _snips-nlu-parsers: https://github.com/snipsco/snips-nlu-parsers\n");
 }
