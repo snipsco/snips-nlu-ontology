@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.66.0]
 ### Changed
 - Remove support for music entities in korean [#148](https://github.com/snipsco/snips-nlu-ontology/pull/148)
 - Remove snips-nlu-ontology-export kotlin package [#149](https://github.com/snipsco/snips-nlu-ontology/pull/149)
@@ -190,7 +190,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
-[Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.65.0...HEAD
+[0.66.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.65.0...0.66.0
 [0.65.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.8...0.65.0
 [0.64.8]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.7...0.64.8
 [0.64.7]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.6...0.64.7
