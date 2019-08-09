@@ -42,6 +42,7 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var input: Pointer? = null
     @JvmField var intent: CIntentClassifierResult? = null
     @JvmField var slots: CSlots? = null
+    @JvmField var alternatives: CIntentParserResultArray? = null
 
     init {
         read()
@@ -53,8 +54,29 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
 
     fun toIntentParserResult() = IntentParserResult(input = input.readString(),
                                                     intent = intent!!.toIntentClassifierResult(),
-                                                    slots = slots!!.toSlotList())
+                                                    slots = slots!!.toSlotList(),
+                                                    alternatives = alternatives!!.toIntentParserResultList())
+}
 
+class CIntentParserResultArray(p: Pointer?) : Structure(p), Structure.ByReference {
+
+    @JvmField var intent_parser_results: Pointer? = null
+    @JvmField var size: Int = -1
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
+
+    override fun getFieldOrder() = listOf("intent_parser_results", "size")
+
+    fun toIntentParserResultList(): List<IntentParserResult> =
+            if (size > 0)
+                CIntentParserResult(intent_parser_results!!)
+                        .toArray(size)
+                        .map { (it as CIntentParserResult).toIntentParserResult() }
+            else listOf<IntentParserResult>()
 }
 
 class CIntentClassifierResult(p: Pointer?) : Structure(p), Structure.ByReference {
@@ -190,7 +212,6 @@ class CSlotValue : Structure(), Structure.ByValue {
         REGION -> RegionValue(value.readString())
         else -> throw IllegalArgumentException("unknown value type $value_type")
     }
-
 }
 
 class CInstantTimeValue(p: Pointer) : Structure(p), Structure.ByReference {

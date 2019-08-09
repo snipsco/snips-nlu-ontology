@@ -5,6 +5,7 @@ pub struct IntentParserResult {
     pub input: String,
     pub intent: IntentClassifierResult,
     pub slots: Vec<Slot>,
+    pub alternatives: Vec<IntentParserResult>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -22,7 +23,7 @@ pub struct Slot {
     pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")] 
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub confidence_score: Option<f32>,
 }
 

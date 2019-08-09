@@ -21,6 +21,8 @@ pub struct CIntentParserResult {
     pub intent: *const CIntentClassifierResult,
     /// The slots extracted
     pub slots: *const CSlotList,
+    /// Alternative parsings
+    pub alternatives: *const CIntentParserResultArray,
 }
 
 impl From<IntentParserResult> for CIntentParserResult {
@@ -29,6 +31,7 @@ impl From<IntentParserResult> for CIntentParserResult {
             input: CString::new(input.input).unwrap().into_raw(),
             intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
             slots: CSlotList::from(input.slots).into_raw_pointer(),
+            alternatives: CIntentParserResultArray::from(input.alternatives).into_raw_pointer(),
         }
     }
 }
@@ -39,6 +42,7 @@ impl AsRust<IntentParserResult> for CIntentParserResult {
             input: create_rust_string_from!(self.input),
             intent: unsafe { &*self.intent }.as_rust()?,
             slots: unsafe { &*self.slots }.as_rust()?,
+            alternatives: unsafe { &*self.alternatives }.as_rust()?,
         })
     }
 }
@@ -48,6 +52,60 @@ impl Drop for CIntentParserResult {
         take_back_c_string!(self.input);
         let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
         let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
+        let _ = unsafe { CIntentParserResultArray::from_raw_pointer(self.alternatives) };
+    }
+}
+
+/// Wrapper around a list of IntentParserResult
+#[repr(C)]
+#[derive(Debug)]
+pub struct CIntentParserResultArray {
+    /// Pointer to the first result of the list
+    pub intent_parser_results: *const CIntentParserResult,
+    /// Number of results in the list
+    pub size: libc::int32_t,
+}
+
+impl From<Vec<IntentParserResult>> for CIntentParserResultArray {
+    fn from(input: Vec<IntentParserResult>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            intent_parser_results: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CIntentParserResult::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CIntentParserResult,
+        }
+    }
+}
+
+impl AsRust<Vec<IntentParserResult>> for CIntentParserResultArray {
+    fn as_rust(&self) -> Fallible<Vec<IntentParserResult>> {
+        let mut result = vec![];
+        let ic_results = unsafe {
+            std::slice::from_raw_parts_mut(
+                self.intent_parser_results as *mut CIntentParserResult,
+                self.size as usize,
+            )
+        };
+
+        for ic_result in ic_results {
+            result.push(ic_result.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
+impl Drop for CIntentParserResultArray {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.intent_parser_results as *mut CIntentParserResult,
+                self.size as usize,
+            ))
+        };
     }
 }
 
@@ -933,7 +991,11 @@ mod tests {
         round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
             intent_name: Some("intent_name".to_string()),
             confidence_score: 0.5,
-        })
+        });
+        round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
+            intent_name: None,
+            confidence_score: 0.5,
+        });
     }
 
     #[test]
@@ -968,6 +1030,57 @@ mod tests {
                 slot_name: "slot_name".to_string(),
                 confidence_score: Some(1.0),
             }],
+            alternatives: vec![],
+        });
+        round_trip_test::<_, CIntentParserResult>(IntentParserResult {
+            input: "input".to_string(),
+            intent: IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.6,
+            },
+            slots: vec![],
+            alternatives: vec![IntentParserResult {
+                input: "input".to_string(),
+                intent: IntentClassifierResult {
+                    intent_name: Some("other_intent_name".to_string()),
+                    confidence_score: 0.4,
+                },
+                slots: vec![],
+                alternatives: vec![],
+            }],
         })
+    }
+
+    #[test]
+    fn round_trip_c_intent_parser_result_array() {
+        round_trip_test::<_, CIntentParserResultArray>(vec![
+            IntentParserResult {
+                input: "input".to_string(),
+                intent: IntentClassifierResult {
+                    intent_name: Some("intent_name".to_string()),
+                    confidence_score: 0.5,
+                },
+                slots: vec![Slot {
+                    raw_value: "raw_value".to_string(),
+                    value: SlotValue::Custom(StringValue {
+                        value: "custom_slot".to_string(),
+                    }),
+                    range: 0..42,
+                    entity: "entity".to_string(),
+                    slot_name: "slot_name".to_string(),
+                    confidence_score: Some(1.0),
+                }],
+                alternatives: vec![],
+            },
+            IntentParserResult {
+                input: "input".to_string(),
+                intent: IntentClassifierResult {
+                    intent_name: Some("other_intent_name".to_string()),
+                    confidence_score: 0.4,
+                },
+                slots: vec![],
+                alternatives: vec![],
+            },
+        ]);
     }
 }
