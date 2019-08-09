@@ -22,7 +22,7 @@ pub struct CIntentParserResult {
     /// The slots extracted
     pub slots: *const CSlotList,
     /// Alternative parsings
-    pub alternatives: *const CIntentParserResultArray,
+    pub alternatives: *const CIntentParserAlternativeArray,
 }
 
 impl From<IntentParserResult> for CIntentParserResult {
@@ -31,7 +31,8 @@ impl From<IntentParserResult> for CIntentParserResult {
             input: CString::new(input.input).unwrap().into_raw(),
             intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
             slots: CSlotList::from(input.slots).into_raw_pointer(),
-            alternatives: CIntentParserResultArray::from(input.alternatives).into_raw_pointer(),
+            alternatives: CIntentParserAlternativeArray::from(input.alternatives)
+                .into_raw_pointer(),
         }
     }
 }
@@ -52,41 +53,76 @@ impl Drop for CIntentParserResult {
         take_back_c_string!(self.input);
         let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
         let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
-        let _ = unsafe { CIntentParserResultArray::from_raw_pointer(self.alternatives) };
+        let _ = unsafe { CIntentParserAlternativeArray::from_raw_pointer(self.alternatives) };
     }
 }
 
-/// Wrapper around a list of IntentParserResult
+/// Alternative intent parsing result
 #[repr(C)]
 #[derive(Debug)]
-pub struct CIntentParserResultArray {
-    /// Pointer to the first result of the list
-    pub intent_parser_results: *const CIntentParserResult,
-    /// Number of results in the list
-    pub size: libc::int32_t,
+pub struct CIntentParserAlternative {
+    /// The result of intent classification
+    pub intent: *const CIntentClassifierResult,
+    /// The slots extracted
+    pub slots: *const CSlotList,
 }
 
-impl From<Vec<IntentParserResult>> for CIntentParserResultArray {
-    fn from(input: Vec<IntentParserResult>) -> Self {
+impl From<IntentParserAlternative> for CIntentParserAlternative {
+    fn from(input: IntentParserAlternative) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
-            intent_parser_results: Box::into_raw(
-                input
-                    .into_iter()
-                    .map(CIntentParserResult::from)
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            ) as *const CIntentParserResult,
+            intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
+            slots: CSlotList::from(input.slots).into_raw_pointer(),
         }
     }
 }
 
-impl AsRust<Vec<IntentParserResult>> for CIntentParserResultArray {
-    fn as_rust(&self) -> Fallible<Vec<IntentParserResult>> {
+impl AsRust<IntentParserAlternative> for CIntentParserAlternative {
+    fn as_rust(&self) -> Fallible<IntentParserAlternative> {
+        Ok(IntentParserAlternative {
+            intent: unsafe { &*self.intent }.as_rust()?,
+            slots: unsafe { &*self.slots }.as_rust()?,
+        })
+    }
+}
+
+impl Drop for CIntentParserAlternative {
+    fn drop(&mut self) {
+        let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
+        let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
+    }
+}
+
+/// Wrapper around a list of IntentParserAlternative
+#[repr(C)]
+#[derive(Debug)]
+pub struct CIntentParserAlternativeArray {
+    /// Pointer to the first result of the list
+    pub intent_parser_alternatives: *const CIntentParserAlternative,
+    /// Number of results in the list
+    pub size: libc::int32_t,
+}
+
+impl From<Vec<IntentParserAlternative>> for CIntentParserAlternativeArray {
+    fn from(input: Vec<IntentParserAlternative>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            intent_parser_alternatives: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CIntentParserAlternative::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CIntentParserAlternative,
+        }
+    }
+}
+
+impl AsRust<Vec<IntentParserAlternative>> for CIntentParserAlternativeArray {
+    fn as_rust(&self) -> Fallible<Vec<IntentParserAlternative>> {
         let mut result = vec![];
         let ic_results = unsafe {
             std::slice::from_raw_parts_mut(
-                self.intent_parser_results as *mut CIntentParserResult,
+                self.intent_parser_alternatives as *mut CIntentParserAlternative,
                 self.size as usize,
             )
         };
@@ -98,11 +134,11 @@ impl AsRust<Vec<IntentParserResult>> for CIntentParserResultArray {
     }
 }
 
-impl Drop for CIntentParserResultArray {
+impl Drop for CIntentParserAlternativeArray {
     fn drop(&mut self) {
         let _ = unsafe {
             Box::from_raw(slice::from_raw_parts_mut(
-                self.intent_parser_results as *mut CIntentParserResult,
+                self.intent_parser_alternatives as *mut CIntentParserAlternative,
                 self.size as usize,
             ))
         };
@@ -1039,23 +1075,40 @@ mod tests {
                 confidence_score: 0.6,
             },
             slots: vec![],
-            alternatives: vec![IntentParserResult {
-                input: "input".to_string(),
+            alternatives: vec![IntentParserAlternative {
                 intent: IntentClassifierResult {
                     intent_name: Some("other_intent_name".to_string()),
                     confidence_score: 0.4,
                 },
                 slots: vec![],
-                alternatives: vec![],
             }],
         })
     }
 
     #[test]
-    fn round_trip_c_intent_parser_result_array() {
-        round_trip_test::<_, CIntentParserResultArray>(vec![
-            IntentParserResult {
-                input: "input".to_string(),
+    fn round_trip_c_intent_parser_alternative() {
+        round_trip_test::<_, CIntentParserAlternative>(IntentParserAlternative {
+            intent: IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.5,
+            },
+            slots: vec![Slot {
+                raw_value: "raw_value".to_string(),
+                value: SlotValue::Custom(StringValue {
+                    value: "custom_slot".to_string(),
+                }),
+                range: 0..42,
+                entity: "entity".to_string(),
+                slot_name: "slot_name".to_string(),
+                confidence_score: Some(1.0),
+            }],
+        });
+    }
+
+    #[test]
+    fn round_trip_c_intent_parser_alternative_array() {
+        round_trip_test::<_, CIntentParserAlternativeArray>(vec![
+            IntentParserAlternative {
                 intent: IntentClassifierResult {
                     intent_name: Some("intent_name".to_string()),
                     confidence_score: 0.5,
@@ -1070,16 +1123,13 @@ mod tests {
                     slot_name: "slot_name".to_string(),
                     confidence_score: Some(1.0),
                 }],
-                alternatives: vec![],
             },
-            IntentParserResult {
-                input: "input".to_string(),
+            IntentParserAlternative {
                 intent: IntentClassifierResult {
                     intent_name: Some("other_intent_name".to_string()),
                     confidence_score: 0.4,
                 },
                 slots: vec![],
-                alternatives: vec![],
             },
         ]);
     }

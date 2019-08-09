@@ -2,6 +2,7 @@ package ai.snips.nlu.ontology.ffi
 
 import ai.snips.nlu.ontology.Grain
 import ai.snips.nlu.ontology.IntentClassifierResult
+import ai.snips.nlu.ontology.IntentParserAlternative
 import ai.snips.nlu.ontology.IntentParserResult
 import ai.snips.nlu.ontology.Precision
 import ai.snips.nlu.ontology.Range
@@ -42,7 +43,7 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var input: Pointer? = null
     @JvmField var intent: CIntentClassifierResult? = null
     @JvmField var slots: CSlots? = null
-    @JvmField var alternatives: CIntentParserResultArray? = null
+    @JvmField var alternatives: CIntentParserAlternativeArray? = null
 
     init {
         read()
@@ -50,17 +51,34 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
 
     override fun getFieldOrder() = listOf("input",
                                           "intent",
-                                          "slots")
+                                          "slots",
+                                          "alternatives")
 
     fun toIntentParserResult() = IntentParserResult(input = input.readString(),
                                                     intent = intent!!.toIntentClassifierResult(),
                                                     slots = slots!!.toSlotList(),
-                                                    alternatives = alternatives!!.toIntentParserResultList())
+                                                    alternatives = alternatives!!.toIntentParserAlternativeList())
 }
 
-class CIntentParserResultArray(p: Pointer?) : Structure(p), Structure.ByReference {
+class CIntentParserAlternative(p: Pointer) : Structure(p), Structure.ByReference {
 
-    @JvmField var intent_parser_results: Pointer? = null
+    @JvmField var intent: CIntentClassifierResult? = null
+    @JvmField var slots: CSlots? = null
+
+    init {
+        read()
+    }
+
+    override fun getFieldOrder() = listOf("intent", "slots")
+
+    fun toIntentParserAlternative() = CIntentParserAlternative(
+            intent = intent!!.toIntentClassifierResult(),
+            slots = slots!!.toSlotList())
+}
+
+class CIntentParserAlternativeArray(p: Pointer?) : Structure(p), Structure.ByReference {
+
+    @JvmField var intent_parser_alternatives: Pointer? = null
     @JvmField var size: Int = -1
 
     init {
@@ -69,14 +87,14 @@ class CIntentParserResultArray(p: Pointer?) : Structure(p), Structure.ByReferenc
 
     constructor(): this(null)
 
-    override fun getFieldOrder() = listOf("intent_parser_results", "size")
+    override fun getFieldOrder() = listOf("intent_parser_alternatives", "size")
 
-    fun toIntentParserResultList(): List<IntentParserResult> =
+    fun toIntentParserAlternativeList(): List<IntentParserAlternative> =
             if (size > 0)
-                CIntentParserResult(intent_parser_results!!)
+                CIntentParserAlternative(intent_parser_alternatives!!)
                         .toArray(size)
-                        .map { (it as CIntentParserResult).toIntentParserResult() }
-            else listOf<IntentParserResult>()
+                        .map { (it as CIntentParserAlternative).toIntentParserAlternative() }
+            else listOf<IntentParserAlternative>()
 }
 
 class CIntentClassifierResult(p: Pointer?) : Structure(p), Structure.ByReference {

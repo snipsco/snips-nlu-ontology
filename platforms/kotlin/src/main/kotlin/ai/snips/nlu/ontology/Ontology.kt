@@ -171,8 +171,13 @@ data class IntentClassifierResult @ParcelConstructor constructor(
         @ParcelProperty("confidenceScore") val confidenceScore: Float)
 
 @Parcel(BEAN)
+data class IntentParserAlternative @ParcelConstructor constructor(
+        @ParcelProperty("intent") val intent: IntentClassifierResult,
+        @ParcelProperty("slots") val slots: List<Slot>)
+
+@Parcel(BEAN)
 data class IntentParserResult @ParcelConstructor constructor(
         @ParcelProperty("input") val input: String,
         @ParcelProperty("intent") val intent: IntentClassifierResult,
         @ParcelProperty("slots") val slots: List<Slot>,
-        @ParcelProperty("alternatives") val slots: List<IntentParserResult>)
+        @ParcelProperty("alternatives") val slots: List<IntentParserAlternative>)

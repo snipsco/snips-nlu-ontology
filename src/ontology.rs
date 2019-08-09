@@ -5,7 +5,13 @@ pub struct IntentParserResult {
     pub input: String,
     pub intent: IntentClassifierResult,
     pub slots: Vec<Slot>,
-    pub alternatives: Vec<IntentParserResult>,
+    pub alternatives: Vec<IntentParserAlternative>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct IntentParserAlternative {
+    pub intent: IntentClassifierResult,
+    pub slots: Vec<Slot>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
