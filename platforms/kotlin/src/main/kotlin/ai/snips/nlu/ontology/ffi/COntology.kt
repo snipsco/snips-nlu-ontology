@@ -71,7 +71,7 @@ class CIntentParserAlternative(p: Pointer) : Structure(p), Structure.ByReference
 
     override fun getFieldOrder() = listOf("intent", "slots")
 
-    fun toIntentParserAlternative() = CIntentParserAlternative(
+    fun toIntentParserAlternative() = IntentParserAlternative(
             intent = intent!!.toIntentClassifierResult(),
             slots = slots!!.toSlotList())
 }

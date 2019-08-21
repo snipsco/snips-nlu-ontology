@@ -180,4 +180,4 @@ data class IntentParserResult @ParcelConstructor constructor(
         @ParcelProperty("input") val input: String,
         @ParcelProperty("intent") val intent: IntentClassifierResult,
         @ParcelProperty("slots") val slots: List<Slot>,
-        @ParcelProperty("alternatives") val slots: List<IntentParserAlternative>)
+        @ParcelProperty("alternatives") val alternatives: List<IntentParserAlternative>)
