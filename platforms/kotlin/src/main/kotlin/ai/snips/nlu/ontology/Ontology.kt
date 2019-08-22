@@ -47,6 +47,7 @@ data class Range @ParcelConstructor constructor(@ParcelProperty("start") val sta
 @Parcel(BEAN)
 data class Slot @ParcelConstructor constructor(@ParcelProperty("rawValue") val rawValue: String,
                                                @ParcelProperty("value") val value: SlotValue,
+                                               @ParcelProperty("alternatives") val alternatives: List<SlotValue>,
                                                @ParcelProperty("range") val range: Range,
                                                @ParcelProperty("entity") val entity: String,
                                                @ParcelProperty("slotName") val slotName: String,

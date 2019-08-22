@@ -26,6 +26,7 @@ pub struct IntentClassifierResult {
 pub struct Slot {
     pub raw_value: String,
     pub value: SlotValue,
+    pub alternatives: Vec<SlotValue>,
     pub range: Range<usize>,
     pub entity: String,
     pub slot_name: String,
@@ -40,10 +41,12 @@ impl Slot {
         entity: String,
         slot_name: String,
         confidence_score: Option<f32>,
+        alternatives: Vec<SlotValue>,
     ) -> Slot {
         Slot {
             raw_value: value.clone(),
             value: SlotValue::Custom(value.into()),
+            alternatives,
             range,
             entity,
             slot_name,
@@ -57,6 +60,7 @@ impl Slot {
         Slot {
             raw_value: self.raw_value,
             value: slot_value,
+            alternatives: self.alternatives,
             range: self.range,
             entity: self.entity,
             slot_name: self.slot_name,
@@ -188,6 +192,7 @@ mod tests {
         let slot = Slot {
             raw_value: "value".into(),
             value: SlotValue::Custom("value".into()),
+            alternatives: vec![],
             range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
@@ -202,6 +207,7 @@ mod tests {
         let slot = Slot {
             raw_value: "fifth".into(),
             value: SlotValue::Ordinal(OrdinalValue { value: 5 }),
+            alternatives: vec![],
             range: 0..5,
             entity: "toto".into(),
             slot_name: "toto".into(),
@@ -220,6 +226,7 @@ mod tests {
                 grain: Grain::Year,
                 precision: Precision::Exact,
             }),
+            alternatives: vec![],
             range: 0..10,
             entity: "toto".into(),
             slot_name: "toto".into(),

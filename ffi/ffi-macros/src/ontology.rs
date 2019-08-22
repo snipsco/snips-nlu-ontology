@@ -290,7 +290,9 @@ impl Drop for CSlotList {
 #[derive(Debug)]
 pub struct CSlot {
     /// The resolved value of the slot
-    pub value: CSlotValue,
+    pub value: *const CSlotValue,
+    /// The alternative slot values
+    pub alternatives: *const CSlotValueArray,
     /// The raw value as it appears in the input text
     pub raw_value: *const libc::c_char,
     /// Name of the entity type of the slot
@@ -309,7 +311,8 @@ impl From<Slot> for CSlot {
     fn from(input: Slot) -> Self {
         Self {
             raw_value: CString::new(input.raw_value).unwrap().into_raw(),
-            value: CSlotValue::from(input.value),
+            value: CSlotValue::from(input.value).into_raw_pointer(),
+            alternatives: CSlotValueArray::from(input.alternatives).into_raw_pointer(),
             range_start: input.range.start as libc::int32_t,
             range_end: input.range.end as libc::int32_t,
             entity: CString::new(input.entity).unwrap().into_raw(),
@@ -326,7 +329,8 @@ impl AsRust<Slot> for CSlot {
     fn as_rust(&self) -> Fallible<Slot> {
         Ok(Slot {
             raw_value: create_rust_string_from!(self.raw_value),
-            value: self.value.as_rust()?,
+            value: unsafe { &*self.value }.as_rust()?,
+            alternatives: unsafe { &*self.alternatives }.as_rust()?,
             range: (self.range_start as usize..self.range_end as usize),
             entity: create_rust_string_from!(self.entity),
             slot_name: create_rust_string_from!(self.slot_name),
@@ -344,6 +348,8 @@ impl Drop for CSlot {
         take_back_c_string!(self.raw_value);
         take_back_c_string!(self.entity);
         take_back_c_string!(self.slot_name);
+        let _ = unsafe { CSlotValue::from_raw_pointer(self.value) };
+        let _ = unsafe { CSlotValueArray::from_raw_pointer(self.alternatives) };
     }
 }
 
@@ -873,6 +879,56 @@ impl Drop for CSlotValue {
     }
 }
 
+/// Wrapper around a list of SlotValue
+#[repr(C)]
+#[derive(Debug)]
+pub struct CSlotValueArray {
+    /// Pointer to the first slot value of the list
+    pub slot_values: *const CSlotValue,
+    /// Number of slot values in the list
+    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
+}
+
+impl From<Vec<SlotValue>> for CSlotValueArray {
+    fn from(input: Vec<SlotValue>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            slot_values: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CSlotValue::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CSlotValue,
+        }
+    }
+}
+
+impl AsRust<Vec<SlotValue>> for CSlotValueArray {
+    fn as_rust(&self) -> Fallible<Vec<SlotValue>> {
+        let mut result = vec![];
+        let slot_values = unsafe {
+            std::slice::from_raw_parts_mut(self.slot_values as *mut CSlotValue, self.size as usize)
+        };
+
+        for slot_value in slot_values {
+            result.push(slot_value.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
+impl Drop for CSlotValueArray {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.slot_values as *mut CSlotValue,
+                self.size as usize,
+            ))
+        };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -952,6 +1008,7 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -961,6 +1018,20 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![],
+            range: 0..1,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: None,
+        });
+
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "raw_value".to_string(),
+            value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![
+                SlotValue::Custom("alternative_1".to_string().into()),
+                SlotValue::Custom("alternative_2".to_string().into()),
+            ],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -975,6 +1046,7 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::InstantTime(instant_time_value),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -988,6 +1060,7 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::TimeInterval(instant_time_value),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -1006,6 +1079,7 @@ mod tests {
             Slot {
                 raw_value: "raw_value_slot".to_string(),
                 value: SlotValue::Custom("custom_value".to_string().into()),
+                alternatives: vec![SlotValue::Custom("alternative".to_string().into())],
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -1014,6 +1088,7 @@ mod tests {
             Slot {
                 raw_value: "".to_string(),
                 value: SlotValue::Temperature(temperature_value),
+                alternatives: vec![],
                 range: (0..42),
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -1061,6 +1136,9 @@ mod tests {
                 value: SlotValue::Custom(StringValue {
                     value: "custom_slot".to_string(),
                 }),
+                alternatives: vec![SlotValue::Custom(StringValue {
+                    value: "alternative".to_string(),
+                })],
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -1097,6 +1175,7 @@ mod tests {
                 value: SlotValue::Custom(StringValue {
                     value: "custom_slot".to_string(),
                 }),
+                alternatives: vec![],
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -1118,6 +1197,7 @@ mod tests {
                     value: SlotValue::Custom(StringValue {
                         value: "custom_slot".to_string(),
                     }),
+                    alternatives: vec![],
                     range: 0..42,
                     entity: "entity".to_string(),
                     slot_name: "slot_name".to_string(),
