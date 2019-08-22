@@ -1069,6 +1069,20 @@ mod tests {
     }
 
     #[test]
+    fn round_trip_c_slot_value() {
+        round_trip_test::<_, CSlotValue>(SlotValue::Custom("foobar".to_string().into()));
+        round_trip_test::<_, CSlotValue>(SlotValue::Number(NumberValue { value: 42.0 }));
+    }
+
+    #[test]
+    fn round_trip_c_slot_value_array() {
+        round_trip_test::<_, CSlotValueArray>(vec![
+            SlotValue::Custom("foobar".to_string().into()),
+            SlotValue::Number(NumberValue { value: 42.0 }),
+        ])
+    }
+
+    #[test]
     fn round_trip_c_slot_list() {
         let temperature_value = TemperatureValue {
             value: 20.0,
