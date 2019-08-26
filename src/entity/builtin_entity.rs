@@ -11,6 +11,7 @@ pub struct BuiltinEntity {
     pub value: String,
     pub range: Range<usize>,
     pub entity: SlotValue,
+    pub alternatives: Vec<SlotValue>,
     #[serde(
         serialize_with = "serialize_builtin_entity_kind",
         deserialize_with = "deserialize_builtin_entity_kind"
@@ -281,6 +282,11 @@ mod tests {
                 grain: Grain::Year,
                 precision: Precision::Exact,
             }),
+            alternatives: vec![SlotValue::InstantTime(InstantTimeValue {
+                value: "some_alternative".into(),
+                grain: Grain::Day,
+                precision: Precision::Exact,
+            })],
             entity_kind: BuiltinEntityKind::Datetime,
         };
 
@@ -289,7 +295,7 @@ mod tests {
             &[
                 Token::Struct {
                     name: "BuiltinEntity",
-                    len: 4,
+                    len: 5,
                 },
                 Token::Str("value"),
                 Token::Str("hello"),
@@ -323,6 +329,28 @@ mod tests {
                     variant: "Exact",
                 },
                 Token::StructEnd,
+                Token::Str("alternatives"),
+                Token::Seq { len: Some(1) },
+                Token::Struct {
+                    name: "InstantTimeValue",
+                    len: 4,
+                },
+                Token::Str("kind"),
+                Token::Str("InstantTime"),
+                Token::Str("value"),
+                Token::String("some_alternative"),
+                Token::Str("grain"),
+                Token::UnitVariant {
+                    name: "Grain",
+                    variant: "Day",
+                },
+                Token::Str("precision"),
+                Token::UnitVariant {
+                    name: "Precision",
+                    variant: "Exact",
+                },
+                Token::StructEnd,
+                Token::SeqEnd,
                 Token::Str("entity_kind"),
                 Token::Str("snips/datetime"),
                 Token::StructEnd,
