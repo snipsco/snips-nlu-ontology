@@ -51,9 +51,9 @@ impl AsRust<IntentParserResult> for CIntentParserResult {
 impl Drop for CIntentParserResult {
     fn drop(&mut self) {
         take_back_c_string!(self.input);
-        let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
-        let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
-        let _ = unsafe { CIntentParserAlternativeArray::from_raw_pointer(self.alternatives) };
+        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        unsafe { CSlotList::drop_raw_pointer(self.slots) };
+        unsafe { CIntentParserAlternativeArray::drop_raw_pointer(self.alternatives) };
     }
 }
 
@@ -87,8 +87,8 @@ impl AsRust<IntentParserAlternative> for CIntentParserAlternative {
 
 impl Drop for CIntentParserAlternative {
     fn drop(&mut self) {
-        let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
-        let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
+        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        unsafe { CSlotList::drop_raw_pointer(self.slots) };
     }
 }
 
@@ -348,8 +348,8 @@ impl Drop for CSlot {
         take_back_c_string!(self.raw_value);
         take_back_c_string!(self.entity);
         take_back_c_string!(self.slot_name);
-        let _ = unsafe { CSlotValue::from_raw_pointer(self.value) };
-        let _ = unsafe { CSlotValueArray::from_raw_pointer(self.alternatives) };
+        unsafe { CSlotValue::drop_raw_pointer(self.value) };
+        unsafe { CSlotValueArray::drop_raw_pointer(self.alternatives) };
     }
 }
 
@@ -827,7 +827,7 @@ impl AsRust<SlotValue> for CSlotValue {
 
 impl Drop for CSlotValue {
     fn drop(&mut self) {
-        let _ = unsafe {
+        unsafe {
             match self.value_type {
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
                     CString::drop_raw_pointer(self.value)
