@@ -51,9 +51,9 @@ impl AsRust<IntentParserResult> for CIntentParserResult {
 impl Drop for CIntentParserResult {
     fn drop(&mut self) {
         take_back_c_string!(self.input);
-        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
-        unsafe { CSlotList::drop_raw_pointer(self.slots) };
-        unsafe { CIntentParserAlternativeArray::drop_raw_pointer(self.alternatives) };
+        let _ = unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        let _ = unsafe { CSlotList::drop_raw_pointer(self.slots) };
+        let _ = unsafe { CIntentParserAlternativeArray::drop_raw_pointer(self.alternatives) };
     }
 }
 
@@ -87,8 +87,8 @@ impl AsRust<IntentParserAlternative> for CIntentParserAlternative {
 
 impl Drop for CIntentParserAlternative {
     fn drop(&mut self) {
-        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
-        unsafe { CSlotList::drop_raw_pointer(self.slots) };
+        let _ = unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        let _ = unsafe { CSlotList::drop_raw_pointer(self.slots) };
     }
 }
 
@@ -99,13 +99,13 @@ pub struct CIntentParserAlternativeArray {
     /// Pointer to the first result of the list
     pub intent_parser_alternatives: *const CIntentParserAlternative,
     /// Number of results in the list
-    pub size: libc::int32_t,
+    pub size: i32,
 }
 
 impl From<Vec<IntentParserAlternative>> for CIntentParserAlternativeArray {
     fn from(input: Vec<IntentParserAlternative>) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
+            size: input.len() as i32,
             intent_parser_alternatives: Box::into_raw(
                 input
                     .into_iter()
@@ -190,13 +190,13 @@ pub struct CIntentClassifierResultArray {
     /// Pointer to the first result of the list
     pub intent_classifier_results: *const CIntentClassifierResult,
     /// Number of results in the list
-    pub size: libc::int32_t,
+    pub size: i32,
 }
 
 impl From<Vec<IntentClassifierResult>> for CIntentClassifierResultArray {
     fn from(input: Vec<IntentClassifierResult>) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
+            size: input.len() as i32,
             intent_classifier_results: Box::into_raw(
                 input
                     .into_iter()
@@ -243,13 +243,13 @@ pub struct CSlotList {
     /// Pointer to the first slot of the list
     pub slots: *const CSlot,
     /// Number of slots in the list
-    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: i32, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl From<Vec<Slot>> for CSlotList {
     fn from(input: Vec<Slot>) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
+            size: input.len() as i32,
             slots: Box::into_raw(
                 input
                     .into_iter()
@@ -300,9 +300,9 @@ pub struct CSlot {
     /// Name of the slot
     pub slot_name: *const libc::c_char,
     /// Start index of raw value in input text
-    pub range_start: libc::int32_t,
+    pub range_start: i32,
     /// End index of raw value in input text
-    pub range_end: libc::int32_t,
+    pub range_end: i32,
     /// Confidence score of the slot
     pub confidence_score: libc::c_float,
 }
@@ -313,8 +313,8 @@ impl From<Slot> for CSlot {
             raw_value: CString::new(input.raw_value).unwrap().into_raw(),
             value: CSlotValue::from(input.value).into_raw_pointer(),
             alternatives: CSlotValueArray::from(input.alternatives).into_raw_pointer(),
-            range_start: input.range.start as libc::int32_t,
-            range_end: input.range.end as libc::int32_t,
+            range_start: input.range.start as i32,
+            range_end: input.range.end as i32,
             entity: CString::new(input.entity).unwrap().into_raw(),
             slot_name: CString::new(input.slot_name).unwrap().into_raw(),
             confidence_score: input
@@ -348,8 +348,8 @@ impl Drop for CSlot {
         take_back_c_string!(self.raw_value);
         take_back_c_string!(self.entity);
         take_back_c_string!(self.slot_name);
-        unsafe { CSlotValue::drop_raw_pointer(self.value) };
-        unsafe { CSlotValueArray::drop_raw_pointer(self.alternatives) };
+        let _ = unsafe { CSlotValue::drop_raw_pointer(self.value) };
+        let _ = unsafe { CSlotValueArray::drop_raw_pointer(self.alternatives) };
     }
 }
 
@@ -448,7 +448,7 @@ pub type CNumberValue = libc::c_double;
 /// Representation of a percentage value
 pub type CPercentageValue = libc::c_double;
 /// Representation of an ordinal value
-pub type COrdinalValue = libc::int64_t;
+pub type COrdinalValue = i64;
 
 /// Enum representing the grain of a resolved date related value
 #[repr(C)]
@@ -668,21 +668,21 @@ impl Drop for CTemperatureValue {
 #[derive(Debug)]
 pub struct CDurationValue {
     /// Number of years in the duration
-    pub years: libc::int64_t,
+    pub years: i64,
     /// Number of quarters in the duration
-    pub quarters: libc::int64_t,
+    pub quarters: i64,
     /// Number of months in the duration
-    pub months: libc::int64_t,
+    pub months: i64,
     /// Number of weeks in the duration
-    pub weeks: libc::int64_t,
+    pub weeks: i64,
     /// Number of days in the duration
-    pub days: libc::int64_t,
+    pub days: i64,
     /// Number of hours in the duration
-    pub hours: libc::int64_t,
+    pub hours: i64,
     /// Number of minutes in the duration
-    pub minutes: libc::int64_t,
+    pub minutes: i64,
     /// Number of seconds in the duration
-    pub seconds: libc::int64_t,
+    pub seconds: i64,
     /// Precision of the resolved value
     pub precision: SNIPS_PRECISION,
 }
@@ -690,14 +690,14 @@ pub struct CDurationValue {
 impl From<DurationValue> for CDurationValue {
     fn from(value: DurationValue) -> Self {
         Self {
-            years: value.years as libc::int64_t,
-            quarters: value.quarters as libc::int64_t,
-            months: value.months as libc::int64_t,
-            weeks: value.weeks as libc::int64_t,
-            days: value.days as libc::int64_t,
-            hours: value.hours as libc::int64_t,
-            minutes: value.minutes as libc::int64_t,
-            seconds: value.seconds as libc::int64_t,
+            years: value.years as i64,
+            quarters: value.quarters as i64,
+            months: value.months as i64,
+            weeks: value.weeks as i64,
+            days: value.days as i64,
+            hours: value.hours as i64,
+            minutes: value.minutes as i64,
+            seconds: value.seconds as i64,
             precision: SNIPS_PRECISION::from(value.precision),
         }
     }
@@ -827,7 +827,7 @@ impl AsRust<SlotValue> for CSlotValue {
 
 impl Drop for CSlotValue {
     fn drop(&mut self) {
-        unsafe {
+        let _ = unsafe {
             match self.value_type {
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
                     CString::drop_raw_pointer(self.value)
@@ -886,13 +886,13 @@ pub struct CSlotValueArray {
     /// Pointer to the first slot value of the list
     pub slot_values: *const CSlotValue,
     /// Number of slot values in the list
-    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: i32, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl From<Vec<SlotValue>> for CSlotValueArray {
     fn from(input: Vec<SlotValue>) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
+            size: input.len() as i32,
             slot_values: Box::into_raw(
                 input
                     .into_iter()

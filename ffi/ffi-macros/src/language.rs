@@ -27,6 +27,6 @@ pub fn supported_languages() -> CStringArray {
 
     CStringArray {
         data: ALL.0.as_ptr() as *const *const libc::c_char,
-        size: ALL.0.len() as libc::int32_t,
+        size: ALL.0.len() as i32,
     }
 }
