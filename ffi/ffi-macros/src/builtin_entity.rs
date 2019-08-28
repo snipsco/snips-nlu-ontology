@@ -20,8 +20,8 @@ pub struct CBuiltinEntity {
     pub entity: CSlotValue,
     pub entity_kind: *const libc::c_char,
     pub value: *const libc::c_char,
-    pub range_start: libc::int32_t,
-    pub range_end: libc::int32_t,
+    pub range_start: i32,
+    pub range_end: i32,
 }
 
 impl From<BuiltinEntity> for CBuiltinEntity {
@@ -30,8 +30,8 @@ impl From<BuiltinEntity> for CBuiltinEntity {
             entity: CSlotValue::from(e.entity),
             entity_kind: CString::new(e.entity_kind.identifier()).unwrap().into_raw(),
             value: CString::new(e.value).unwrap().into_raw(),
-            range_start: e.range.start as libc::int32_t,
-            range_end: e.range.end as libc::int32_t,
+            range_start: e.range.start as i32,
+            range_end: e.range.end as i32,
         }
     }
 }
@@ -47,13 +47,13 @@ impl Drop for CBuiltinEntity {
 #[derive(Debug)]
 pub struct CBuiltinEntityArray {
     pub data: *const CBuiltinEntity,
-    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
+    pub size: i32, // Note: we can't use `libc::size_t` because it's not supported by JNA
 }
 
 impl From<Vec<CBuiltinEntity>> for CBuiltinEntityArray {
     fn from(input: Vec<CBuiltinEntity>) -> Self {
         Self {
-            size: input.len() as libc::int32_t,
+            size: input.len() as i32,
             data: Box::into_raw(input.into_boxed_slice()) as *const CBuiltinEntity,
         }
     }
@@ -93,7 +93,7 @@ pub fn all_builtin_entities() -> CStringArray {
 
     CStringArray {
         data: ALL.0.as_ptr() as *const *const libc::c_char,
-        size: ALL.0.len() as libc::int32_t,
+        size: ALL.0.len() as i32,
     }
 }
 
@@ -113,7 +113,7 @@ pub fn all_grammar_entities() -> CStringArray {
 
     CStringArray {
         data: ALL.0.as_ptr() as *const *const libc::c_char,
-        size: ALL.0.len() as libc::int32_t,
+        size: ALL.0.len() as i32,
     }
 }
 
@@ -133,7 +133,7 @@ pub fn all_gazetteer_entities() -> CStringArray {
 
     CStringArray {
         data: ALL.0.as_ptr() as *const *const libc::c_char,
-        size: ALL.0.len() as libc::int32_t,
+        size: ALL.0.len() as i32,
     }
 }
 
