@@ -21,6 +21,8 @@ pub struct CIntentParserResult {
     pub intent: *const CIntentClassifierResult,
     /// The slots extracted
     pub slots: *const CSlotList,
+    /// Alternative parsings
+    pub alternatives: *const CIntentParserAlternativeArray,
 }
 
 impl From<IntentParserResult> for CIntentParserResult {
@@ -29,6 +31,8 @@ impl From<IntentParserResult> for CIntentParserResult {
             input: CString::new(input.input).unwrap().into_raw(),
             intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
             slots: CSlotList::from(input.slots).into_raw_pointer(),
+            alternatives: CIntentParserAlternativeArray::from(input.alternatives)
+                .into_raw_pointer(),
         }
     }
 }
@@ -39,6 +43,7 @@ impl AsRust<IntentParserResult> for CIntentParserResult {
             input: create_rust_string_from!(self.input),
             intent: unsafe { &*self.intent }.as_rust()?,
             slots: unsafe { &*self.slots }.as_rust()?,
+            alternatives: unsafe { &*self.alternatives }.as_rust()?,
         })
     }
 }
@@ -46,8 +51,97 @@ impl AsRust<IntentParserResult> for CIntentParserResult {
 impl Drop for CIntentParserResult {
     fn drop(&mut self) {
         take_back_c_string!(self.input);
-        let _ = unsafe { CIntentClassifierResult::from_raw_pointer(self.intent) };
-        let _ = unsafe { CSlotList::from_raw_pointer(self.slots) };
+        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        unsafe { CSlotList::drop_raw_pointer(self.slots) };
+        unsafe { CIntentParserAlternativeArray::drop_raw_pointer(self.alternatives) };
+    }
+}
+
+/// Alternative intent parsing result
+#[repr(C)]
+#[derive(Debug)]
+pub struct CIntentParserAlternative {
+    /// The result of intent classification
+    pub intent: *const CIntentClassifierResult,
+    /// The slots extracted
+    pub slots: *const CSlotList,
+}
+
+impl From<IntentParserAlternative> for CIntentParserAlternative {
+    fn from(input: IntentParserAlternative) -> Self {
+        Self {
+            intent: CIntentClassifierResult::from(input.intent).into_raw_pointer(),
+            slots: CSlotList::from(input.slots).into_raw_pointer(),
+        }
+    }
+}
+
+impl AsRust<IntentParserAlternative> for CIntentParserAlternative {
+    fn as_rust(&self) -> Fallible<IntentParserAlternative> {
+        Ok(IntentParserAlternative {
+            intent: unsafe { &*self.intent }.as_rust()?,
+            slots: unsafe { &*self.slots }.as_rust()?,
+        })
+    }
+}
+
+impl Drop for CIntentParserAlternative {
+    fn drop(&mut self) {
+        unsafe { CIntentClassifierResult::drop_raw_pointer(self.intent) };
+        unsafe { CSlotList::drop_raw_pointer(self.slots) };
+    }
+}
+
+/// Wrapper around a list of IntentParserAlternative
+#[repr(C)]
+#[derive(Debug)]
+pub struct CIntentParserAlternativeArray {
+    /// Pointer to the first result of the list
+    pub intent_parser_alternatives: *const CIntentParserAlternative,
+    /// Number of results in the list
+    pub size: libc::int32_t,
+}
+
+impl From<Vec<IntentParserAlternative>> for CIntentParserAlternativeArray {
+    fn from(input: Vec<IntentParserAlternative>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            intent_parser_alternatives: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CIntentParserAlternative::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CIntentParserAlternative,
+        }
+    }
+}
+
+impl AsRust<Vec<IntentParserAlternative>> for CIntentParserAlternativeArray {
+    fn as_rust(&self) -> Fallible<Vec<IntentParserAlternative>> {
+        let mut result = vec![];
+        let ic_results = unsafe {
+            std::slice::from_raw_parts_mut(
+                self.intent_parser_alternatives as *mut CIntentParserAlternative,
+                self.size as usize,
+            )
+        };
+
+        for ic_result in ic_results {
+            result.push(ic_result.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
+impl Drop for CIntentParserAlternativeArray {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.intent_parser_alternatives as *mut CIntentParserAlternative,
+                self.size as usize,
+            ))
+        };
     }
 }
 
@@ -196,7 +290,9 @@ impl Drop for CSlotList {
 #[derive(Debug)]
 pub struct CSlot {
     /// The resolved value of the slot
-    pub value: CSlotValue,
+    pub value: *const CSlotValue,
+    /// The alternative slot values
+    pub alternatives: *const CSlotValueArray,
     /// The raw value as it appears in the input text
     pub raw_value: *const libc::c_char,
     /// Name of the entity type of the slot
@@ -215,7 +311,8 @@ impl From<Slot> for CSlot {
     fn from(input: Slot) -> Self {
         Self {
             raw_value: CString::new(input.raw_value).unwrap().into_raw(),
-            value: CSlotValue::from(input.value),
+            value: CSlotValue::from(input.value).into_raw_pointer(),
+            alternatives: CSlotValueArray::from(input.alternatives).into_raw_pointer(),
             range_start: input.range.start as libc::int32_t,
             range_end: input.range.end as libc::int32_t,
             entity: CString::new(input.entity).unwrap().into_raw(),
@@ -232,7 +329,8 @@ impl AsRust<Slot> for CSlot {
     fn as_rust(&self) -> Fallible<Slot> {
         Ok(Slot {
             raw_value: create_rust_string_from!(self.raw_value),
-            value: self.value.as_rust()?,
+            value: unsafe { &*self.value }.as_rust()?,
+            alternatives: unsafe { &*self.alternatives }.as_rust()?,
             range: (self.range_start as usize..self.range_end as usize),
             entity: create_rust_string_from!(self.entity),
             slot_name: create_rust_string_from!(self.slot_name),
@@ -250,6 +348,8 @@ impl Drop for CSlot {
         take_back_c_string!(self.raw_value);
         take_back_c_string!(self.entity);
         take_back_c_string!(self.slot_name);
+        unsafe { CSlotValue::drop_raw_pointer(self.value) };
+        unsafe { CSlotValueArray::drop_raw_pointer(self.alternatives) };
     }
 }
 
@@ -727,7 +827,7 @@ impl AsRust<SlotValue> for CSlotValue {
 
 impl Drop for CSlotValue {
     fn drop(&mut self) {
-        let _ = unsafe {
+        unsafe {
             match self.value_type {
                 SNIPS_SLOT_VALUE_TYPE::SNIPS_SLOT_VALUE_TYPE_CUSTOM => {
                     CString::drop_raw_pointer(self.value)
@@ -775,6 +875,56 @@ impl Drop for CSlotValue {
                     CString::drop_raw_pointer(self.value)
                 }
             }
+        };
+    }
+}
+
+/// Wrapper around a list of SlotValue
+#[repr(C)]
+#[derive(Debug)]
+pub struct CSlotValueArray {
+    /// Pointer to the first slot value of the list
+    pub slot_values: *const CSlotValue,
+    /// Number of slot values in the list
+    pub size: libc::int32_t, // Note: we can't use `libc::size_t` because it's not supported by JNA
+}
+
+impl From<Vec<SlotValue>> for CSlotValueArray {
+    fn from(input: Vec<SlotValue>) -> Self {
+        Self {
+            size: input.len() as libc::int32_t,
+            slot_values: Box::into_raw(
+                input
+                    .into_iter()
+                    .map(CSlotValue::from)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ) as *const CSlotValue,
+        }
+    }
+}
+
+impl AsRust<Vec<SlotValue>> for CSlotValueArray {
+    fn as_rust(&self) -> Fallible<Vec<SlotValue>> {
+        let mut result = vec![];
+        let slot_values = unsafe {
+            std::slice::from_raw_parts_mut(self.slot_values as *mut CSlotValue, self.size as usize)
+        };
+
+        for slot_value in slot_values {
+            result.push(slot_value.as_rust()?)
+        }
+        Ok(result)
+    }
+}
+
+impl Drop for CSlotValueArray {
+    fn drop(&mut self) {
+        let _ = unsafe {
+            Box::from_raw(slice::from_raw_parts_mut(
+                self.slot_values as *mut CSlotValue,
+                self.size as usize,
+            ))
         };
     }
 }
@@ -858,6 +1008,7 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -867,6 +1018,20 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![],
+            range: 0..1,
+            entity: "entity".to_string(),
+            slot_name: "slot_name".to_string(),
+            confidence_score: None,
+        });
+
+        round_trip_test::<_, CSlot>(Slot {
+            raw_value: "raw_value".to_string(),
+            value: SlotValue::Custom("slot_value".to_string().into()),
+            alternatives: vec![
+                SlotValue::Custom("alternative_1".to_string().into()),
+                SlotValue::Custom("alternative_2".to_string().into()),
+            ],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -881,6 +1046,7 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::InstantTime(instant_time_value),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
@@ -894,11 +1060,26 @@ mod tests {
         round_trip_test::<_, CSlot>(Slot {
             raw_value: "raw_value".to_string(),
             value: SlotValue::TimeInterval(instant_time_value),
+            alternatives: vec![],
             range: 0..1,
             entity: "entity".to_string(),
             slot_name: "slot_name".to_string(),
             confidence_score: Some(0.5),
         });
+    }
+
+    #[test]
+    fn round_trip_c_slot_value() {
+        round_trip_test::<_, CSlotValue>(SlotValue::Custom("foobar".to_string().into()));
+        round_trip_test::<_, CSlotValue>(SlotValue::Number(NumberValue { value: 42.0 }));
+    }
+
+    #[test]
+    fn round_trip_c_slot_value_array() {
+        round_trip_test::<_, CSlotValueArray>(vec![
+            SlotValue::Custom("foobar".to_string().into()),
+            SlotValue::Number(NumberValue { value: 42.0 }),
+        ])
     }
 
     #[test]
@@ -912,6 +1093,7 @@ mod tests {
             Slot {
                 raw_value: "raw_value_slot".to_string(),
                 value: SlotValue::Custom("custom_value".to_string().into()),
+                alternatives: vec![SlotValue::Custom("alternative".to_string().into())],
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -920,6 +1102,7 @@ mod tests {
             Slot {
                 raw_value: "".to_string(),
                 value: SlotValue::Temperature(temperature_value),
+                alternatives: vec![],
                 range: (0..42),
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
@@ -933,7 +1116,11 @@ mod tests {
         round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
             intent_name: Some("intent_name".to_string()),
             confidence_score: 0.5,
-        })
+        });
+        round_trip_test::<_, CIntentClassifierResult>(IntentClassifierResult {
+            intent_name: None,
+            confidence_score: 0.5,
+        });
     }
 
     #[test]
@@ -963,11 +1150,81 @@ mod tests {
                 value: SlotValue::Custom(StringValue {
                     value: "custom_slot".to_string(),
                 }),
+                alternatives: vec![SlotValue::Custom(StringValue {
+                    value: "alternative".to_string(),
+                })],
                 range: 0..42,
                 entity: "entity".to_string(),
                 slot_name: "slot_name".to_string(),
                 confidence_score: Some(1.0),
             }],
+            alternatives: vec![],
+        });
+        round_trip_test::<_, CIntentParserResult>(IntentParserResult {
+            input: "input".to_string(),
+            intent: IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.6,
+            },
+            slots: vec![],
+            alternatives: vec![IntentParserAlternative {
+                intent: IntentClassifierResult {
+                    intent_name: Some("other_intent_name".to_string()),
+                    confidence_score: 0.4,
+                },
+                slots: vec![],
+            }],
         })
+    }
+
+    #[test]
+    fn round_trip_c_intent_parser_alternative() {
+        round_trip_test::<_, CIntentParserAlternative>(IntentParserAlternative {
+            intent: IntentClassifierResult {
+                intent_name: Some("intent_name".to_string()),
+                confidence_score: 0.5,
+            },
+            slots: vec![Slot {
+                raw_value: "raw_value".to_string(),
+                value: SlotValue::Custom(StringValue {
+                    value: "custom_slot".to_string(),
+                }),
+                alternatives: vec![],
+                range: 0..42,
+                entity: "entity".to_string(),
+                slot_name: "slot_name".to_string(),
+                confidence_score: Some(1.0),
+            }],
+        });
+    }
+
+    #[test]
+    fn round_trip_c_intent_parser_alternative_array() {
+        round_trip_test::<_, CIntentParserAlternativeArray>(vec![
+            IntentParserAlternative {
+                intent: IntentClassifierResult {
+                    intent_name: Some("intent_name".to_string()),
+                    confidence_score: 0.5,
+                },
+                slots: vec![Slot {
+                    raw_value: "raw_value".to_string(),
+                    value: SlotValue::Custom(StringValue {
+                        value: "custom_slot".to_string(),
+                    }),
+                    alternatives: vec![],
+                    range: 0..42,
+                    entity: "entity".to_string(),
+                    slot_name: "slot_name".to_string(),
+                    confidence_score: Some(1.0),
+                }],
+            },
+            IntentParserAlternative {
+                intent: IntentClassifierResult {
+                    intent_name: Some("other_intent_name".to_string()),
+                    confidence_score: 0.4,
+                },
+                slots: vec![],
+            },
+        ]);
     }
 }

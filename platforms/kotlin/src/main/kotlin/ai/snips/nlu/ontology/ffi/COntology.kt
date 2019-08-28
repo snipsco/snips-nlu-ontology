@@ -2,6 +2,7 @@ package ai.snips.nlu.ontology.ffi
 
 import ai.snips.nlu.ontology.Grain
 import ai.snips.nlu.ontology.IntentClassifierResult
+import ai.snips.nlu.ontology.IntentParserAlternative
 import ai.snips.nlu.ontology.IntentParserResult
 import ai.snips.nlu.ontology.Precision
 import ai.snips.nlu.ontology.Range
@@ -42,6 +43,7 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
     @JvmField var input: Pointer? = null
     @JvmField var intent: CIntentClassifierResult? = null
     @JvmField var slots: CSlots? = null
+    @JvmField var alternatives: CIntentParserAlternativeArray? = null
 
     init {
         read()
@@ -49,12 +51,50 @@ class CIntentParserResult(p: Pointer) : Structure(p), Structure.ByReference {
 
     override fun getFieldOrder() = listOf("input",
                                           "intent",
-                                          "slots")
+                                          "slots",
+                                          "alternatives")
 
     fun toIntentParserResult() = IntentParserResult(input = input.readString(),
                                                     intent = intent!!.toIntentClassifierResult(),
-                                                    slots = slots!!.toSlotList())
+                                                    slots = slots!!.toSlotList(),
+                                                    alternatives = alternatives!!.toIntentParserAlternativeList())
+}
 
+class CIntentParserAlternative(p: Pointer) : Structure(p), Structure.ByReference {
+
+    @JvmField var intent: CIntentClassifierResult? = null
+    @JvmField var slots: CSlots? = null
+
+    init {
+        read()
+    }
+
+    override fun getFieldOrder() = listOf("intent", "slots")
+
+    fun toIntentParserAlternative() = IntentParserAlternative(
+            intent = intent!!.toIntentClassifierResult(),
+            slots = slots!!.toSlotList())
+}
+
+class CIntentParserAlternativeArray(p: Pointer?) : Structure(p), Structure.ByReference {
+
+    @JvmField var intent_parser_alternatives: Pointer? = null
+    @JvmField var size: Int = -1
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
+
+    override fun getFieldOrder() = listOf("intent_parser_alternatives", "size")
+
+    fun toIntentParserAlternativeList(): List<IntentParserAlternative> =
+            if (size > 0)
+                CIntentParserAlternative(intent_parser_alternatives!!)
+                        .toArray(size)
+                        .map { (it as CIntentParserAlternative).toIntentParserAlternative() }
+            else listOf<IntentParserAlternative>()
 }
 
 class CIntentClassifierResult(p: Pointer?) : Structure(p), Structure.ByReference {
@@ -148,7 +188,7 @@ object CPrecision {
     }
 }
 
-class CSlotValue : Structure(), Structure.ByValue {
+class CSlotValue(p: Pointer) : Structure(p), Structure.ByReference {
     companion object {
         const val CUSTOM = 1
         const val NUMBER = 2
@@ -170,6 +210,10 @@ class CSlotValue : Structure(), Structure.ByValue {
     @JvmField var value_type: Int? = null
     @JvmField var value: Pointer? = null
 
+    init {
+        read()
+    }
+
     override fun getFieldOrder() = listOf("value", "value_type")
 
     fun toSlotValue(): SlotValue = when (value_type!!) {
@@ -190,7 +234,6 @@ class CSlotValue : Structure(), Structure.ByValue {
         REGION -> RegionValue(value.readString())
         else -> throw IllegalArgumentException("unknown value type $value_type")
     }
-
 }
 
 class CInstantTimeValue(p: Pointer) : Structure(p), Structure.ByReference {
@@ -300,12 +343,13 @@ class CDurationValue(p: Pointer) : Structure(p), Structure.ByReference {
 
 class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
 
-    @JvmField var raw_value: Pointer? = null
     @JvmField var value: CSlotValue? = null
-    @JvmField var range_start: Int? = null
-    @JvmField var range_end: Int? = null
+    @JvmField var alternatives: CSlotValueArray? = null
+    @JvmField var raw_value: Pointer? = null
     @JvmField var entity: Pointer? = null
     @JvmField var slot_name: Pointer? = null
+    @JvmField var range_start: Int? = null
+    @JvmField var range_end: Int? = null
     @JvmField var confidence_score: Float? = null
 
     init {
@@ -313,6 +357,7 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
     }
 
     override fun getFieldOrder() = listOf("value",
+                                          "alternatives",
                                           "raw_value",
                                           "entity",
                                           "slot_name",
@@ -320,10 +365,32 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
                                           "range_end",
                                           "confidence_score")
 
-    fun toSlot() = Slot(rawValue = raw_value.readString(),
-                        value = value.readSlotValue(),
-                        range = range_start.readRangeTo(range_end),
+    fun toSlot() = Slot(value = value.readSlotValue(),
+                        rawValue = raw_value.readString(),
+                        alternatives = alternatives!!.toSlotValueList(),
                         entity = entity.readString(),
                         slotName = slot_name.readString(),
+                        range = range_start.readRangeTo(range_end),
                         confidenceScore = confidence_score.readFloat())
+}
+
+class CSlotValueArray(p: Pointer?) : Structure(p), Structure.ByReference {
+
+    @JvmField var slot_values: Pointer? = null
+    @JvmField var size: Int = -1
+
+    init {
+        read()
+    }
+
+    constructor(): this(null)
+
+    override fun getFieldOrder() = listOf("slot_values", "size")
+
+    fun toSlotValueList(): List<SlotValue> =
+            if (size > 0)
+                CSlotValue(slot_values!!)
+                        .toArray(size)
+                        .map { (it as CSlotValue).toSlotValue() }
+            else listOf<SlotValue>()
 }
