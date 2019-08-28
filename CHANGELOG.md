@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.67.0] - 2019-08-28
 ### Added
 - Add an `alternatives` attribute, containing less likely alternatives, to ([#153](https://github.com/snipsco/snips-nlu-ontology/pull/153)):
     - `IntentParserResult`
@@ -201,7 +201,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
-[Unreleased]: https://github.com/snipsco/snips-nlu-ontology/compare/0.66.0...HEAD
+[0.67.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.66.0...0.67.0
 [0.66.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.65.0...0.66.0
 [0.65.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.8...0.65.0
 [0.64.8]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.7...0.64.8
