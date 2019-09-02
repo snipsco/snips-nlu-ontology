@@ -5,6 +5,7 @@ pub struct IntentParserResult {
     pub input: String,
     pub intent: IntentClassifierResult,
     pub slots: Vec<Slot>,
+    #[serde(default)]
     pub alternatives: Vec<IntentParserAlternative>,
 }
 
@@ -26,6 +27,7 @@ pub struct IntentClassifierResult {
 pub struct Slot {
     pub raw_value: String,
     pub value: SlotValue,
+    #[serde(default)]
     pub alternatives: Vec<SlotValue>,
     pub range: Range<usize>,
     pub entity: String,
@@ -188,51 +190,54 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_custom_slot() {
-        let slot = Slot {
-            raw_value: "value".into(),
-            value: SlotValue::Custom("value".into()),
-            alternatives: vec![],
-            range: 0..5,
-            entity: "toto".into(),
-            slot_name: "toto".into(),
-            confidence_score: None,
-        };
-        assert!(serde_json::to_string(&slot).is_ok());
-        assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
-    }
+    fn test_deserializing_with_default_alternatives() {
+        // Given
+        let intent_parser_result_json = r#"
+            {
+                "input": "foo bar baz",
+                "intent": {
+                    "intentName": "FooBar",
+                    "confidenceScore": 0.42
+                },
+                "slots": [
+                    {
+                        "rawValue": "baz",
+                        "value": {
+                            "kind": "Custom",
+                            "value": "baz"
+                        },
+                        "range": {
+                            "start": 8,
+                            "end": 11
+                        },
+                        "entity": "foo",
+                        "slotName": "foo"
+                    }
+                ]
+            }
+        "#;
 
-    #[test]
-    fn test_builtin_slot_1() {
-        let slot = Slot {
-            raw_value: "fifth".into(),
-            value: SlotValue::Ordinal(OrdinalValue { value: 5 }),
-            alternatives: vec![],
-            range: 0..5,
-            entity: "toto".into(),
-            slot_name: "toto".into(),
-            confidence_score: Some(0.8),
-        };
-        assert!(serde_json::to_string(&slot).is_ok());
-        assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
-    }
+        // When
+        let deserialized = serde_json::from_str(intent_parser_result_json).unwrap();
 
-    #[test]
-    fn test_builtin_slot_2() {
-        let slot = Slot {
-            raw_value: "some_value".into(),
-            value: SlotValue::InstantTime(InstantTimeValue {
-                value: "some_value".into(),
-                grain: Grain::Year,
-                precision: Precision::Exact,
-            }),
+        // Then
+        let expected_result = IntentParserResult {
+            input: "foo bar baz".to_string(),
+            intent: IntentClassifierResult {
+                intent_name: Some("FooBar".to_string()),
+                confidence_score: 0.42,
+            },
+            slots: vec![Slot {
+                value: SlotValue::Custom("baz".into()),
+                raw_value: "baz".to_string(),
+                range: 8..11,
+                entity: "foo".to_string(),
+                slot_name: "foo".to_string(),
+                alternatives: vec![],
+                confidence_score: None,
+            }],
             alternatives: vec![],
-            range: 0..10,
-            entity: "toto".into(),
-            slot_name: "toto".into(),
-            confidence_score: None,
         };
-        assert!(serde_json::to_string(&slot).is_ok());
-        assert!(serde_json::from_str::<Slot>(&serde_json::to_string(&slot).unwrap()).is_ok());
+        assert_eq!(expected_result, deserialized);
     }
 }
