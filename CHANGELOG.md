@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.67.1] - 2019-09-02
+### Fixed
+- Add default deserialization for alternative intents and slot values when missing [#155](https://github.com/snipsco/snips-nlu-ontology/pull/155)
+
 ## [0.67.0] - 2019-08-28
 ### Added
 - Add an `alternatives` attribute, containing less likely alternatives, to ([#153](https://github.com/snipsco/snips-nlu-ontology/pull/153)):
@@ -201,6 +205,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.67.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.67.0...0.67.1
 [0.67.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.66.0...0.67.0
 [0.66.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.65.0...0.66.0
 [0.65.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.64.8...0.65.0

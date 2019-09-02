@@ -5,6 +5,7 @@ pub struct IntentParserResult {
     pub input: String,
     pub intent: IntentClassifierResult,
     pub slots: Vec<Slot>,
+    #[serde(default)]
     pub alternatives: Vec<IntentParserAlternative>,
 }
 
@@ -26,6 +27,7 @@ pub struct IntentClassifierResult {
 pub struct Slot {
     pub raw_value: String,
     pub value: SlotValue,
+    #[serde(default)]
     pub alternatives: Vec<SlotValue>,
     pub range: Range<usize>,
     pub entity: String,
