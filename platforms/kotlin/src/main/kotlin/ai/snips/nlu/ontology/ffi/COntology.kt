@@ -367,7 +367,7 @@ class CSlot(p: Pointer) : Structure(p), Structure.ByReference {
 
     fun toSlot() = Slot(value = value.readSlotValue(),
                         rawValue = raw_value.readString(),
-                        alternatives = alternatives!!.toSlotValueList(),
+                        alternatives = alternatives!!.toSlotValueList().toMutableList(),
                         entity = entity.readString(),
                         slotName = slot_name.readString(),
                         range = range_start.readRangeTo(range_end),
