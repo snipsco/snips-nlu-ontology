@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.67.2] - 2019-09-06
+### Fixed
+- Update kotlin ontology to make parceler happy [#156](https://github.com/snipsco/snips-nlu-ontology/pull/156)
+
 ## [0.67.1] - 2019-09-02
 ### Fixed
 - Add default deserialization for alternative intents and slot values when missing [#155](https://github.com/snipsco/snips-nlu-ontology/pull/155)
@@ -205,6 +209,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated Rustling ontology to `0.16.4`
 
+[0.67.2]: https://github.com/snipsco/snips-nlu-ontology/compare/0.67.1...0.67.2
 [0.67.1]: https://github.com/snipsco/snips-nlu-ontology/compare/0.67.0...0.67.1
 [0.67.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.66.0...0.67.0
 [0.66.0]: https://github.com/snipsco/snips-nlu-ontology/compare/0.65.0...0.66.0
